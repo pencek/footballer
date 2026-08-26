@@ -1,0 +1,1284 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+
+body {
+
+    min-height: 100vh;
+
+    font-family:
+            "Microsoft YaHei",
+            "PingFang SC",
+            Arial,
+            sans-serif;
+
+    color: #ffffff;
+
+    background: #06100a;
+
+}
+
+
+/* =========================
+   页面
+========================= */
+
+.page {
+
+    min-height: 100vh;
+
+    position: relative;
+
+    overflow: hidden;
+
+}
+
+
+/* =========================
+   背景
+========================= */
+
+.background {
+
+    position: fixed;
+
+    inset: 0;
+
+    z-index: -1;
+
+    background:
+            radial-gradient(
+                    circle at 20% 10%,
+                    rgba(43, 234, 112, .10),
+                    transparent 30%
+            ),
+            radial-gradient(
+                    circle at 90% 90%,
+                    rgba(0, 170, 255, .08),
+                    transparent 30%
+            ),
+            linear-gradient(
+                    135deg,
+                    #06100a,
+                    #0a1710,
+                    #06100a
+            );
+
+}
+
+
+.glow {
+
+    position: absolute;
+
+    width: 500px;
+
+    height: 500px;
+
+    border-radius: 50%;
+
+    filter: blur(130px);
+
+    opacity: .15;
+
+}
+
+
+.glow-1 {
+
+    left: -250px;
+
+    top: -250px;
+
+    background: #20e86b;
+
+}
+
+
+.glow-2 {
+
+    right: -250px;
+
+    bottom: -250px;
+
+    background: #008cff;
+
+}
+
+
+/* =========================
+   足球场背景
+========================= */
+
+.field {
+
+    position: absolute;
+
+    inset: 0;
+
+    opacity: .25;
+
+}
+
+
+.field-line {
+
+    position: absolute;
+
+    background:
+            rgba(255,255,255,.035);
+
+}
+
+
+.field-line.horizontal {
+
+    width: 100%;
+
+    height: 1px;
+
+    top: 50%;
+
+}
+
+
+.field-line.vertical {
+
+    height: 100%;
+
+    width: 1px;
+
+    left: 50%;
+
+}
+
+
+.center-circle {
+
+    position: absolute;
+
+    width: 650px;
+
+    height: 650px;
+
+    left: 50%;
+
+    top: 50%;
+
+    transform:
+            translate(-50%, -50%);
+
+    border:
+            1px solid
+            rgba(255,255,255,.035);
+
+    border-radius: 50%;
+
+}
+
+
+/* =========================
+   导航栏
+========================= */
+
+.navbar {
+
+    height: 76px;
+
+    padding:
+            0 6%;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    border-bottom:
+            1px solid
+            rgba(255,255,255,.06);
+
+    background:
+            rgba(5,15,9,.75);
+
+    backdrop-filter:
+            blur(18px);
+
+}
+
+
+/* =========================
+   Logo
+========================= */
+
+.brand {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+}
+
+
+.brand-icon {
+
+    width: 42px;
+
+    height: 42px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 12px;
+
+    background:
+            rgba(43,234,112,.08);
+
+    border:
+            1px solid
+            rgba(43,234,112,.2);
+
+    font-size: 20px;
+
+}
+
+
+.brand-title {
+
+    font-size: 15px;
+
+    font-weight: 900;
+
+    letter-spacing: 2px;
+
+}
+
+
+.brand-subtitle {
+
+    margin-top: 3px;
+
+    color: #65736a;
+
+    font-size: 8px;
+
+    letter-spacing: 2px;
+
+}
+
+
+/* =========================
+   用户区域
+========================= */
+
+.user-area {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+}
+
+
+.user-avatar {
+
+    width: 34px;
+
+    height: 34px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 50%;
+
+    color: #2bea70;
+
+    font-size: 13px;
+
+    font-weight: 800;
+
+    background:
+            rgba(43,234,112,.08);
+
+    border:
+            1px solid
+            rgba(43,234,112,.2);
+
+}
+
+
+.user-name {
+
+    color: #cbd5ce;
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+}
+
+
+.logout-button {
+
+    margin-left: 8px;
+
+    padding:
+            7px 13px;
+
+    border:
+            1px solid
+            rgba(255,255,255,.08);
+
+    border-radius: 8px;
+
+    background:
+            rgba(255,255,255,.035);
+
+    color: #78857d;
+
+    font-size: 11px;
+
+    cursor: pointer;
+
+    transition: .2s;
+
+}
+
+
+.logout-button:hover {
+
+    color: #ffffff;
+
+    border-color:
+            rgba(255,255,255,.18);
+
+}
+
+
+/* =========================
+   主体
+========================= */
+
+.main {
+
+    width: 100%;
+
+    max-width: 1000px;
+
+    margin: auto;
+
+    padding:
+            70px 20px 100px;
+
+}
+
+
+/* =========================
+   Hero
+========================= */
+
+.hero {
+
+    text-align: center;
+
+    margin-bottom: 48px;
+
+}
+
+
+.hero-tag {
+
+    display: inline-block;
+
+    padding:
+            7px 14px;
+
+    border:
+            1px solid
+            rgba(43,234,112,.18);
+
+    border-radius: 30px;
+
+    color: #42e77d;
+
+    background:
+            rgba(43,234,112,.06);
+
+    font-size: 10px;
+
+    letter-spacing: 2px;
+
+}
+
+
+.hero h1 {
+
+    margin-top: 18px;
+
+    font-size: 43px;
+
+    font-weight: 900;
+
+    letter-spacing: -1px;
+
+}
+
+
+.hero h1 span {
+
+    color: #2bea70;
+
+}
+
+
+.hero p {
+
+    margin-top: 12px;
+
+    color: #68756d;
+
+    font-size: 13px;
+
+}
+
+
+/* =========================
+   排行榜卡片
+========================= */
+
+.ranking-card {
+
+    overflow: hidden;
+
+    border:
+            1px solid
+            rgba(255,255,255,.07);
+
+    border-radius: 20px;
+
+    background:
+            rgba(10,23,15,.88);
+
+    box-shadow:
+            0 30px 80px
+            rgba(0,0,0,.3);
+
+}
+
+
+/* =========================
+   排行榜头部
+========================= */
+
+.ranking-header {
+
+    min-height: 82px;
+
+    padding:
+            20px 28px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    border-bottom:
+            1px solid
+            rgba(255,255,255,.06);
+
+}
+
+
+.ranking-header h2 {
+
+    font-size: 19px;
+
+}
+
+
+.ranking-header p {
+
+    margin-top: 5px;
+
+    color: #68766d;
+
+    font-size: 11px;
+
+}
+
+
+.ranking-header p span {
+
+    color: #2bea70;
+
+}
+
+
+/* =========================
+   刷新
+========================= */
+
+.refresh-button {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 6px;
+
+    padding:
+            8px 14px;
+
+    border:
+            1px solid
+            rgba(255,255,255,.08);
+
+    border-radius: 8px;
+
+    background:
+            rgba(255,255,255,.035);
+
+    color: #7c8981;
+
+    font-size: 11px;
+
+    cursor: pointer;
+
+    transition: .2s;
+
+}
+
+
+.refresh-button:hover {
+
+    color: #ffffff;
+
+    border-color:
+            rgba(255,255,255,.18);
+
+}
+
+
+.refresh-button span {
+
+    font-size: 16px;
+
+}
+
+
+/* =========================
+   球员
+========================= */
+
+.player {
+
+    min-height: 88px;
+
+    padding:
+            14px 28px;
+
+    display: grid;
+
+    grid-template-columns:
+        60px
+        1fr
+        130px
+        130px;
+
+    align-items: center;
+
+    gap: 15px;
+
+    border-bottom:
+            1px solid
+            rgba(255,255,255,.045);
+
+    transition: .2s;
+
+}
+
+
+.player:hover {
+
+    background:
+            rgba(255,255,255,.025);
+
+}
+
+
+.player:last-child {
+
+    border-bottom: none;
+
+}
+
+
+/* =========================
+   排名
+========================= */
+
+.rank {
+
+    font-size: 19px;
+
+    font-weight: 900;
+
+    color: #4d5b52;
+
+}
+
+
+.player:nth-child(1) .rank {
+
+    color: #ffd75e;
+
+}
+
+
+.player:nth-child(2) .rank {
+
+    color: #c4ccd0;
+
+}
+
+
+.player:nth-child(3) .rank {
+
+    color: #c98c63;
+
+}
+
+
+/* =========================
+   球员信息
+========================= */
+
+.player-info {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 13px;
+
+}
+
+
+.avatar {
+
+    width: 45px;
+
+    height: 45px;
+
+    flex-shrink: 0;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border:
+            1px solid
+            rgba(43,234,112,.16);
+
+    border-radius: 50%;
+
+    background:
+            rgba(43,234,112,.07);
+
+    color: #2bea70;
+
+    font-size: 15px;
+
+    font-weight: 900;
+
+}
+
+
+.player-name {
+
+    font-size: 14px;
+
+    font-weight: 700;
+
+}
+
+
+.player-account {
+
+    margin-top: 4px;
+
+    color: #5e6b63;
+
+    font-size: 10px;
+
+}
+
+
+/* =========================
+   平均分
+========================= */
+
+.score {
+
+    text-align: center;
+
+}
+
+
+.score-number {
+
+    font-size: 23px;
+
+    font-weight: 900;
+
+    color: #2bea70;
+
+}
+
+
+.score-number.no-score {
+
+    color: #4c5951;
+
+}
+
+
+.score-label {
+
+    margin-top: 3px;
+
+    color: #59665e;
+
+    font-size: 9px;
+
+}
+
+
+/* =========================
+   操作
+========================= */
+
+.player-action {
+
+    text-align: center;
+
+}
+
+
+.rating-count {
+
+    margin-bottom: 7px;
+
+    color: #606d65;
+
+    font-size: 10px;
+
+}
+
+
+.rate-button {
+
+    width: 100%;
+
+    padding:
+            9px 10px;
+
+    border:
+            1px solid
+            rgba(43,234,112,.18);
+
+    border-radius: 8px;
+
+    background:
+            rgba(43,234,112,.05);
+
+    color: #3ee679;
+
+    font-size: 10px;
+
+    cursor: pointer;
+
+    transition: .2s;
+
+}
+
+
+.rate-button:hover {
+
+    background:
+            rgba(43,234,112,.12);
+
+    border-color:
+            rgba(43,234,112,.3);
+
+}
+
+
+.self-label {
+
+    color: #4e5b53;
+
+    font-size: 10px;
+
+}
+
+
+/* =========================
+   加载
+========================= */
+
+.loading {
+
+    min-height: 220px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: center;
+
+    color: #647168;
+
+    font-size: 12px;
+
+}
+
+
+.loading-spinner {
+
+    width: 30px;
+
+    height: 30px;
+
+    margin-bottom: 15px;
+
+    border:
+            2px solid
+            rgba(255,255,255,.08);
+
+    border-top-color:
+            #2bea70;
+
+    border-radius: 50%;
+
+    animation:
+            spin .8s linear infinite;
+
+}
+
+
+@keyframes spin {
+
+    to {
+
+        transform:
+                rotate(360deg);
+
+    }
+
+}
+
+
+/* =========================
+   弹窗
+========================= */
+
+.modal {
+
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 100;
+
+    display: none;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 20px;
+
+    background:
+            rgba(0,0,0,.72);
+
+    backdrop-filter:
+            blur(8px);
+
+}
+
+
+.modal.show {
+
+    display: flex;
+
+}
+
+
+.modal-content {
+
+    width: 100%;
+
+    max-width: 390px;
+
+    position: relative;
+
+    padding:
+            35px;
+
+    text-align: center;
+
+    border:
+            1px solid
+            rgba(255,255,255,.08);
+
+    border-radius: 20px;
+
+    background:
+            #0c1b12;
+
+    box-shadow:
+            0 30px 90px
+            rgba(0,0,0,.55);
+
+}
+
+
+.close-modal {
+
+    position: absolute;
+
+    top: 13px;
+
+    right: 17px;
+
+    border: none;
+
+    background: transparent;
+
+    color: #66746c;
+
+    font-size: 26px;
+
+    cursor: pointer;
+
+}
+
+
+.modal-icon {
+
+    margin-bottom: 12px;
+
+    font-size: 34px;
+
+}
+
+
+.modal-content h2 {
+
+    font-size: 20px;
+
+}
+
+
+.modal-content h2 span {
+
+    color: #2bea70;
+
+}
+
+
+.modal-description {
+
+    margin-top: 8px;
+
+    color: #66756c;
+
+    font-size: 11px;
+
+}
+
+
+/* =========================
+   分数
+========================= */
+
+.score-display {
+
+    margin:
+            25px 0 20px;
+
+    color: #2bea70;
+
+}
+
+
+#scoreValue {
+
+    font-size: 50px;
+
+    font-weight: 900;
+
+}
+
+
+.score-display small {
+
+    color: #5e6c63;
+
+    font-size: 12px;
+
+}
+
+
+/* =========================
+   滑块
+========================= */
+
+#scoreRange {
+
+    width: 100%;
+
+    cursor: pointer;
+
+    accent-color: #2bea70;
+
+}
+
+
+.score-range-label {
+
+    margin-top: 7px;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    color: #55635a;
+
+    font-size: 10px;
+
+}
+
+
+/* =========================
+   提交按钮
+========================= */
+
+.submit-rating {
+
+    width: 100%;
+
+    height: 47px;
+
+    margin-top: 25px;
+
+    border: none;
+
+    border-radius: 10px;
+
+    background:
+            linear-gradient(
+                    135deg,
+                    #2bea70,
+                    #16c65a
+            );
+
+    color: #031009;
+
+    font-size: 13px;
+
+    font-weight: 900;
+
+    cursor: pointer;
+
+    transition: .2s;
+
+}
+
+
+.submit-rating:hover {
+
+    transform:
+            translateY(-1px);
+
+    box-shadow:
+            0 8px 25px
+            rgba(43,234,112,.15);
+
+}
+
+
+.submit-rating:disabled {
+
+    opacity: .5;
+
+    cursor: not-allowed;
+
+}
+
+
+/* =========================
+   手机端
+========================= */
+
+@media (max-width: 700px) {
+
+
+    .navbar {
+
+        height: 68px;
+
+        padding:
+                0 15px;
+
+    }
+
+
+    .brand-subtitle {
+
+        display: none;
+
+    }
+
+
+    .brand-title {
+
+        font-size: 13px;
+
+    }
+
+
+    .user-name {
+
+        display: none;
+
+    }
+
+
+    .logout-button {
+
+        margin-left: 3px;
+
+        padding:
+                6px 10px;
+
+    }
+
+
+    .main {
+
+        padding:
+                45px 10px 70px;
+
+    }
+
+
+    .hero {
+
+        margin-bottom: 35px;
+
+    }
+
+
+    .hero h1 {
+
+        font-size: 31px;
+
+    }
+
+
+    .hero p {
+
+        font-size: 11px;
+
+    }
+
+
+    .ranking-header {
+
+        padding:
+                18px 15px;
+
+    }
+
+
+    .player {
+
+        min-height: 90px;
+
+        padding:
+                13px 15px;
+
+        grid-template-columns:
+            35px
+            1fr
+            75px;
+
+        gap: 8px;
+
+    }
+
+
+    .score {
+
+        text-align: right;
+
+    }
+
+
+    .score-number {
+
+        font-size: 20px;
+
+    }
+
+
+    .player-action {
+
+        grid-column:
+                2 / 4;
+
+    }
+
+
+    .rate-button {
+
+        width: 100%;
+
+    }
+
+
+    .self-label {
+
+        text-align: right;
+
+    }
+
+
+    .modal-content {
+
+        padding:
+                30px 22px;
+
+    }
+
+}
