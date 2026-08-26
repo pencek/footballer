@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0">
+
+    <title>Footballer - 球员排行榜</title>
+
+
+    <!-- =========================
+         Supabase
+    ========================== -->
+
+    <script
+            src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
+    </script>
+
+
+    <!-- Supabase 配置 -->
+
+    <script src="js/supabase.js"></script>
+
+
+    <!-- 页面 CSS -->
+
+    <link
+            rel="stylesheet"
+            href="css/index.css">
+
+</head>
+
+
+<body>
+
+
+<div class="page">
+
+
+    <!-- =========================
+         背景
+    ========================== -->
+
+    <div class="background">
+
+        <div class="glow glow-1"></div>
+
+        <div class="glow glow-2"></div>
+
+        <div class="field">
+
+            <div class="field-line horizontal"></div>
+
+            <div class="field-line vertical"></div>
+
+            <div class="center-circle"></div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =========================
+         顶部导航栏
+    ========================== -->
+
+    <header class="navbar">
+
+
+        <!-- Logo -->
+
+        <div class="brand">
+
+            <div class="brand-icon">
+                ⚽
+            </div>
+
+            <div>
+
+                <div class="brand-title">
+                    FOOTBALLER
+                </div>
+
+                <div class="brand-subtitle">
+                    PLAYER PLATFORM
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- 用户信息 -->
+
+        <div class="user-area">
+
+            <div class="user-avatar"
+                 id="currentUserAvatar">
+
+                ?
+
+            </div>
+
+            <div class="user-name"
+                 id="currentUserName">
+
+                用户
+
+            </div>
+
+            <button
+                    id="logoutButton"
+                    class="logout-button">
+
+                退出
+
+            </button>
+
+        </div>
+
+
+    </header>
+
+
+
+    <!-- =========================
+         主体
+    ========================== -->
+
+    <main class="main">
+
+
+        <!-- =========================
+             页面标题
+        ========================== -->
+
+        <section class="hero">
+
+
+            <div class="hero-tag">
+
+                ⚽ PLAYER RANKING
+
+            </div>
+
+
+            <h1>
+
+                球员
+                <span>排行榜</span>
+
+            </h1>
+
+
+            <p>
+
+                根据所有球员评分的平均分进行排名
+
+            </p>
+
+
+        </section>
+
+
+
+        <!-- =========================
+             排行榜
+        ========================== -->
+
+        <section class="ranking-card">
+
+
+            <!-- 排行榜头部 -->
+
+            <div class="ranking-header">
+
+
+                <div>
+
+                    <h2>
+                        球员排名
+                    </h2>
+
+                    <p>
+
+                        共
+                        <span id="playerCount">
+                            0
+                        </span>
+                        名球员
+
+                    </p>
+
+                </div>
+
+
+                <button
+                        id="refreshButton"
+                        class="refresh-button">
+
+                    <span>
+                        ↻
+                    </span>
+
+                    刷新
+
+                </button>
+
+
+            </div>
+
+
+
+            <!-- =========================
+                 加载状态
+            ========================== -->
+
+            <div
+                    id="loading"
+                    class="loading">
+
+                <div class="loading-spinner"></div>
+
+                <p>
+                    正在加载球员数据...
+                </p>
+
+            </div>
+
+
+
+            <!-- =========================
+                 球员列表
+            ========================== -->
+
+            <div
+                    id="rankingList"
+                    class="ranking-list">
+
+            </div>
+
+
+        </section>
+
+
+    </main>
+
+
+
+    <!-- =========================
+         评分弹窗
+    ========================== -->
+
+    <div
+            id="ratingModal"
+            class="modal">
+
+
+        <div class="modal-content">
+
+
+            <!-- 关闭 -->
+
+            <button
+                    id="closeModal"
+                    class="close-modal">
+
+                ×
+
+            </button>
+
+
+
+            <!-- 图标 -->
+
+            <div class="modal-icon">
+
+                ⭐
+
+            </div>
+
+
+
+            <h2>
+
+                给
+                <span id="ratingPlayerName">
+                    球员
+                </span>
+                评分
+
+            </h2>
+
+
+            <p class="modal-description">
+
+                请选择你对这名球员的评分
+
+            </p>
+
+
+
+            <!-- 分数 -->
+
+            <div class="score-display">
+
+                <span id="scoreValue">
+                    5.0
+                </span>
+
+                <small>
+                    / 10
+                </small>
+
+            </div>
+
+
+
+            <!-- 滑块 -->
+
+            <input
+                    type="range"
+                    id="scoreRange"
+                    min="0"
+                    max="10"
+                    step="0.1"
+                    value="5">
+
+
+            <!-- 刻度 -->
+
+            <div class="score-range-label">
+
+                <span>
+                    0
+                </span>
+
+                <span>
+                    5
+                </span>
+
+                <span>
+                    10
+                </span>
+
+            </div>
+
+
+
+            <!-- 提交 -->
+
+            <button
+                    id="submitRating"
+                    class="submit-rating">
+
+                提交评分
+
+            </button>
+
+
+        </div>
+
+
+    </div>
+
+
+</div>
+
+
+
+<!-- =========================
+     首页 JS
+========================== -->
+
+<script src="js/index.js"></script>
+
+
+</body>
+
+</html>
