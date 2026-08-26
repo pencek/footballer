@@ -21,12 +21,16 @@
     </script>
 
 
-    <!-- Supabase 配置 -->
+    <!-- =========================
+         Supabase 配置
+    ========================== -->
 
     <script src="js/supabase.js"></script>
 
 
-    <!-- 页面 CSS -->
+    <!-- =========================
+         页面 CSS
+    ========================== -->
 
     <link
             rel="stylesheet"
@@ -72,7 +76,9 @@
     <header class="navbar">
 
 
-        <!-- Logo -->
+        <!-- =====================
+             Logo
+        ====================== -->
 
         <div class="brand">
 
@@ -96,23 +102,29 @@
 
 
 
-        <!-- 用户信息 -->
+        <!-- =====================
+             用户信息
+        ====================== -->
 
         <div class="user-area">
 
-            <div class="user-avatar"
-                 id="currentUserAvatar">
+            <div
+                    class="user-avatar"
+                    id="currentUserAvatar">
 
                 ?
 
             </div>
 
-            <div class="user-name"
-                 id="currentUserName">
+
+            <div
+                    class="user-name"
+                    id="currentUserName">
 
                 用户
 
             </div>
+
 
             <button
                     id="logoutButton"
@@ -176,7 +188,9 @@
         <section class="ranking-card">
 
 
-            <!-- 排行榜头部 -->
+            <!-- =====================
+                 排行榜头部
+            ====================== -->
 
             <div class="ranking-header">
 
@@ -187,12 +201,15 @@
                         球员排名
                     </h2>
 
+
                     <p>
 
                         共
+
                         <span id="playerCount">
                             0
                         </span>
+
                         名球员
 
                     </p>
@@ -243,6 +260,10 @@
                     id="rankingList"
                     class="ranking-list">
 
+                <!--
+                    球员数据由 index.js 动态生成
+                -->
+
             </div>
 
 
@@ -265,7 +286,9 @@
         <div class="modal-content">
 
 
-            <!-- 关闭 -->
+            <!-- =====================
+                 关闭按钮
+            ====================== -->
 
             <button
                     id="closeModal"
@@ -277,7 +300,9 @@
 
 
 
-            <!-- 图标 -->
+            <!-- =====================
+                 图标
+            ====================== -->
 
             <div class="modal-icon">
 
@@ -287,12 +312,18 @@
 
 
 
+            <!-- =====================
+                 标题
+            ====================== -->
+
             <h2>
 
                 给
+
                 <span id="ratingPlayerName">
                     球员
                 </span>
+
                 评分
 
             </h2>
@@ -306,7 +337,9 @@
 
 
 
-            <!-- 分数 -->
+            <!-- =====================
+                 分数显示
+            ====================== -->
 
             <div class="score-display">
 
@@ -322,7 +355,9 @@
 
 
 
-            <!-- 滑块 -->
+            <!-- =====================
+                 评分滑块
+            ====================== -->
 
             <input
                     type="range"
@@ -333,27 +368,44 @@
                     value="5">
 
 
-            <!-- 刻度 -->
+
+            <!-- =====================
+                 评分刻度
+            ====================== -->
 
             <div class="score-range-label">
 
-                <span>0</span>
+                <span>
+                    0
+                </span>
 
-                <span>1</span>
+                <span>
+                    1
+                </span>
 
-                <span>2</span>
+                <span>
+                    2
+                </span>
 
-                <span>3</span>
+                <span>
+                    3
+                </span>
 
-                <span>4</span>
+                <span>
+                    4
+                </span>
 
-                <span>5</span>
+                <span>
+                    5
+                </span>
 
             </div>
 
 
 
-            <!-- 提交 -->
+            <!-- =====================
+                 提交评分
+            ====================== -->
 
             <button
                     id="submitRating"
@@ -368,6 +420,45 @@
 
 
     </div>
+
+
+
+    <!-- ==================================================
+         评论功能说明
+    ===================================================
+
+         评论区域不直接写死在 HTML 中。
+
+         每一个球员的评论区由 index.js 动态创建。
+
+         结构大致如下：
+
+         .player
+         │
+         ├── .player-main
+         │
+         └── .player-comments
+               │
+               ├── .comments-header
+               │
+               ├── .comments-list
+               │
+               ├── .show-comments-button
+               │
+               └── .comment-input-area
+
+         功能：
+
+         1. 本人不能评论自己
+         2. 其他用户可以评论
+         3. 一个用户对一个球员只能有一条评论
+         4. 默认显示最新一条评论
+         5. 点击查看全部评论
+         6. 点击收起评论
+         7. 最多200字
+         8. 评论每天北京时间04:00清空
+
+    =================================================== -->
 
 
 </div>
