@@ -1930,48 +1930,60 @@ async function saveTodayComment(
         // 获取该用户对该球员的评论
         // ====================================================
 
-        const {
-            data: existingComments,
-            error: findError
-        } =
-            await supabaseClient
-                .from("comments")
-                .select(
-                    `
-                    id,
-                    target_id,
-                    user_id,
-                    content,
-                    created_at
-                    `
-                )
-                .eq(
-                    "target_id",
-                    targetId
-                )
-                .eq(
-                    "user_id",
-                    userId
-                )
-                .order(
-                    "created_at",
-                    {
-                        ascending: false
-                    }
+        let commentData = null;
+        let commentError = null;
+
+        if (comment.length > 0) {
+
+            const result =
+                await supabaseClient
+                    .from("comments")
+                    .upsert(
+                        {
+                            target_id:
+                                Number(
+                                    selectedPlayerId
+                                ),
+
+                            user_id:
+                                Number(
+                                    loginUser.id
+                                ),
+
+                            content:
+                            comment
+                        },
+                        {
+                            onConflict:
+                                "user_id,target_id"
+                        }
+                    )
+                    .select();
+
+            commentData =
+                result.data;
+
+            commentError =
+                result.error;
+
+
+            if (commentError) {
+
+                console.error(
+                    "评论提交失败：",
+                    commentError
                 );
 
+                alert(
+                    "评分已经提交成功，但评论提交失败：\n" +
+                    commentError.message
+                );
 
-        if (findError) {
+                await loadRanking();
 
-            console.error(
-                "查找已有评论失败：",
-                findError
-            );
+                return;
 
-            return {
-                success: false,
-                error: findError
-            };
+            }
 
         }
 
