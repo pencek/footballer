@@ -5,15 +5,18 @@
 const loginUserData =
     localStorage.getItem("loginUser");
 
+
 if (!loginUserData) {
 
     window.location.href = "login.html";
 
     throw new Error("用户未登录");
+
 }
 
 
 let loginUser;
+
 
 try {
 
@@ -27,6 +30,7 @@ try {
     window.location.href = "login.html";
 
     throw new Error("登录信息错误");
+
 }
 
 
@@ -91,6 +95,7 @@ let selectedPlayerId = null;
 currentUserName.textContent =
     loginUser.name || "用户";
 
+
 currentUserAvatar.textContent =
     getInitial(loginUser.name);
 
@@ -103,25 +108,42 @@ async function loadRanking() {
 
     console.log("开始加载排行榜...");
 
-    loading.style.display = "flex";
+
+    loading.style.display =
+        "flex";
+
 
     loading.innerHTML = `
         <div class="loading-spinner"></div>
-        <p>正在加载球员数据...</p>
+
+        <p>
+            正在加载球员数据...
+        </p>
     `;
 
-    rankingList.innerHTML = "";
 
-    refreshButton.disabled = true;
+    rankingList.innerHTML =
+        "";
+
+
+    refreshButton.disabled =
+        true;
 
 
     try {
 
+        // ========================
+        // 调用数据库排行榜函数
+        // ========================
+
         const {
             data,
             error
-        } = await supabaseClient
-            .rpc("get_player_ranking");
+        } =
+            await supabaseClient
+                .rpc(
+                    "get_player_ranking"
+                );
 
 
         // ========================
@@ -135,21 +157,33 @@ async function loadRanking() {
                 error
             );
 
+
             loading.innerHTML = `
+
                 <p style="color:#ff6b6b;">
+
                     排行榜加载失败
+
                 </p>
+
 
                 <p style="
                     margin-top:8px;
                     font-size:11px;
                     color:#65736a;
                 ">
-                    ${escapeHTML(error.message)}
+
+                    ${escapeHTML(
+                error.message
+            )}
+
                 </p>
+
             `;
 
+
             return;
+
         }
 
 
@@ -159,35 +193,51 @@ async function loadRanking() {
         );
 
 
-        loading.style.display = "none";
+        loading.style.display =
+            "none";
 
 
         // ========================
         // 没有用户
         // ========================
 
-        if (!data || data.length === 0) {
+        if (
+            !data ||
+            data.length === 0
+        ) {
 
-            playerCount.textContent = "0";
+            playerCount.textContent =
+                "0";
+
 
             rankingList.innerHTML = `
+
                 <div class="loading">
+
                     <p>
                         暂时还没有用户
                     </p>
+
                 </div>
+
             `;
 
+
             return;
+
         }
 
+
+        // ========================
+        // 用户数量
+        // ========================
 
         playerCount.textContent =
             data.length;
 
 
         // ========================
-        // 创建球员
+        // 创建排行榜
         // ========================
 
         data.forEach(
@@ -209,11 +259,17 @@ async function loadRanking() {
             error
         );
 
+
         loading.innerHTML = `
+
             <p style="color:#ff6b6b;">
+
                 网络连接失败，请稍后再试
+
             </p>
+
         `;
+
 
     } finally {
 
@@ -235,21 +291,27 @@ function createPlayer(
 ) {
 
     const element =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
 
 
     element.className =
         "player";
 
 
-    // 是否是自己
+    // ========================
+    // 是否是当前用户
+    // ========================
 
     const isSelf =
         Number(player.id) ===
         Number(loginUser.id);
 
 
+    // ========================
     // 评分人数
+    // ========================
 
     const ratingCount =
         Number(
@@ -257,7 +319,9 @@ function createPlayer(
         );
 
 
+    // ========================
     // 平均分
+    // ========================
 
     const averageScore =
         player.average_score === null
@@ -268,7 +332,7 @@ function createPlayer(
 
 
     // ========================
-    // 分数HTML
+    // 分数 HTML
     // ========================
 
     let scoreHTML;
@@ -276,28 +340,37 @@ function createPlayer(
 
     if (
         ratingCount === 0 ||
-        averageScore === null
+        averageScore === null ||
+        Number.isNaN(averageScore)
     ) {
 
         scoreHTML = `
+
             <div class="score-number no-score">
+
                 暂无
+
             </div>
+
         `;
 
     } else {
 
         scoreHTML = `
+
             <div class="score-number">
+
                 ${averageScore.toFixed(2)}
+
             </div>
+
         `;
 
     }
 
 
     // ========================
-    // 操作HTML
+    // 操作 HTML
     // ========================
 
     let actionHTML;
@@ -306,14 +379,19 @@ function createPlayer(
     if (isSelf) {
 
         actionHTML = `
+
             <div class="self-label">
+
                 这是你自己
+
             </div>
+
         `;
 
     } else {
 
         actionHTML = `
+
             <button
                 type="button"
                 class="rate-button"
@@ -322,13 +400,14 @@ function createPlayer(
                 ⭐ 给TA评分
 
             </button>
+
         `;
 
     }
 
 
     // ========================
-    // 球员HTML
+    // 球员 HTML
     // ========================
 
     element.innerHTML = `
@@ -353,14 +432,18 @@ function createPlayer(
 
                 <div class="player-name">
 
-                    ${escapeHTML(player.name)}
+                    ${escapeHTML(
+        player.name
+    )}
 
                 </div>
 
 
                 <div class="player-account">
 
-                    @${escapeHTML(player.username)}
+                    @${escapeHTML(
+        player.username
+    )}
 
                 </div>
 
@@ -372,6 +455,7 @@ function createPlayer(
         <div class="score">
 
             ${scoreHTML}
+
 
             <div class="score-label">
 
@@ -389,6 +473,7 @@ function createPlayer(
                 ${ratingCount} 人评分
 
             </div>
+
 
             ${actionHTML}
 
@@ -453,21 +538,37 @@ function openRatingModal(
     );
 
 
+    // ========================
+    // 保存当前评分对象
+    // ========================
+
     selectedPlayerId =
         playerId;
 
+
+    // ========================
+    // 设置球员名称
+    // ========================
 
     ratingPlayerName.textContent =
         playerName;
 
 
+    // ========================
     // 默认5分
+    // ========================
 
-    scoreRange.value = 5;
+    scoreRange.value =
+        5;
+
 
     scoreValue.textContent =
-        "5.0";
+        "5";
 
+
+    // ========================
+    // 打开弹窗
+    // ========================
 
     ratingModal.classList.add(
         "show"
@@ -490,8 +591,22 @@ function closeRatingModal() {
     selectedPlayerId =
         null;
 
+
+    // 恢复默认评分
+
+    scoreRange.value =
+        5;
+
+
+    scoreValue.textContent =
+        "5";
+
 }
 
+
+// ============================
+// 点击关闭按钮
+// ============================
 
 closeModal.addEventListener(
     "click",
@@ -499,7 +614,9 @@ closeModal.addEventListener(
 );
 
 
+// ============================
 // 点击背景关闭
+// ============================
 
 ratingModal.addEventListener(
     "click",
@@ -518,7 +635,9 @@ ratingModal.addEventListener(
 );
 
 
+// ============================
 // ESC关闭
+// ============================
 
 document.addEventListener(
     "keydown",
@@ -558,8 +677,35 @@ scoreRange.addEventListener(
             );
 
 
+        // ========================
+        // 强制验证
+        // ========================
+
+        if (
+            !Number.isInteger(score) ||
+            score < 0 ||
+            score > 5
+        ) {
+
+            scoreRange.value =
+                5;
+
+
+            scoreValue.textContent =
+                "5";
+
+
+            return;
+
+        }
+
+
+        // ========================
+        // 显示整数评分
+        // ========================
+
         scoreValue.textContent =
-            score.toFixed(1);
+            String(score);
 
     }
 );
@@ -573,16 +719,26 @@ submitRating.addEventListener(
     "click",
     async function () {
 
+        // ========================
         // 没有选择用户
+        // ========================
 
         if (
             selectedPlayerId === null
         ) {
 
+            alert(
+                "请选择要评分的球员"
+            );
+
             return;
 
         }
 
+
+        // ========================
+        // 获取评分
+        // ========================
 
         const score =
             Number(
@@ -601,6 +757,25 @@ submitRating.addEventListener(
 
 
         // ========================
+        // 评分范围验证
+        // ========================
+
+        if (
+            !Number.isInteger(score) ||
+            score < 0 ||
+            score > 5
+        ) {
+
+            alert(
+                "评分必须是0～5的整数"
+            );
+
+            return;
+
+        }
+
+
+        // ========================
         // 防止自己给自己评分
         // ========================
 
@@ -613,7 +788,9 @@ submitRating.addEventListener(
                 "不能给自己评分"
             );
 
+
             closeRatingModal();
+
 
             return;
 
@@ -626,6 +803,7 @@ submitRating.addEventListener(
 
         submitRating.disabled =
             true;
+
 
         submitRating.textContent =
             "提交中...";
@@ -657,9 +835,7 @@ submitRating.addEventListener(
                                 ),
 
                             target_score:
-                                Number(
-                                    score.toFixed(1)
-                                )
+                            score
 
                         }
                     );
@@ -695,6 +871,15 @@ submitRating.addEventListener(
 
 
             // ====================
+            // 提示
+            // ====================
+
+            alert(
+                "评分成功！"
+            );
+
+
+            // ====================
             // 关闭弹窗
             // ====================
 
@@ -720,11 +905,15 @@ submitRating.addEventListener(
                 "网络连接失败，请稍后再试"
             );
 
-
         } finally {
+
+            // ====================
+            // 恢复按钮
+            // ====================
 
             submitRating.disabled =
                 false;
+
 
             submitRating.textContent =
                 "提交评分";
@@ -791,7 +980,7 @@ function getInitial(name) {
 
 
 // ============================
-// 防止HTML注入
+// 防止 HTML 注入
 // ============================
 
 function escapeHTML(text) {
