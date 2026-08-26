@@ -1,38 +1,60 @@
 /* =========================================================
+   Footballer
+   Player Ranking Platform
+========================================================= */
+
+
+/* =========================================================
    全局
 ========================================================= */
 
 * {
-
     margin: 0;
     padding: 0;
-
     box-sizing: border-box;
-
 }
 
 
 html {
-
     scroll-behavior: smooth;
-
 }
 
 
 body {
-
     min-height: 100vh;
 
     font-family:
             "Microsoft YaHei",
             "PingFang SC",
+            "Noto Sans SC",
             Arial,
             sans-serif;
 
     color: #ffffff;
 
-    background: #06100a;
+    background: #050c08;
 
+    -webkit-font-smoothing: antialiased;
+}
+
+
+button,
+input,
+textarea {
+    font-family: inherit;
+}
+
+
+button {
+    outline: none;
+}
+
+
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+    outline: 2px solid rgba(43, 234, 112, .45);
+    outline-offset: 2px;
 }
 
 
@@ -41,13 +63,9 @@ body {
 ========================================================= */
 
 .page {
-
     min-height: 100vh;
-
     position: relative;
-
     overflow: hidden;
-
 }
 
 
@@ -56,73 +74,89 @@ body {
 ========================================================= */
 
 .background {
-
     position: fixed;
-
     inset: 0;
 
-    z-index: -1;
+    z-index: -10;
+
+    overflow: hidden;
 
     background:
-
             radial-gradient(
-                    circle at 20% 10%,
-                    rgba(43,234,112,.10),
-                    transparent 30%
+                    circle at 15% 5%,
+                    rgba(43, 234, 112, .09),
+                    transparent 32%
             ),
-
             radial-gradient(
                     circle at 90% 90%,
-                    rgba(0,170,255,.08),
+                    rgba(0, 142, 255, .06),
                     transparent 30%
             ),
-
             linear-gradient(
-                    135deg,
-                    #06100a,
-                    #0a1710,
-                    #06100a
+                    145deg,
+                    #040a07 0%,
+                    #07130c 45%,
+                    #040a07 100%
+            );
+}
+
+
+.background-gradient {
+    position: absolute;
+    inset: 0;
+
+    background:
+            linear-gradient(
+                    90deg,
+                    rgba(255,255,255,.012) 1px,
+                    transparent 1px
+            ),
+            linear-gradient(
+                    rgba(255,255,255,.012) 1px,
+                    transparent 1px
             );
 
+    background-size: 70px 70px;
+
+    opacity: .18;
+
+    mask-image: linear-gradient(
+            to bottom,
+            black,
+            transparent 85%
+    );
 }
 
 
 .glow {
-
     position: absolute;
 
     width: 500px;
-
     height: 500px;
 
     border-radius: 50%;
 
-    filter: blur(130px);
+    filter: blur(140px);
 
-    opacity: .15;
+    opacity: .13;
 
+    pointer-events: none;
 }
 
 
-.glow-1 {
-
-    left: -250px;
-
-    top: -250px;
+.glow-green {
+    top: -300px;
+    left: -220px;
 
     background: #20e86b;
-
 }
 
 
-.glow-2 {
-
-    right: -250px;
-
-    bottom: -250px;
+.glow-blue {
+    right: -300px;
+    bottom: -300px;
 
     background: #008cff;
-
 }
 
 
@@ -131,68 +165,137 @@ body {
 ========================================================= */
 
 .field {
-
     position: absolute;
 
     inset: 0;
 
-    opacity: .25;
+    opacity: .15;
 
+    pointer-events: none;
 }
 
 
-.field-line {
-
+.field-border {
     position: absolute;
 
-    background: rgba(255,255,255,.035);
+    width: 900px;
+    height: 550px;
 
+    left: 50%;
+    top: 50%;
+
+    transform: translate(-50%, -50%);
+
+    border: 1px solid rgba(255,255,255,.04);
 }
 
 
-.field-line.horizontal {
+.field-half-line {
+    position: absolute;
 
     width: 100%;
-
     height: 1px;
 
+    left: 0;
     top: 50%;
 
+    background: rgba(255,255,255,.04);
 }
 
 
-.field-line.vertical {
-
-    height: 100%;
-
-    width: 1px;
-
-    left: 50%;
-
-}
-
-
-.center-circle {
-
+.field-center-line {
     position: absolute;
 
-    width: 650px;
-
-    height: 650px;
+    width: 1px;
+    height: 100%;
 
     left: 50%;
+    top: 0;
+
+    background: rgba(255,255,255,.025);
+}
+
+
+.field-center-circle {
+    position: absolute;
+
+    width: 280px;
+    height: 280px;
+
+    left: 50%;
+    top: 50%;
+
+    transform: translate(-50%, -50%);
+
+    border:
+            1px solid
+            rgba(255,255,255,.04);
+
+    border-radius: 50%;
+}
+
+
+.field-center-dot {
+    position: absolute;
+
+    width: 7px;
+    height: 7px;
+
+    left: 50%;
+    top: 50%;
+
+    transform: translate(-50%, -50%);
+
+    border-radius: 50%;
+
+    background: rgba(255,255,255,.07);
+}
+
+
+.penalty-area {
+    position: absolute;
+
+    width: 150px;
+    height: 250px;
 
     top: 50%;
 
-    transform:
-            translate(-50%, -50%);
+    transform: translateY(-50%);
 
     border:
             1px solid
             rgba(255,255,255,.035);
+}
 
-    border-radius: 50%;
 
+.penalty-left {
+    left: calc(50% - 450px);
+}
+
+
+.penalty-right {
+    right: calc(50% - 450px);
+}
+
+
+/* =========================================================
+   网格
+========================================================= */
+
+.grid {
+    position: absolute;
+
+    inset: 0;
+
+    background:
+            linear-gradient(
+                    90deg,
+                    transparent 0%,
+                    rgba(43,234,112,.018) 50%,
+                    transparent 100%
+            );
+
+    pointer-events: none;
 }
 
 
@@ -201,28 +304,35 @@ body {
 ========================================================= */
 
 .navbar {
+    position: relative;
 
     height: 76px;
 
-    padding:
-            0 6%;
+    border-bottom:
+            1px solid
+            rgba(255,255,255,.055);
+
+    background:
+            rgba(4,12,7,.78);
+
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+
+    z-index: 20;
+}
+
+
+.nav-inner {
+    width: 100%;
+    height: 100%;
+
+    padding: 0 6%;
 
     display: flex;
 
     align-items: center;
 
     justify-content: space-between;
-
-    border-bottom:
-            1px solid
-            rgba(255,255,255,.06);
-
-    background:
-            rgba(5,15,9,.75);
-
-    backdrop-filter:
-            blur(18px);
-
 }
 
 
@@ -231,63 +341,74 @@ body {
 ========================================================= */
 
 .brand {
-
     display: flex;
 
     align-items: center;
 
     gap: 12px;
 
+    color: inherit;
+
+    text-decoration: none;
 }
 
 
-.brand-icon {
-
+.brand-logo {
     width: 42px;
-
     height: 42px;
 
     display: flex;
 
     align-items: center;
-
     justify-content: center;
-
-    border-radius: 12px;
-
-    background:
-            rgba(43,234,112,.08);
 
     border:
             1px solid
             rgba(43,234,112,.2);
 
+    border-radius: 12px;
+
+    background:
+            linear-gradient(
+                    145deg,
+                    rgba(43,234,112,.11),
+                    rgba(43,234,112,.025)
+            );
+
+    box-shadow:
+            inset 0 0 20px
+            rgba(43,234,112,.025);
+}
+
+
+.brand-logo span {
     font-size: 20px;
 
+    filter:
+            drop-shadow(
+                    0 0 10px
+                    rgba(43,234,112,.18)
+            );
 }
 
 
 .brand-title {
-
     font-size: 15px;
 
     font-weight: 900;
 
-    letter-spacing: 2px;
-
+    letter-spacing: 2.5px;
 }
 
 
 .brand-subtitle {
-
     margin-top: 3px;
 
-    color: #65736a;
+    color: #536159;
 
     font-size: 8px;
 
     letter-spacing: 2px;
-
 }
 
 
@@ -296,91 +417,116 @@ body {
 ========================================================= */
 
 .user-area {
-
     display: flex;
 
     align-items: center;
 
     gap: 10px;
-
 }
 
 
 .user-avatar {
-
-    width: 34px;
-
-    height: 34px;
+    width: 36px;
+    height: 36px;
 
     display: flex;
 
     align-items: center;
-
     justify-content: center;
 
+    border:
+            1px solid
+            rgba(43,234,112,.22);
+
     border-radius: 50%;
+
+    background:
+            rgba(43,234,112,.075);
 
     color: #2bea70;
 
     font-size: 13px;
 
-    font-weight: 800;
+    font-weight: 900;
+}
 
-    background:
-            rgba(43,234,112,.08);
 
-    border:
-            1px solid
-            rgba(43,234,112,.2);
-
+.user-info {
+    min-width: 65px;
 }
 
 
 .user-name {
+    color: #d1d9d3;
 
-    color: #cbd5ce;
+    font-size: 12px;
 
-    font-size: 13px;
+    font-weight: 700;
+}
 
-    font-weight: 600;
 
+.user-status {
+    margin-top: 3px;
+
+    color: #3d9d5e;
+
+    font-size: 7px;
+
+    letter-spacing: 1.5px;
+
+    font-weight: 700;
 }
 
 
 .logout-button {
+    margin-left: 10px;
 
-    margin-left: 8px;
+    padding: 8px 12px;
 
-    padding:
-            7px 13px;
+    display: flex;
+
+    align-items: center;
+
+    gap: 5px;
 
     border:
             1px solid
-            rgba(255,255,255,.08);
+            rgba(255,255,255,.07);
 
     border-radius: 8px;
 
     background:
-            rgba(255,255,255,.035);
+            rgba(255,255,255,.025);
 
-    color: #78857d;
+    color: #68756d;
 
-    font-size: 11px;
+    font-size: 10px;
 
     cursor: pointer;
 
-    transition: .2s;
-
+    transition:
+            color .2s ease,
+            background .2s ease,
+            border-color .2s ease,
+            transform .2s ease;
 }
 
 
 .logout-button:hover {
-
     color: #ffffff;
 
-    border-color:
-            rgba(255,255,255,.18);
+    background:
+            rgba(255,255,255,.05);
 
+    border-color:
+            rgba(255,255,255,.14);
+
+    transform: translateY(-1px);
+}
+
+
+.logout-icon {
+    font-size: 13px;
 }
 
 
@@ -389,16 +535,14 @@ body {
 ========================================================= */
 
 .main {
-
     width: 100%;
 
-    max-width: 1000px;
+    max-width: 1080px;
 
-    margin: auto;
+    margin: 0 auto;
 
     padding:
-            70px 20px 100px;
-
+            72px 20px 50px;
 }
 
 
@@ -407,349 +551,115 @@ body {
 ========================================================= */
 
 .hero {
-
     text-align: center;
 
-    margin-bottom: 48px;
-
+    margin-bottom: 50px;
 }
 
 
-.hero-tag {
-
-    display: inline-block;
-
-    padding:
-            7px 14px;
-
-    border:
-            1px solid
-            rgba(43,234,112,.18);
-
-    border-radius: 30px;
-
-    color: #42e77d;
-
-    background:
-            rgba(43,234,112,.06);
-
-    font-size: 10px;
-
-    letter-spacing: 2px;
-
-}
-
-
-.hero h1 {
-
-    margin-top: 18px;
-
-    font-size: 43px;
-
-    font-weight: 900;
-
-    letter-spacing: -1px;
-
-}
-
-
-.hero h1 span {
-
-    color: #2bea70;
-
-}
-
-
-.hero p {
-
-    margin-top: 12px;
-
-    color: #68756d;
-
-    font-size: 13px;
-
-}
-
-
-/* =========================================================
-   每日刷新提示
-========================================================= */
-
-.hero-notice {
-
+.hero-label {
     display: inline-flex;
 
     align-items: center;
 
-    gap: 6px;
-
-    margin-top: 18px;
+    gap: 8px;
 
     padding:
-            6px 12px;
+            7px 13px;
 
     border:
             1px solid
-            rgba(255,255,255,.05);
+            rgba(43,234,112,.17);
 
-    border-radius: 20px;
+    border-radius: 30px;
 
     background:
-            rgba(255,255,255,.025);
+            rgba(43,234,112,.045);
 
-    color: #56645b;
+    color: #4de582;
 
-    font-size: 10px;
+    font-size: 9px;
 
+    font-weight: 800;
+
+    letter-spacing: 2px;
 }
 
 
-.hero-notice span {
+.hero-label-dot {
+    width: 6px;
+    height: 6px;
 
-    color: #2bea70;
+    border-radius: 50%;
 
-}
-
-
-/* =========================================================
-   排行榜卡片
-========================================================= */
-
-.ranking-card {
-
-    overflow: hidden;
-
-    border:
-            1px solid
-            rgba(255,255,255,.07);
-
-    border-radius: 20px;
-
-    background:
-            rgba(10,23,15,.88);
+    background: #2bea70;
 
     box-shadow:
-            0 30px 80px
-            rgba(0,0,0,.3);
+            0 0 10px
+            rgba(43,234,112,.55);
 
+    animation:
+            pulse-dot 2s ease-in-out infinite;
 }
 
 
-/* =========================================================
-   排行榜头部
-========================================================= */
+@keyframes pulse-dot {
+    0%,
+    100% {
+        opacity: .55;
+        transform: scale(.9);
+    }
 
-.ranking-header {
-
-    min-height: 82px;
-
-    padding:
-            20px 28px;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: space-between;
-
-    border-bottom:
-            1px solid
-            rgba(255,255,255,.06);
-
+    50% {
+        opacity: 1;
+        transform: scale(1.1);
+    }
 }
 
 
-.ranking-header h2 {
+.hero-title {
+    margin-top: 19px;
 
-    font-size: 19px;
+    font-size: clamp(38px, 5vw, 56px);
 
+    line-height: 1.1;
+
+    font-weight: 950;
+
+    letter-spacing: -2px;
 }
 
 
-.ranking-header p {
-
-    margin-top: 5px;
-
-    color: #68766d;
-
-    font-size: 11px;
-
-}
-
-
-.ranking-header p span {
-
+.hero-title span {
     color: #2bea70;
 
+    text-shadow:
+            0 0 35px
+            rgba(43,234,112,.1);
+}
+
+
+.hero-description {
+    max-width: 550px;
+
+    margin: 16px auto 0;
+
+    color: #68766e;
+
+    font-size: 13px;
+
+    line-height: 1.8;
 }
 
 
 /* =========================================================
-   刷新按钮
+   Hero 数据
 ========================================================= */
 
-.refresh-button {
+.hero-stats {
+    max-width: 560px;
 
-    display: flex;
-
-    align-items: center;
-
-    gap: 6px;
-
-    padding:
-            8px 14px;
-
-    border:
-            1px solid
-            rgba(255,255,255,.08);
-
-    border-radius: 8px;
-
-    background:
-            rgba(255,255,255,.035);
-
-    color: #7c8981;
-
-    font-size: 11px;
-
-    cursor: pointer;
-
-    transition: .2s;
-
-}
-
-
-.refresh-button:hover {
-
-    color: #ffffff;
-
-    border-color:
-            rgba(255,255,255,.18);
-
-}
-
-
-.refresh-button span {
-
-    font-size: 16px;
-
-}
-
-
-/* =========================================================
-   球员整体
-========================================================= */
-
-.player {
-
-    border-bottom:
-            1px solid
-            rgba(255,255,255,.045);
-
-    transition: .2s;
-
-}
-
-
-.player:hover {
-
-    background:
-            rgba(255,255,255,.018);
-
-}
-
-
-.player:last-child {
-
-    border-bottom: none;
-
-}
-
-
-/* =========================================================
-   球员主体
-========================================================= */
-
-.player-main {
-
-    min-height: 88px;
-
-    padding:
-            14px 28px;
-
-    display: grid;
-
-    grid-template-columns:
-            60px
-            1fr
-            130px
-            130px;
-
-    align-items: center;
-
-    gap: 15px;
-
-}
-
-
-/* =========================================================
-   排名
-========================================================= */
-
-.rank {
-
-    font-size: 19px;
-
-    font-weight: 900;
-
-    color: #4d5b52;
-
-}
-
-
-.player:nth-child(1) .rank {
-
-    color: #ffd75e;
-
-}
-
-
-.player:nth-child(2) .rank {
-
-    color: #c4ccd0;
-
-}
-
-
-.player:nth-child(3) .rank {
-
-    color: #c98c63;
-
-}
-
-
-/* =========================================================
-   球员信息
-========================================================= */
-
-.player-info {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 13px;
-
-}
-
-
-.avatar {
-
-    width: 45px;
-
-    height: 45px;
-
-    flex-shrink: 0;
+    margin: 27px auto 0;
 
     display: flex;
 
@@ -757,164 +667,7 @@ body {
 
     justify-content: center;
 
-    border:
-            1px solid
-            rgba(43,234,112,.16);
-
-    border-radius: 50%;
-
-    background:
-            rgba(43,234,112,.07);
-
-    color: #2bea70;
-
-    font-size: 15px;
-
-    font-weight: 900;
-
-}
-
-
-.player-name {
-
-    font-size: 14px;
-
-    font-weight: 700;
-
-}
-
-
-.player-account {
-
-    margin-top: 4px;
-
-    color: #5e6b63;
-
-    font-size: 10px;
-
-}
-
-
-/* =========================================================
-   平均分
-========================================================= */
-
-.score {
-
-    text-align: center;
-
-}
-
-
-.score-number {
-
-    font-size: 23px;
-
-    font-weight: 900;
-
-    color: #2bea70;
-
-}
-
-
-.score-number.no-score {
-
-    color: #4c5951;
-
-}
-
-
-.score-label {
-
-    margin-top: 3px;
-
-    color: #59665e;
-
-    font-size: 9px;
-
-}
-
-
-/* =========================================================
-   球员操作
-========================================================= */
-
-.player-action {
-
-    text-align: center;
-
-}
-
-
-.rating-count {
-
-    margin-bottom: 7px;
-
-    color: #606d65;
-
-    font-size: 10px;
-
-}
-
-
-.rate-button {
-
-    width: 100%;
-
-    padding:
-            9px 10px;
-
-    border:
-            1px solid
-            rgba(43,234,112,.18);
-
-    border-radius: 8px;
-
-    background:
-            rgba(43,234,112,.05);
-
-    color: #3ee679;
-
-    font-size: 10px;
-
-    cursor: pointer;
-
-    transition: .2s;
-
-}
-
-
-.rate-button:hover {
-
-    background:
-            rgba(43,234,112,.12);
-
-    border-color:
-            rgba(43,234,112,.3);
-
-}
-
-
-.self-label {
-
-    color: #4e5b53;
-
-    font-size: 10px;
-
-}
-
-
-/* =========================================================
-   评论区
-========================================================= */
-
-.player-comments {
-
-    margin:
-            0 28px 18px;
-
-    padding:
-            16px 18px;
+    padding: 13px 18px;
 
     border:
             1px solid
@@ -923,16 +676,147 @@ body {
     border-radius: 14px;
 
     background:
-            rgba(3,12,7,.38);
+            rgba(255,255,255,.018);
 
+    backdrop-filter: blur(10px);
+}
+
+
+.hero-stat {
+    display: flex;
+
+    align-items: center;
+
+    gap: 9px;
+
+    flex: 1;
+
+    text-align: left;
+}
+
+
+.hero-stat-icon {
+    width: 29px;
+    height: 29px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 8px;
+
+    background:
+            rgba(43,234,112,.055);
+
+    font-size: 12px;
+}
+
+
+.hero-stat strong {
+    display: block;
+
+    color: #a7b2ab;
+
+    font-size: 8px;
+
+    letter-spacing: 1px;
+}
+
+
+.hero-stat span {
+    display: block;
+
+    margin-top: 3px;
+
+    color: #505d55;
+
+    font-size: 8px;
+}
+
+
+.hero-stat-divider {
+    width: 1px;
+    height: 28px;
+
+    margin: 0 13px;
+
+    background:
+            rgba(255,255,255,.055);
 }
 
 
 /* =========================================================
-   评论头部
+   Hero 提示
 ========================================================= */
 
-.comments-header {
+.hero-notice {
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    margin-top: 18px;
+
+    padding:
+            6px 11px;
+
+    border:
+            1px solid
+            rgba(255,255,255,.035);
+
+    border-radius: 20px;
+
+    background:
+            rgba(255,255,255,.015);
+
+    color: #505d55;
+
+    font-size: 9px;
+}
+
+
+.notice-icon {
+    color: #2bea70;
+
+    font-size: 11px;
+}
+
+
+/* =========================================================
+   排行榜卡片
+========================================================= */
+
+.ranking-card {
+    overflow: hidden;
+
+    border:
+            1px solid
+            rgba(255,255,255,.065);
+
+    border-radius: 22px;
+
+    background:
+            rgba(8,19,12,.91);
+
+    box-shadow:
+            0 35px 100px
+            rgba(0,0,0,.32);
+
+    backdrop-filter: blur(15px);
+}
+
+
+/* =========================================================
+   排行榜头部
+========================================================= */
+
+.ranking-header {
+    min-height: 86px;
+
+    padding:
+            19px 28px;
 
     display: flex;
 
@@ -940,538 +824,259 @@ body {
 
     justify-content: space-between;
 
-    margin-bottom: 12px;
-
+    border-bottom:
+            1px solid
+            rgba(255,255,255,.055);
 }
 
 
-.comments-title {
-
+.ranking-title-area {
     display: flex;
 
     align-items: center;
 
-    gap: 7px;
-
-    color: #c9d3cc;
-
-    font-size: 12px;
-
-    font-weight: 700;
-
+    gap: 12px;
 }
 
 
-.comments-title-icon {
-
-    width: 25px;
-
-    height: 25px;
+.ranking-title-icon {
+    width: 40px;
+    height: 40px;
 
     display: flex;
 
     align-items: center;
-
     justify-content: center;
 
-    border-radius: 7px;
-
-    background:
-            rgba(43,234,112,.07);
-
     border:
             1px solid
-            rgba(43,234,112,.12);
-
-    color: #2bea70;
-
-    font-size: 12px;
-
-}
-
-
-.comments-count {
-
-    color: #59675e;
-
-    font-size: 10px;
-
-}
-
-
-/* =========================================================
-   评论列表
-========================================================= */
-
-.comments-list {
-
-    display: flex;
-
-    flex-direction: column;
-
-    gap: 8px;
-
-}
-
-
-/* =========================================================
-   单条评论
-========================================================= */
-
-.comment-item {
-
-    position: relative;
-
-    padding:
-            11px 13px;
-
-    border:
-            1px solid
-            rgba(255,255,255,.035);
+            rgba(43,234,112,.14);
 
     border-radius: 10px;
 
     background:
-            rgba(255,255,255,.018);
+            rgba(43,234,112,.045);
 
-    transition: .2s;
-
+    font-size: 17px;
 }
 
 
-.comment-item:hover {
+.ranking-header h2 {
+    font-size: 17px;
 
-    background:
-            rgba(255,255,255,.03);
+    font-weight: 850;
+}
 
-    border-color:
-            rgba(43,234,112,.08);
 
+.ranking-header p {
+    margin-top: 5px;
+
+    color: #5b6961;
+
+    font-size: 10px;
 }
 
 
 /* =========================================================
-   评论用户
+   排行榜右侧
 ========================================================= */
 
-.comment-user {
-
+.ranking-header-right {
     display: flex;
 
     align-items: center;
 
-    gap: 8px;
-
+    gap: 15px;
 }
 
 
-.comment-avatar {
+.player-total {
+    text-align: right;
+}
 
-    width: 27px;
 
-    height: 27px;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    flex-shrink: 0;
-
-    border-radius: 50%;
-
-    background:
-            rgba(43,234,112,.07);
-
-    border:
-            1px solid
-            rgba(43,234,112,.12);
-
+.player-total span {
     color: #2bea70;
 
-    font-size: 9px;
+    font-size: 18px;
 
     font-weight: 900;
-
 }
 
 
-.comment-user-name {
+.player-total small {
+    display: block;
 
-    color: #aebbb2;
+    margin-top: 1px;
 
-    font-size: 11px;
+    color: #4b5850;
 
-    font-weight: 700;
+    font-size: 7px;
 
+    letter-spacing: 1px;
 }
 
 
-.comment-time {
-
-    margin-left: auto;
-
-    color: #48554d;
-
-    font-size: 9px;
-
-}
-
-
-/* =========================================================
-   评论文字
-========================================================= */
-
-.comment-content {
-
-    margin-top: 8px;
-
-    padding-left: 35px;
-
-    color: #849188;
-
-    font-size: 11px;
-
-    line-height: 1.7;
-
-    word-break: break-word;
-
-}
-
-
-/* =========================================================
-   没有评论
-========================================================= */
-
-.no-comments {
+.refresh-button {
+    height: 34px;
 
     padding:
-            14px;
-
-    text-align: center;
-
-    color: #4e5b53;
-
-    font-size: 10px;
-
-    border:
-            1px dashed
-            rgba(255,255,255,.05);
-
-    border-radius: 9px;
-
-}
-
-
-/* =========================================================
-   查看全部评论
-========================================================= */
-
-.show-comments-button {
-
-    width: 100%;
-
-    margin-top: 9px;
-
-    padding:
-            8px;
-
-    border:
-            1px solid
-            rgba(255,255,255,.05);
-
-    border-radius: 8px;
-
-    background:
-            rgba(255,255,255,.018);
-
-    color: #65736a;
-
-    font-size: 10px;
-
-    cursor: pointer;
-
-    transition: .2s;
-
-}
-
-
-.show-comments-button:hover {
-
-    color: #2bea70;
-
-    border-color:
-            rgba(43,234,112,.12);
-
-    background:
-            rgba(43,234,112,.035);
-
-}
-
-
-/* =========================================================
-   评论输入区域
-========================================================= */
-
-.comment-input-area {
+            0 12px;
 
     display: flex;
 
-    align-items: flex-end;
+    align-items: center;
 
-    gap: 8px;
-
-    margin-top: 12px;
-
-    padding-top: 12px;
-
-    border-top:
-            1px solid
-            rgba(255,255,255,.035);
-
-}
-
-
-.comment-input {
-
-    flex: 1;
-
-    min-height: 40px;
-
-    max-height: 100px;
-
-    resize: vertical;
-
-    padding:
-            10px 12px;
+    gap: 6px;
 
     border:
             1px solid
             rgba(255,255,255,.07);
 
-    border-radius: 9px;
-
-    outline: none;
+    border-radius: 8px;
 
     background:
-            rgba(0,0,0,.18);
+            rgba(255,255,255,.025);
 
-    color: #d8e0da;
-
-    font-family: inherit;
-
-    font-size: 11px;
-
-    line-height: 1.5;
-
-    transition: .2s;
-
-}
-
-
-.comment-input::placeholder {
-
-    color: #4f5c54;
-
-}
-
-
-.comment-input:focus {
-
-    border-color:
-            rgba(43,234,112,.25);
-
-    background:
-            rgba(43,234,112,.025);
-
-    box-shadow:
-            0 0 0 3px
-            rgba(43,234,112,.035);
-
-}
-
-
-/* =========================================================
-   评论提交按钮
-========================================================= */
-
-.submit-comment {
-
-    height: 40px;
-
-    padding:
-            0 15px;
-
-    flex-shrink: 0;
-
-    border:
-            1px solid
-            rgba(43,234,112,.18);
-
-    border-radius: 9px;
-
-    background:
-            rgba(43,234,112,.07);
-
-    color: #3ee679;
+    color: #69766e;
 
     font-size: 10px;
-
-    font-weight: 700;
 
     cursor: pointer;
 
     transition: .2s;
-
 }
 
 
-.submit-comment:hover {
-
-    background:
-            rgba(43,234,112,.14);
+.refresh-button:hover {
+    color: #ffffff;
 
     border-color:
-            rgba(43,234,112,.32);
+            rgba(43,234,112,.2);
 
+    background:
+            rgba(43,234,112,.045);
 }
 
 
-.submit-comment:disabled {
-
+.refresh-button:disabled {
     opacity: .45;
 
     cursor: not-allowed;
+}
 
+
+.refresh-icon {
+    font-size: 16px;
+
+    line-height: 1;
+
+    transition: transform .4s ease;
+}
+
+
+.refresh-button:hover .refresh-icon {
+    transform: rotate(180deg);
 }
 
 
 /* =========================================================
-   评论字数
+   排行榜说明
 ========================================================= */
 
-.comment-input-footer {
+.ranking-info {
+    min-height: 45px;
+
+    padding:
+            0 28px;
 
     display: flex;
 
-    justify-content: flex-end;
+    align-items: center;
 
-    margin-top: 5px;
+    gap: 18px;
 
-    color: #46534b;
-
-    font-size: 9px;
-
-}
-
-
-/* =========================================================
-   评论加载
-========================================================= */
-
-.comments-loading {
-
-    padding:
-            12px;
-
-    text-align: center;
-
-    color: #59665e;
-
-    font-size: 10px;
-
-}
-
-
-.comments-loading::before {
-
-    content: "";
-
-    display: inline-block;
-
-    width: 10px;
-
-    height: 10px;
-
-    margin-right: 6px;
-
-    vertical-align: -1px;
-
-    border:
-            1px solid
-            rgba(255,255,255,.08);
-
-    border-top-color:
-            #2bea70;
-
-    border-radius: 50%;
-
-    animation:
-            comment-spin .7s linear infinite;
-
-}
-
-
-@keyframes comment-spin {
-
-    to {
-
-        transform: rotate(360deg);
-
-    }
-
-}
-
-
-/* =========================================================
-   评论错误
-========================================================= */
-
-.comments-error {
-
-    padding:
-            12px;
-
-    text-align: center;
-
-    color: #b46b6b;
-
-    font-size: 10px;
-
-    border:
-            1px solid
-            rgba(255,80,80,.08);
-
-    border-radius: 8px;
-
-    background:
-            rgba(255,60,60,.025);
-
-}
-
-
-/* =========================================================
-   本人不能评论
-========================================================= */
-
-.comment-disabled {
-
-    margin-top: 12px;
-
-    padding:
-            10px;
-
-    text-align: center;
-
-    color: #4e5b53;
-
-    font-size: 10px;
-
-    border-top:
+    border-bottom:
             1px solid
             rgba(255,255,255,.035);
 
+    background:
+            rgba(255,255,255,.008);
+}
+
+
+.ranking-info-item {
+    display: flex;
+
+    align-items: center;
+
+    gap: 6px;
+
+    color: #555f59;
+
+    font-size: 9px;
+}
+
+
+.ranking-info-icon {
+    width: 17px;
+    height: 17px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 5px;
+
+    font-size: 8px;
+
+    font-weight: 900;
+}
+
+
+.ranking-info-icon.gold {
+    color: #ffd75e;
+
+    background:
+            rgba(255,215,94,.08);
+
+    border:
+            1px solid
+            rgba(255,215,94,.13);
+}
+
+
+.ranking-info-icon.silver {
+    color: #c5ced3;
+
+    background:
+            rgba(197,206,211,.07);
+
+    border:
+            1px solid
+            rgba(197,206,211,.11);
+}
+
+
+.ranking-info-icon.bronze {
+    color: #cd9068;
+
+    background:
+            rgba(205,144,104,.07);
+
+    border:
+            1px solid
+            rgba(205,144,104,.11);
+}
+
+
+.ranking-info-note {
+    margin-left: auto;
+
+    color: #4d5a52;
+
+    font-size: 9px;
 }
 
 
@@ -1480,8 +1085,7 @@ body {
 ========================================================= */
 
 .loading {
-
-    min-height: 220px;
+    min-height: 270px;
 
     display: flex;
 
@@ -1491,24 +1095,19 @@ body {
 
     justify-content: center;
 
-    color: #647168;
-
-    font-size: 12px;
-
+    color: #66736b;
 }
 
 
 .loading-spinner {
-
-    width: 30px;
-
-    height: 30px;
+    width: 32px;
+    height: 32px;
 
     margin-bottom: 15px;
 
     border:
             2px solid
-            rgba(255,255,255,.08);
+            rgba(255,255,255,.07);
 
     border-top-color:
             #2bea70;
@@ -1516,29 +1115,690 @@ body {
     border-radius: 50%;
 
     animation:
-            spin .8s linear infinite;
-
+            spin .75s linear infinite;
 }
 
 
 @keyframes spin {
-
     to {
-
-        transform:
-                rotate(360deg);
-
+        transform: rotate(360deg);
     }
+}
 
+
+.loading p {
+    font-size: 12px;
+}
+
+
+.loading span {
+    margin-top: 7px;
+
+    color: #39453e;
+
+    font-size: 7px;
+
+    letter-spacing: 1.5px;
 }
 
 
 /* =========================================================
-   评分弹窗
+   球员
+========================================================= */
+
+.player {
+    border-bottom:
+            1px solid
+            rgba(255,255,255,.04);
+
+    transition:
+            background .2s ease;
+}
+
+
+.player:last-child {
+    border-bottom: none;
+}
+
+
+.player:hover {
+    background:
+            rgba(255,255,255,.012);
+}
+
+
+/* =========================================================
+   球员主体
+========================================================= */
+
+.player-main {
+    min-height: 94px;
+
+    padding:
+            15px 28px;
+
+    display: grid;
+
+    grid-template-columns:
+            65px
+            minmax(220px, 1fr)
+            135px
+            145px;
+
+    align-items: center;
+
+    gap: 16px;
+}
+
+
+/* =========================================================
+   排名
+========================================================= */
+
+.rank {
+    position: relative;
+
+    color: #46534b;
+
+    font-size: 18px;
+
+    font-weight: 950;
+
+    letter-spacing: -1px;
+}
+
+
+.player:nth-child(1) .rank {
+    color: #ffd75e;
+}
+
+
+.player:nth-child(2) .rank {
+    color: #c5ced3;
+}
+
+
+.player:nth-child(3) .rank {
+    color: #cd9068;
+}
+
+
+.player:nth-child(1) .rank::before {
+    content: "TOP";
+
+    position: absolute;
+
+    left: 0;
+    bottom: -10px;
+
+    color: #806e30;
+
+    font-size: 6px;
+
+    letter-spacing: 1px;
+}
+
+
+.player:nth-child(2) .rank::before {
+    content: "TOP";
+
+    position: absolute;
+
+    left: 0;
+    bottom: -10px;
+
+    color: #687177;
+
+    font-size: 6px;
+
+    letter-spacing: 1px;
+}
+
+
+.player:nth-child(3) .rank::before {
+    content: "TOP";
+
+    position: absolute;
+
+    left: 0;
+    bottom: -10px;
+
+    color: #79543e;
+
+    font-size: 6px;
+
+    letter-spacing: 1px;
+}
+
+
+/* =========================================================
+   球员信息
+========================================================= */
+
+.player-info {
+    min-width: 0;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 13px;
+}
+
+
+.avatar {
+    width: 47px;
+    height: 47px;
+
+    flex-shrink: 0;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border:
+            1px solid
+            rgba(43,234,112,.15);
+
+    border-radius: 50%;
+
+    background:
+            linear-gradient(
+                    145deg,
+                    rgba(43,234,112,.085),
+                    rgba(43,234,112,.025)
+            );
+
+    color: #2bea70;
+
+    font-size: 15px;
+
+    font-weight: 900;
+}
+
+
+.player-name {
+    overflow: hidden;
+
+    color: #d6ded8;
+
+    font-size: 14px;
+
+    font-weight: 800;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
+}
+
+
+.player-account {
+    margin-top: 5px;
+
+    overflow: hidden;
+
+    color: #505d55;
+
+    font-size: 9px;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
+}
+
+
+/* =========================================================
+   分数
+========================================================= */
+
+.score {
+    text-align: center;
+}
+
+
+.score-number {
+    color: #2bea70;
+
+    font-size: 24px;
+
+    font-weight: 950;
+
+    letter-spacing: -.5px;
+}
+
+
+.score-number.no-score {
+    color: #48544d;
+
+    font-size: 17px;
+}
+
+
+.score-label {
+    margin-top: 4px;
+
+    color: #4f5c54;
+
+    font-size: 8px;
+
+    letter-spacing: .5px;
+}
+
+
+/* =========================================================
+   操作
+========================================================= */
+
+.player-action {
+    text-align: center;
+}
+
+
+.rating-count {
+    margin-bottom: 7px;
+
+    color: #59665e;
+
+    font-size: 9px;
+}
+
+
+.rate-button {
+    width: 100%;
+
+    min-height: 33px;
+
+    padding:
+            0 10px;
+
+    border:
+            1px solid
+            rgba(43,234,112,.16);
+
+    border-radius: 8px;
+
+    background:
+            rgba(43,234,112,.04);
+
+    color: #3ee679;
+
+    font-size: 9px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition: .2s;
+}
+
+
+.rate-button:hover {
+    background:
+            rgba(43,234,112,.10);
+
+    border-color:
+            rgba(43,234,112,.28);
+
+    transform:
+            translateY(-1px);
+
+    box-shadow:
+            0 5px 20px
+            rgba(43,234,112,.06);
+}
+
+
+.self-label {
+    min-height: 33px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    color: #4d5951;
+
+    font-size: 9px;
+}
+
+
+/* =========================================================
+   评论区域
+========================================================= */
+
+.player-comments {
+    margin:
+            0 28px 17px;
+
+    padding:
+            15px 17px;
+
+    border:
+            1px solid
+            rgba(255,255,255,.04);
+
+    border-radius: 13px;
+
+    background:
+            rgba(2,10,6,.35);
+}
+
+
+/* =========================================================
+   评论头部
+========================================================= */
+
+.comments-header {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    margin-bottom: 11px;
+}
+
+
+.comments-title {
+    display: flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    color: #b8c4bc;
+
+    font-size: 11px;
+
+    font-weight: 750;
+}
+
+
+.comments-title::first-letter {
+    color: #2bea70;
+}
+
+
+.comments-count {
+    color: #4d5952;
+
+    font-size: 9px;
+}
+
+
+/* =========================================================
+   评论列表
+========================================================= */
+
+.comments-list {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 7px;
+}
+
+
+.comment-item {
+    display: flex;
+
+    gap: 9px;
+
+    padding:
+            10px 11px;
+
+    border:
+            1px solid
+            rgba(255,255,255,.032);
+
+    border-radius: 9px;
+
+    background:
+            rgba(255,255,255,.014);
+
+    transition: .2s;
+}
+
+
+.comment-item:hover {
+    background:
+            rgba(255,255,255,.025);
+
+    border-color:
+            rgba(43,234,112,.065);
+}
+
+
+.comment-avatar {
+    width: 27px;
+    height: 27px;
+
+    flex-shrink: 0;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border:
+            1px solid
+            rgba(43,234,112,.12);
+
+    border-radius: 50%;
+
+    background:
+            rgba(43,234,112,.055);
+
+    color: #2bea70;
+
+    font-size: 9px;
+
+    font-weight: 900;
+}
+
+
+.comment-body {
+    min-width: 0;
+
+    flex: 1;
+}
+
+
+.comment-top {
+    min-height: 18px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+}
+
+
+.comment-user {
+    color: #aebbb3;
+
+    font-size: 10px;
+
+    font-weight: 700;
+}
+
+
+.comment-you {
+    display: inline-block;
+
+    margin-left: 5px;
+
+    padding:
+            2px 5px;
+
+    border-radius: 4px;
+
+    color: #3ee679;
+
+    background:
+            rgba(43,234,112,.06);
+
+    font-size: 7px;
+}
+
+
+.comment-time {
+    margin-left: auto;
+
+    color: #414d46;
+
+    font-size: 8px;
+
+    white-space: nowrap;
+}
+
+
+.comment-content {
+    margin-top: 5px;
+
+    color: #77847c;
+
+    font-size: 10px;
+
+    line-height: 1.65;
+
+    word-break: break-word;
+}
+
+
+/* =========================================================
+   没有评论
+========================================================= */
+
+.comments-empty {
+    padding:
+            13px;
+
+    text-align: center;
+
+    border:
+            1px dashed
+            rgba(255,255,255,.045);
+
+    border-radius: 8px;
+
+    color: #48554d;
+
+    font-size: 9px;
+}
+
+
+/* =========================================================
+   查看评论
+========================================================= */
+
+.show-comments-button {
+    width: 100%;
+
+    margin-top: 8px;
+
+    padding:
+            7px;
+
+    border:
+            1px solid
+            rgba(255,255,255,.04);
+
+    border-radius: 7px;
+
+    background:
+            rgba(255,255,255,.012);
+
+    color: #5c6961;
+
+    font-size: 9px;
+
+    cursor: pointer;
+
+    transition: .2s;
+}
+
+
+.show-comments-button:hover {
+    color: #2bea70;
+
+    border-color:
+            rgba(43,234,112,.12);
+
+    background:
+            rgba(43,234,112,.025);
+}
+
+
+.comment-self-tip,
+.comment-action-tip {
+    margin-top: 9px;
+
+    padding-top: 9px;
+
+    border-top:
+            1px solid
+            rgba(255,255,255,.03);
+
+    text-align: center;
+
+    color: #3f4b44;
+
+    font-size: 8px;
+}
+
+
+.comment-action-tip {
+    color: #48554c;
+}
+
+
+/* =========================================================
+   空状态
+========================================================= */
+
+.empty-state {
+    min-height: 260px;
+
+    padding: 50px 20px;
+
+    text-align: center;
+}
+
+
+.empty-icon {
+    font-size: 38px;
+
+    opacity: .45;
+}
+
+
+.empty-state h3 {
+    margin-top: 14px;
+
+    color: #9aa69e;
+
+    font-size: 14px;
+}
+
+
+.empty-state p {
+    margin-top: 7px;
+
+    color: #4d5a52;
+
+    font-size: 10px;
+}
+
+
+/* =========================================================
+   弹窗
 ========================================================= */
 
 .modal {
-
     position: fixed;
 
     inset: 0;
@@ -1548,119 +1808,276 @@ body {
     display: none;
 
     align-items: center;
-
     justify-content: center;
 
     padding: 20px;
 
     background:
-            rgba(0,0,0,.72);
+            rgba(0,0,0,.74);
 
     backdrop-filter:
-            blur(8px);
+            blur(10px);
 
+    -webkit-backdrop-filter:
+            blur(10px);
 }
 
 
 .modal.show {
-
     display: flex;
 
+    animation:
+            modal-fade .2s ease;
+}
+
+
+@keyframes modal-fade {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 
 .modal-content {
-
     width: 100%;
 
-    max-width: 390px;
+    max-width: 430px;
+
+    max-height: calc(100vh - 40px);
+
+    overflow-y: auto;
 
     position: relative;
 
-    padding:
-            35px;
-
-    text-align: center;
+    padding: 28px;
 
     border:
             1px solid
-            rgba(255,255,255,.08);
+            rgba(255,255,255,.085);
 
     border-radius: 20px;
 
     background:
-            #0c1b12;
+            linear-gradient(
+                    145deg,
+                    #0d1d13,
+                    #09160e
+            );
 
     box-shadow:
-            0 30px 90px
-            rgba(0,0,0,.55);
+            0 35px 100px
+            rgba(0,0,0,.58);
 
+    animation:
+            modal-up .25s ease;
 }
 
 
-.close-modal {
+@keyframes modal-up {
+    from {
+        opacity: 0;
+        transform: translateY(12px) scale(.98);
+    }
 
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+
+/* =========================================================
+   关闭
+========================================================= */
+
+.close-modal {
     position: absolute;
 
     top: 13px;
+    right: 15px;
 
-    right: 17px;
+    width: 32px;
+    height: 32px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
 
     border: none;
 
-    background: transparent;
+    border-radius: 8px;
 
-    color: #66746c;
+    background:
+            rgba(255,255,255,.025);
 
-    font-size: 26px;
+    color: #5e6b63;
+
+    font-size: 22px;
 
     cursor: pointer;
 
     transition: .2s;
-
 }
 
 
 .close-modal:hover {
-
     color: #ffffff;
 
-    transform: rotate(90deg);
+    background:
+            rgba(255,255,255,.07);
 
+    transform: rotate(90deg);
+}
+
+
+/* =========================================================
+   弹窗顶部
+========================================================= */
+
+.modal-top {
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
 }
 
 
 .modal-icon {
+    width: 45px;
+    height: 45px;
 
-    margin-bottom: 12px;
+    display: flex;
 
-    font-size: 34px;
+    align-items: center;
+    justify-content: center;
 
+    border:
+            1px solid
+            rgba(255,215,94,.17);
+
+    border-radius: 12px;
+
+    background:
+            rgba(255,215,94,.055);
+
+    font-size: 21px;
+}
+
+
+.modal-label {
+    color: #56645b;
+
+    font-size: 7px;
+
+    letter-spacing: 1.5px;
+
+    font-weight: 800;
 }
 
 
 .modal-content h2 {
+    margin-top: 4px;
+
+    color: #e1e7e3;
 
     font-size: 20px;
 
+    font-weight: 900;
 }
 
 
 .modal-content h2 span {
-
     color: #2bea70;
-
 }
 
 
 .modal-description {
+    margin-top: 13px;
 
-    margin-top: 8px;
+    color: #637068;
 
-    color: #66756c;
+    font-size: 10px;
 
-    font-size: 11px;
+    line-height: 1.6;
+}
 
+
+/* =========================================================
+   区域
+========================================================= */
+
+.rating-section,
+.comment-section {
+    margin-top: 21px;
+
+    padding:
+            16px;
+
+    border:
+            1px solid
+            rgba(255,255,255,.045);
+
+    border-radius: 13px;
+
+    background:
+            rgba(0,0,0,.13);
+}
+
+
+.section-header {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+}
+
+
+.section-title {
+    display: flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    color: #bac6be;
+
+    font-size: 10px;
+
+    font-weight: 750;
+}
+
+
+.section-icon {
+    width: 23px;
+    height: 23px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 6px;
+
+    background:
+            rgba(43,234,112,.055);
+
+    font-size: 10px;
+}
+
+
+.section-required {
+    color: #435048;
+
+    font-size: 7px;
+
+    letter-spacing: 1px;
 }
 
 
@@ -1669,30 +2086,57 @@ body {
 ========================================================= */
 
 .score-display {
+    margin-top: 15px;
 
-    margin:
-            25px 0 20px;
+    display: flex;
+
+    align-items: baseline;
+
+    justify-content: center;
 
     color: #2bea70;
-
 }
 
 
 #scoreValue {
+    font-size: 54px;
 
-    font-size: 50px;
+    line-height: 1;
 
-    font-weight: 900;
+    font-weight: 950;
 
+    letter-spacing: -2px;
+
+    text-shadow:
+            0 0 30px
+            rgba(43,234,112,.09);
 }
 
 
-.score-display small {
+.score-max {
+    margin-left: 6px;
 
-    color: #5e6c63;
+    color: #56645c;
 
-    font-size: 12px;
+    font-size: 11px;
+}
 
+
+.score-max strong {
+    margin-right: 3px;
+
+    color: #37443b;
+}
+
+
+.score-description {
+    margin-top: 7px;
+
+    text-align: center;
+
+    color: #414e46;
+
+    font-size: 8px;
 }
 
 
@@ -1700,43 +2144,202 @@ body {
    滑块
 ========================================================= */
 
-#scoreRange {
+.range-wrapper {
+    margin-top: 18px;
 
+    padding: 0 2px;
+}
+
+
+#scoreRange {
     width: 100%;
 
+    height: 5px;
+
+    appearance: none;
+
+    -webkit-appearance: none;
+
+    border-radius: 10px;
+
+    outline: none;
+
+    background:
+            linear-gradient(
+                    to right,
+                    #2bea70 0%,
+                    #2bea70 100%
+            );
+
     cursor: pointer;
+}
 
-    accent-color: #2bea70;
 
+#scoreRange::-webkit-slider-thumb {
+    appearance: none;
+
+    -webkit-appearance: none;
+
+    width: 18px;
+    height: 18px;
+
+    border:
+            3px solid
+            #07120b;
+
+    border-radius: 50%;
+
+    background: #2bea70;
+
+    box-shadow:
+            0 0 0 1px
+            rgba(43,234,112,.45),
+            0 3px 12px
+            rgba(43,234,112,.25);
+
+    cursor: pointer;
+}
+
+
+#scoreRange::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+
+    border:
+            3px solid
+            #07120b;
+
+    border-radius: 50%;
+
+    background: #2bea70;
+
+    box-shadow:
+            0 0 0 1px
+            rgba(43,234,112,.45);
+
+    cursor: pointer;
 }
 
 
 .score-range-label {
+    margin-top: 8px;
 
+    display: flex;
+
+    justify-content: space-between;
+
+    color: #56635a;
+
+    font-size: 8px;
+
+    font-weight: 700;
+}
+
+
+.score-words {
+    margin-top: 5px;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    color: #39463e;
+
+    font-size: 7px;
+}
+
+
+/* =========================================================
+   评论输入
+========================================================= */
+
+.comment-input {
+    width: 100%;
+
+    min-height: 105px;
+
+    margin-top: 13px;
+
+    padding:
+            11px 12px;
+
+    resize: vertical;
+
+    border:
+            1px solid
+            rgba(255,255,255,.065);
+
+    border-radius: 9px;
+
+    outline: none;
+
+    background:
+            rgba(0,0,0,.18);
+
+    color: #d5ddd7;
+
+    font-size: 10px;
+
+    line-height: 1.7;
+
+    transition: .2s;
+}
+
+
+.comment-input::placeholder {
+    color: #46534b;
+}
+
+
+.comment-input:focus {
+    border-color:
+            rgba(43,234,112,.25);
+
+    background:
+            rgba(43,234,112,.018);
+
+    box-shadow:
+            0 0 0 3px
+            rgba(43,234,112,.025);
+}
+
+
+.comment-bottom {
     margin-top: 7px;
 
     display: flex;
 
     justify-content: space-between;
 
-    color: #55635a;
+    color: #414d46;
 
-    font-size: 10px;
+    font-size: 8px;
+}
 
+
+.comment-length.limit {
+    color: #ff7373;
 }
 
 
 /* =========================================================
-   提交评分
+   提交
 ========================================================= */
 
 .submit-rating {
-
     width: 100%;
 
-    height: 47px;
+    height: 46px;
 
-    margin-top: 25px;
+    margin-top: 16px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 8px;
 
     border: none;
 
@@ -1746,40 +2349,95 @@ body {
             linear-gradient(
                     135deg,
                     #2bea70,
-                    #16c65a
+                    #18c85d
             );
 
     color: #031009;
 
-    font-size: 13px;
+    font-size: 11px;
 
     font-weight: 900;
 
     cursor: pointer;
 
-    transition: .2s;
+    box-shadow:
+            0 8px 25px
+            rgba(43,234,112,.08);
 
+    transition: .2s;
 }
 
 
 .submit-rating:hover {
-
-    transform:
-            translateY(-1px);
+    transform: translateY(-1px);
 
     box-shadow:
-            0 8px 25px
-            rgba(43,234,112,.15);
+            0 10px 30px
+            rgba(43,234,112,.16);
+}
 
+
+.submit-rating:active {
+    transform: translateY(0);
 }
 
 
 .submit-rating:disabled {
-
-    opacity: .5;
+    opacity: .45;
 
     cursor: not-allowed;
 
+    transform: none;
+
+    box-shadow: none;
+}
+
+
+/* =========================================================
+   安全提示
+========================================================= */
+
+.modal-safe-tip {
+    margin-top: 11px;
+
+    text-align: center;
+
+    color: #3d4942;
+
+    font-size: 7px;
+}
+
+
+/* =========================================================
+   页脚
+========================================================= */
+
+.page-footer {
+    padding-top: 32px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 10px;
+
+    color: #313c35;
+
+    font-size: 7px;
+
+    letter-spacing: 1.3px;
+}
+
+
+.page-footer i {
+    width: 3px;
+    height: 3px;
+
+    border-radius: 50%;
+
+    background: #2a352e;
 }
 
 
@@ -1789,227 +2447,505 @@ body {
 
 @media (max-width: 700px) {
 
-
     .navbar {
-
         height: 68px;
-
-        padding:
-                0 15px;
-
     }
 
 
-    .brand-subtitle {
+    .nav-inner {
+        padding: 0 15px;
+    }
 
-        display: none;
 
+    .brand-logo {
+        width: 37px;
+        height: 37px;
+
+        border-radius: 10px;
     }
 
 
     .brand-title {
+        font-size: 12px;
 
-        font-size: 13px;
-
+        letter-spacing: 2px;
     }
 
 
-    .user-name {
-
+    .brand-subtitle {
         display: none;
+    }
 
+
+    .user-info {
+        display: none;
     }
 
 
     .logout-button {
-
-        margin-left: 3px;
+        margin-left: 2px;
 
         padding:
-                6px 10px;
+                7px 9px;
+    }
 
+
+    .logout-button span:last-child {
+        display: none;
     }
 
 
     .main {
-
         padding:
-                45px 10px 70px;
-
+                45px 10px 35px;
     }
 
 
     .hero {
-
-        margin-bottom: 35px;
-
+        margin-bottom: 34px;
     }
 
 
-    .hero h1 {
+    .hero-title {
+        margin-top: 17px;
 
-        font-size: 31px;
+        font-size: 34px;
 
+        letter-spacing: -1px;
     }
 
 
-    .hero p {
+    .hero-description {
+        padding: 0 15px;
 
-        font-size: 11px;
+        font-size: 10px;
+    }
 
+
+    .hero-stats {
+        width: 100%;
+
+        padding:
+                11px 8px;
+    }
+
+
+    .hero-stat {
+        gap: 6px;
+    }
+
+
+    .hero-stat-icon {
+        width: 25px;
+        height: 25px;
+
+        font-size: 10px;
+    }
+
+
+    .hero-stat strong {
+        font-size: 7px;
+    }
+
+
+    .hero-stat span {
+        font-size: 6px;
+    }
+
+
+    .hero-stat-divider {
+        margin: 0 5px;
     }
 
 
     .hero-notice {
+        font-size: 8px;
+    }
 
-        font-size: 9px;
 
+    /* 排行榜 */
+
+    .ranking-card {
+        border-radius: 16px;
     }
 
 
     .ranking-header {
-
         padding:
-                18px 15px;
+                16px 14px;
 
+        min-height: 75px;
     }
 
 
-    /* =====================
-       手机端球员主体
-    ====================== */
+    .ranking-title-icon {
+        width: 34px;
+        height: 34px;
+
+        border-radius: 9px;
+
+        font-size: 14px;
+    }
+
+
+    .ranking-header h2 {
+        font-size: 14px;
+    }
+
+
+    .ranking-header p {
+        font-size: 8px;
+    }
+
+
+    .ranking-header-right {
+        gap: 8px;
+    }
+
+
+    .player-total span {
+        font-size: 15px;
+    }
+
+
+    .player-total small {
+        font-size: 6px;
+    }
+
+
+    .refresh-button {
+        width: 34px;
+        padding: 0;
+
+        justify-content: center;
+    }
+
+
+    .refresh-button span:last-child {
+        display: none;
+    }
+
+
+    .ranking-info {
+        padding:
+                0 14px;
+
+        gap: 9px;
+
+        overflow: hidden;
+    }
+
+
+    .ranking-info-item {
+        flex-shrink: 0;
+
+        font-size: 7px;
+    }
+
+
+    .ranking-info-note {
+        display: none;
+    }
+
+
+    /* 球员 */
 
     .player-main {
-
-        min-height: 90px;
+        min-height: 92px;
 
         padding:
-                13px 15px;
+                13px 13px;
 
         grid-template-columns:
-                35px
-                1fr
-                75px;
+                31px
+                minmax(0, 1fr)
+                65px;
 
-        gap: 8px;
+        gap: 7px;
+    }
 
+
+    .rank {
+        font-size: 14px;
+    }
+
+
+    .player:nth-child(1) .rank::before,
+    .player:nth-child(2) .rank::before,
+    .player:nth-child(3) .rank::before {
+        display: none;
+    }
+
+
+    .player-info {
+        gap: 9px;
+    }
+
+
+    .avatar {
+        width: 39px;
+        height: 39px;
+
+        font-size: 12px;
+    }
+
+
+    .player-name {
+        font-size: 11px;
+    }
+
+
+    .player-account {
+        margin-top: 3px;
+
+        font-size: 7px;
     }
 
 
     .score {
-
         text-align: right;
-
     }
 
 
     .score-number {
+        font-size: 19px;
+    }
 
-        font-size: 20px;
 
+    .score-number.no-score {
+        font-size: 13px;
+    }
+
+
+    .score-label {
+        font-size: 7px;
     }
 
 
     .player-action {
+        grid-column: 2 / 4;
 
-        grid-column:
-                2 / 4;
+        text-align: right;
+    }
 
+
+    .rating-count {
+        display: inline-block;
+
+        margin-right: 7px;
+
+        margin-bottom: 0;
+
+        font-size: 8px;
     }
 
 
     .rate-button {
+        width: auto;
 
-        width: 100%;
+        min-width: 105px;
 
+        min-height: 30px;
+
+        padding:
+                0 10px;
+
+        font-size: 8px;
     }
 
 
     .self-label {
+        min-height: 30px;
 
-        text-align: right;
-
+        font-size: 8px;
     }
 
 
-    /* =====================
-       手机端评论
-    ====================== */
+    /* 评论 */
 
     .player-comments {
-
         margin:
-                0 12px 14px;
+                0 10px 13px;
 
         padding:
-                13px;
+                12px;
 
-        border-radius: 12px;
-
+        border-radius: 11px;
     }
 
 
-    .comments-header {
-
-        margin-bottom: 10px;
-
+    .comments-title {
+        font-size: 9px;
     }
 
 
-    .comment-content {
+    .comments-count {
+        font-size: 8px;
+    }
 
-        padding-left: 0;
 
-        margin-top: 7px;
+    .comment-item {
+        padding:
+                9px;
+    }
 
+
+    .comment-avatar {
+        width: 25px;
+        height: 25px;
+
+        font-size: 8px;
+    }
+
+
+    .comment-user {
+        font-size: 9px;
     }
 
 
     .comment-time {
-
-        font-size: 8px;
-
+        font-size: 7px;
     }
 
 
-    .comment-input-area {
+    .comment-content {
+        font-size: 9px;
+    }
 
-        display: flex;
 
-        align-items: stretch;
+    /* 弹窗 */
 
-        flex-direction: column;
+    .modal {
+        padding: 12px;
+    }
 
+
+    .modal-content {
+        max-height:
+                calc(100vh - 24px);
+
+        padding:
+                23px 17px;
+
+        border-radius: 16px;
+    }
+
+
+    .modal-icon {
+        width: 39px;
+        height: 39px;
+
+        font-size: 18px;
+    }
+
+
+    .modal-content h2 {
+        font-size: 17px;
+    }
+
+
+    .modal-description {
+        font-size: 9px;
+    }
+
+
+    .rating-section,
+    .comment-section {
+        padding:
+                13px;
+    }
+
+
+    #scoreValue {
+        font-size: 46px;
     }
 
 
     .comment-input {
-
-        width: 100%;
-
-        min-height: 42px;
-
+        min-height: 95px;
     }
 
 
-    .submit-comment {
-
-        width: 100%;
-
-        height: 40px;
-
+    .comment-bottom {
+        font-size: 7px;
     }
 
 
-    /* =====================
-       弹窗
-    ====================== */
+    .submit-rating {
+        height: 44px;
+    }
 
-    .modal-content {
 
+    .page-footer {
+        font-size: 6px;
+    }
+
+}
+
+
+/* =========================================================
+   超小屏幕
+========================================================= */
+
+@media (max-width: 390px) {
+
+    .brand-title {
+        font-size: 11px;
+    }
+
+
+    .hero-title {
+        font-size: 30px;
+    }
+
+
+    .hero-stats {
         padding:
-                30px 22px;
+                9px 5px;
+    }
 
+
+    .hero-stat span {
+        display: none;
+    }
+
+
+    .hero-stat strong {
+        font-size: 6px;
+    }
+
+
+    .ranking-info-item:nth-child(3) {
+        display: none;
+    }
+
+
+    .player-main {
+        grid-template-columns:
+                27px
+                minmax(0, 1fr)
+                60px;
+    }
+
+
+    .player-action {
+        display: flex;
+
+        justify-content: flex-end;
+
+        align-items: center;
+
+        gap: 5px;
+    }
+
+
+    .rating-count {
+        margin-right: 0;
+    }
+
+
+    .rate-button {
+        min-width: 92px;
     }
 
 }

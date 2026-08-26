@@ -1,11 +1,11 @@
 // ============================================================
 // Footballer - 球员排行榜
-// 评分 + 评论完整 JS
+// Player Ranking Platform
 // ============================================================
 
 
 // ============================================================
-// 1. 检查登录状态
+// 1. 登录状态
 // ============================================================
 
 const loginUserData =
@@ -36,16 +36,12 @@ try {
         error
     );
 
-    localStorage.removeItem(
-        "loginUser"
-    );
+    localStorage.removeItem("loginUser");
 
     window.location.href =
         "login.html";
 
-    throw new Error(
-        "登录信息错误"
-    );
+    throw new Error("登录信息错误");
 
 }
 
@@ -55,8 +51,7 @@ try {
 // ============================================================
 
 if (
-    typeof supabaseClient ===
-    "undefined"
+    typeof supabaseClient === "undefined"
 ) {
 
     console.error(
@@ -71,7 +66,7 @@ if (
 
 
 // ============================================================
-// 3. 获取页面元素
+// 3. 页面元素
 // ============================================================
 
 const currentUserName =
@@ -104,6 +99,12 @@ const loading =
     );
 
 
+const emptyState =
+    document.getElementById(
+        "emptyState"
+    );
+
+
 const refreshButton =
     document.getElementById(
         "refreshButton"
@@ -117,7 +118,7 @@ const logoutButton =
 
 
 // ============================================================
-// 4. 评分 + 评论弹窗元素
+// 4. 弹窗元素
 // ============================================================
 
 const ratingModal =
@@ -169,53 +170,25 @@ const submitRating =
 
 
 // ============================================================
-// 5. 当前正在评分的球员
+// 5. 当前选择的球员
 // ============================================================
 
 let selectedPlayerId = null;
 
 
 // ============================================================
-// 6. 评论缓存
-//
-// 格式：
-//
-// commentsByPlayer = {
-//
-//     1: [
-//         {
-//             id: 1,
-//             target_id: 1,
-//             user_id: 2,
-//             content: "...",
-//             created_at: "..."
-//         }
-//     ],
-//
-//     2: [...]
-// }
-//
+// 6. 数据缓存
 // ============================================================
+
+let rankingData = [];
 
 let commentsByPlayer = {};
-
-
-// ============================================================
-// 7. 用户姓名缓存
-//
-// userNameMap = {
-//
-//     1: "张三",
-//     2: "李四"
-//
-// }
-// ============================================================
 
 let userNameMap = {};
 
 
 // ============================================================
-// 8. 当前展开的评论区
+// 7. 评论展开状态
 // ============================================================
 
 const expandedComments =
@@ -223,21 +196,36 @@ const expandedComments =
 
 
 // ============================================================
-// 9. 显示当前登录用户
+// 8. 防止重复提交
 // ============================================================
 
-currentUserName.textContent =
-    loginUser.name || "用户";
-
-
-currentUserAvatar.textContent =
-    getInitial(
-        loginUser.name
-    );
+let submittingRating = false;
 
 
 // ============================================================
-// 10. 初始化
+// 9. 显示当前用户
+// ============================================================
+
+function initializeUser() {
+
+    const userName =
+        loginUser.name ||
+        loginUser.username ||
+        "用户";
+
+
+    currentUserName.textContent =
+        userName;
+
+
+    currentUserAvatar.textContent =
+        getInitial(userName);
+
+}
+
+
+// ============================================================
+// 10. 初始化页面
 // ============================================================
 
 async function initializePage() {
@@ -245,6 +233,9 @@ async function initializePage() {
     console.log(
         "Footballer 页面初始化..."
     );
+
+
+    initializeUser();
 
 
     await loadRanking();
@@ -263,35 +254,21 @@ async function loadRanking() {
     );
 
 
-    // 显示加载
-
-    loading.style.display =
-        "flex";
-
-
-    loading.innerHTML = `
-
-        <div class="loading-spinner"></div>
-
-        <p>
-            正在加载球员数据...
-        </p>
-
-    `;
-
-
-    rankingList.innerHTML =
-        "";
+    setLoading(true);
 
 
     refreshButton.disabled =
         true;
 
 
+    emptyState.style.display =
+        "none";
+
+
     try {
 
         // ====================================================
-        // 第一步：获取排行榜
+        // 获取排行榜
         // ====================================================
 
         const {
@@ -307,77 +284,59 @@ async function loadRanking() {
         if (error) {
 
             console.error(
-                "排行榜错误：",
+                "排行榜加载失败：",
                 error
             );
 
-
-            loading.innerHTML = `
-
-                <p style="color:#ff6b6b;">
-                    排行榜加载失败
-                </p>
-
-                <p style="
-                    margin-top:8px;
-                    font-size:11px;
-                    color:#65736a;
-                ">
-                    ${escapeHTML(error.message)}
-                </p>
-
-            `;
+            showLoadError(
+                error.message
+            );
 
             return;
 
         }
 
 
+        rankingData =
+            Array.isArray(data)
+                ? data
+                : [];
+
+
         console.log(
             "排行榜数据：",
-            data
+            rankingData
         );
 
 
         // ====================================================
-        // 第二步：加载评论
+        // 加载评论
         // ====================================================
 
         await loadComments();
 
 
         // ====================================================
-        // 隐藏加载
+        // 更新数量
         // ====================================================
 
-        loading.style.display =
-            "none";
+        playerCount.textContent =
+            rankingData.length;
 
 
         // ====================================================
-        // 没有球员
+        // 空状态
         // ====================================================
 
         if (
-            !data ||
-            data.length === 0
+            rankingData.length === 0
         ) {
 
-            playerCount.textContent =
-                "0";
+            rankingList.innerHTML =
+                "";
 
-
-            rankingList.innerHTML = `
-
-                <div class="loading">
-
-                    <p>
-                        暂时还没有用户
-                    </p>
-
-                </div>
-
-            `;
+            emptyState.style.display =
+                "block";
 
             return;
 
@@ -385,50 +344,28 @@ async function loadRanking() {
 
 
         // ====================================================
-        // 球员数量
+        // 创建排行榜
         // ====================================================
 
-        playerCount.textContent =
-            data.length;
-
-
-        // ====================================================
-        // 创建球员
-        // ====================================================
-
-        data.forEach(
-            (
-                player,
-                index
-            ) => {
-
-                createPlayer(
-                    player,
-                    index
-                );
-
-            }
-        );
+        renderRanking();
 
 
     } catch (error) {
 
         console.error(
-            "排行榜系统错误：",
+            "排行榜系统异常：",
             error
         );
 
 
-        loading.innerHTML = `
-
-            <p style="color:#ff6b6b;">
-                网络连接失败，请稍后再试
-            </p>
-
-        `;
+        showLoadError(
+            "网络连接失败，请稍后再试"
+        );
 
 
     } finally {
+
+        setLoading(false);
 
         refreshButton.disabled =
             false;
@@ -439,40 +376,109 @@ async function loadRanking() {
 
 
 // ============================================================
-// 12. 加载所有评论
+// 12. 设置加载状态
+// ============================================================
+
+function setLoading(isLoading) {
+
+    if (isLoading) {
+
+        loading.style.display =
+            "flex";
+
+        loading.innerHTML = `
+
+            <div class="loading-spinner"></div>
+
+            <p>
+                正在加载球员数据...
+            </p>
+
+            <span>
+                CONNECTING TO SERVER
+            </span>
+
+        `;
+
+        rankingList.innerHTML =
+            "";
+
+    } else {
+
+        loading.style.display =
+            "none";
+
+    }
+
+}
+
+
+// ============================================================
+// 13. 加载错误
+// ============================================================
+
+function showLoadError(
+    message
+) {
+
+    loading.style.display =
+        "flex";
+
+
+    loading.innerHTML = `
+
+        <div style="
+            font-size:32px;
+            margin-bottom:15px;
+        ">
+            ⚠️
+        </div>
+
+        <p style="
+            color:#ff7373;
+        ">
+            排行榜加载失败
+        </p>
+
+        <span style="
+            max-width:420px;
+            text-align:center;
+            line-height:1.6;
+        ">
+            ${escapeHTML(message)}
+        </span>
+
+    `;
+
+}
+
+
+// ============================================================
+// 14. 加载评论
 // ============================================================
 
 async function loadComments() {
 
-    console.log(
-        "开始加载评论..."
-    );
-
-
     commentsByPlayer = {};
+
+    userNameMap = {};
 
 
     try {
 
-        // ====================================================
-        // 获取评论
-        // ====================================================
-
         const {
             data: comments,
-            error: commentsError
+            error
         } =
             await supabaseClient
                 .from("comments")
-                .select(
-                    `
+                .select(`
                     id,
                     target_id,
                     user_id,
                     content,
                     created_at
-                    `
-                )
+                `)
                 .order(
                     "created_at",
                     {
@@ -481,34 +487,28 @@ async function loadComments() {
                 );
 
 
-        if (commentsError) {
+        if (error) {
 
             console.error(
                 "评论加载失败：",
-                commentsError
+                error
             );
-
-            // 评论加载失败不影响排行榜
-
-            commentsByPlayer = {};
 
             return;
 
         }
 
 
-        console.log(
-            "评论数据：",
-            comments
-        );
+        const commentList =
+            comments || [];
 
 
         // ====================================================
-        // 获取用户名称
+        // 加载评论作者
         // ====================================================
 
         await loadCommentUserNames(
-            comments || []
+            commentList
         );
 
 
@@ -516,7 +516,7 @@ async function loadComments() {
         // 按球员分类
         // ====================================================
 
-        (comments || []).forEach(
+        commentList.forEach(
             comment => {
 
                 const targetId =
@@ -540,9 +540,7 @@ async function loadComments() {
 
                 commentsByPlayer[
                     targetId
-                    ].push(
-                    comment
-                );
+                    ].push(comment);
 
             }
         );
@@ -551,10 +549,9 @@ async function loadComments() {
     } catch (error) {
 
         console.error(
-            "评论系统加载错误：",
+            "评论系统错误：",
             error
         );
-
 
         commentsByPlayer = {};
 
@@ -564,15 +561,12 @@ async function loadComments() {
 
 
 // ============================================================
-// 13. 加载评论作者姓名
+// 15. 加载评论作者
 // ============================================================
 
 async function loadCommentUserNames(
     comments
 ) {
-
-    userNameMap = {};
-
 
     if (
         !comments ||
@@ -584,19 +578,20 @@ async function loadCommentUserNames(
     }
 
 
-    // ========================================================
-    // 提取所有 user_id
-    // ========================================================
-
     const userIds =
         [
             ...new Set(
-                comments.map(
-                    comment =>
-                        Number(
-                            comment.user_id
-                        )
-                )
+                comments
+                    .map(
+                        comment =>
+                            Number(
+                                comment.user_id
+                            )
+                    )
+                    .filter(
+                        id =>
+                            Number.isFinite(id)
+                    )
             )
         ];
 
@@ -655,7 +650,7 @@ async function loadCommentUserNames(
     } catch (error) {
 
         console.error(
-            "获取评论作者异常：",
+            "评论作者异常：",
             error
         );
 
@@ -665,7 +660,34 @@ async function loadCommentUserNames(
 
 
 // ============================================================
-// 14. 创建球员
+// 16. 渲染排行榜
+// ============================================================
+
+function renderRanking() {
+
+    rankingList.innerHTML =
+        "";
+
+
+    rankingData.forEach(
+        (
+            player,
+            index
+        ) => {
+
+            createPlayer(
+                player,
+                index
+            );
+
+        }
+    );
+
+}
+
+
+// ============================================================
+// 17. 创建球员
 // ============================================================
 
 function createPlayer(
@@ -683,12 +705,18 @@ function createPlayer(
         "player";
 
 
-    // ========================================================
-    // 球员 ID
-    // ========================================================
-
     const playerId =
         Number(player.id);
+
+
+    const playerName =
+        player.name ||
+        "未知球员";
+
+
+    const username =
+        player.username ||
+        "unknown";
 
 
     // ========================================================
@@ -724,7 +752,7 @@ function createPlayer(
 
 
     // ========================================================
-    // 分数 HTML
+    // 分数
     // ========================================================
 
     let scoreHTML;
@@ -760,7 +788,7 @@ function createPlayer(
 
 
     // ========================================================
-    // 操作 HTML
+    // 操作
     // ========================================================
 
     let actionHTML;
@@ -783,9 +811,9 @@ function createPlayer(
             <button
                     type="button"
                     class="rate-button"
-                    data-id="${playerId}">
+                    data-player-id="${playerId}">
 
-                ⭐ 给TA评分
+                ⭐ 给 TA 评分
 
             </button>
 
@@ -795,7 +823,7 @@ function createPlayer(
 
 
     // ========================================================
-    // 评论区域
+    // 评论
     // ========================================================
 
     const commentsHTML =
@@ -806,53 +834,32 @@ function createPlayer(
 
 
     // ========================================================
-    // 整个球员 HTML
+    // HTML
     // ========================================================
 
     element.innerHTML = `
 
-        <!-- =========================
-             球员主体
-        ========================== -->
-
         <div class="player-main">
 
-
             <div class="rank">
-
                 #${index + 1}
-
             </div>
 
 
             <div class="player-info">
 
                 <div class="avatar">
-
-                    ${getInitial(
-        player.name
-    )}
-
+                    ${getInitial(playerName)}
                 </div>
-
 
                 <div>
 
                     <div class="player-name">
-
-                        ${escapeHTML(
-        player.name
-    )}
-
+                        ${escapeHTML(playerName)}
                     </div>
 
-
                     <div class="player-account">
-
-                        @${escapeHTML(
-        player.username
-    )}
-
+                        @${escapeHTML(username)}
                     </div>
 
                 </div>
@@ -865,9 +872,7 @@ function createPlayer(
                 ${scoreHTML}
 
                 <div class="score-label">
-
                     平均评分
-
                 </div>
 
             </div>
@@ -876,22 +881,15 @@ function createPlayer(
             <div class="player-action">
 
                 <div class="rating-count">
-
                     ${ratingCount} 人评分
-
                 </div>
 
                 ${actionHTML}
 
             </div>
 
-
         </div>
 
-
-        <!-- =========================
-             评论区域
-        ========================== -->
 
         ${commentsHTML}
 
@@ -904,7 +902,7 @@ function createPlayer(
 
 
     // ========================================================
-    // 绑定评分按钮
+    // 评分按钮
     // ========================================================
 
     if (!isSelf) {
@@ -919,11 +917,11 @@ function createPlayer(
 
             button.addEventListener(
                 "click",
-                function () {
+                () => {
 
                     openRatingModal(
                         playerId,
-                        player.name
+                        playerName
                     );
 
                 }
@@ -935,7 +933,7 @@ function createPlayer(
 
 
     // ========================================================
-    // 绑定评论展开按钮
+    // 评论展开
     // ========================================================
 
     const showCommentsButton =
@@ -950,7 +948,7 @@ function createPlayer(
 
         showCommentsButton.addEventListener(
             "click",
-            function () {
+            () => {
 
                 toggleComments(
                     playerId
@@ -965,7 +963,7 @@ function createPlayer(
 
 
 // ============================================================
-// 15. 创建评论区域
+// 18. 评论区域
 // ============================================================
 
 function createCommentsSection(
@@ -1002,25 +1000,33 @@ function createCommentsSection(
                 <div class="comments-header">
 
                     <div class="comments-title">
-
                         💬 评论
-
                     </div>
 
                     <div class="comments-count">
-
                         0 条评论
-
                     </div>
 
                 </div>
 
 
                 <div class="comments-empty">
-
                     暂时还没有评论
-
                 </div>
+
+                ${
+            isSelf
+                ? `
+                            <div class="comment-self-tip">
+                                这是你自己，不能评价自己
+                            </div>
+                        `
+                : `
+                            <div class="comment-action-tip">
+                                ⭐ 评分时可以同时留下评价
+                            </div>
+                        `
+        }
 
             </div>
 
@@ -1030,29 +1036,14 @@ function createCommentsSection(
 
 
     // ========================================================
-    // 评论数量
-    // ========================================================
-
-    const commentCount =
-        comments.length;
-
-
-    // ========================================================
-    // 当前显示评论
+    // 当前显示的评论
     // ========================================================
 
     const displayComments =
         isExpanded
             ? comments
-            : comments.slice(
-                0,
-                1
-            );
+            : comments.slice(0, 1);
 
-
-    // ========================================================
-    // 评论 HTML
-    // ========================================================
 
     let commentsListHTML =
         "";
@@ -1071,7 +1062,7 @@ function createCommentsSection(
 
 
     // ========================================================
-    // 展开按钮
+    // 查看全部
     // ========================================================
 
     let showButtonHTML =
@@ -1079,7 +1070,7 @@ function createCommentsSection(
 
 
     if (
-        commentCount > 1
+        comments.length > 1
     ) {
 
         showButtonHTML = `
@@ -1091,7 +1082,7 @@ function createCommentsSection(
                 ${
             isExpanded
                 ? "收起评论"
-                : `查看全部 ${commentCount} 条评论`
+                : `查看全部 ${comments.length} 条评论`
         }
 
             </button>
@@ -1107,19 +1098,14 @@ function createCommentsSection(
                 class="player-comments"
                 data-player-id="${playerId}">
 
-
             <div class="comments-header">
 
                 <div class="comments-title">
-
                     💬 评论
-
                 </div>
 
                 <div class="comments-count">
-
-                    ${commentCount} 条评论
-
+                    ${comments.length} 条评论
                 </div>
 
             </div>
@@ -1139,20 +1125,15 @@ function createCommentsSection(
         isSelf
             ? `
                         <div class="comment-self-tip">
-
                             这是你自己，不能评价自己
-
                         </div>
                     `
             : `
                         <div class="comment-action-tip">
-
                             ⭐ 评分时可以同时留下评价
-
                         </div>
                     `
     }
-
 
         </div>
 
@@ -1162,7 +1143,7 @@ function createCommentsSection(
 
 
 // ============================================================
-// 16. 创建单条评论
+// 19. 单条评论
 // ============================================================
 
 function createCommentHTML(
@@ -1211,25 +1192,18 @@ function createCommentHTML(
 
         <div class="comment-item">
 
-
             <div class="comment-avatar">
-
                 ${initial}
-
             </div>
 
 
             <div class="comment-body">
 
-
                 <div class="comment-top">
-
 
                     <span class="comment-user">
 
-                        ${escapeHTML(
-        userName
-    )}
+                        ${escapeHTML(userName)}
 
                         ${
         isCurrentUser
@@ -1237,7 +1211,7 @@ function createCommentHTML(
                                     <span class="comment-you">
                                         你
                                     </span>
-                                  `
+                                `
             : ""
     }
 
@@ -1245,11 +1219,8 @@ function createCommentHTML(
 
 
                     <span class="comment-time">
-
                         ${time}
-
                     </span>
-
 
                 </div>
 
@@ -1260,9 +1231,7 @@ function createCommentHTML(
 
                 </div>
 
-
             </div>
-
 
         </div>
 
@@ -1272,7 +1241,7 @@ function createCommentHTML(
 
 
 // ============================================================
-// 17. 展开 / 收起评论
+// 20. 展开 / 收起评论
 // ============================================================
 
 function toggleComments(
@@ -1298,78 +1267,15 @@ function toggleComments(
     }
 
 
-    // ========================================================
-    // 重新绘制整个排行榜
-    // ========================================================
-
-    redrawRanking();
+    // 不重新请求数据库
+    // 直接使用已有 rankingData
+    renderRanking();
 
 }
 
 
 // ============================================================
-// 18. 重新绘制排行榜
-// ============================================================
-
-async function redrawRanking() {
-
-    try {
-
-        const {
-            data,
-            error
-        } =
-            await supabaseClient
-                .rpc(
-                    "get_player_ranking"
-                );
-
-
-        if (error) {
-
-            console.error(
-                "重新绘制排行榜失败：",
-                error
-            );
-
-            return;
-
-        }
-
-
-        rankingList.innerHTML =
-            "";
-
-
-        (data || []).forEach(
-            (
-                player,
-                index
-            ) => {
-
-                createPlayer(
-                    player,
-                    index
-                );
-
-            }
-        );
-
-
-    } catch (error) {
-
-        console.error(
-            "重新绘制排行榜异常：",
-            error
-        );
-
-    }
-
-}
-
-
-// ============================================================
-// 19. 打开评分 + 评论弹窗
+// 21. 打开评分弹窗
 // ============================================================
 
 function openRatingModal(
@@ -1377,11 +1283,18 @@ function openRatingModal(
     playerName
 ) {
 
-    console.log(
-        "打开评价窗口：",
-        playerId,
-        playerName
-    );
+    if (
+        Number(playerId) ===
+        Number(loginUser.id)
+    ) {
+
+        alert(
+            "不能评价自己"
+        );
+
+        return;
+
+    }
 
 
     selectedPlayerId =
@@ -1392,62 +1305,48 @@ function openRatingModal(
         playerName;
 
 
-    // ========================================================
     // 默认 5 分
-    // ========================================================
 
     scoreRange.value =
         "5";
-
 
     scoreValue.textContent =
         "5";
 
 
-    // ========================================================
+    updateRangeBackground();
+
+
     // 清空评论
-    // ========================================================
 
     commentInput.value =
         "";
 
-
     updateCommentLength();
 
 
-    // ========================================================
-    // 恢复提交按钮
-    // ========================================================
+    // 恢复按钮
 
-    submitRating.disabled =
+    submittingRating =
         false;
 
-
-    submitRating.innerHTML = `
-
-        <span>
-            ⭐
-        </span>
-
-        <span>
-            提交评分与评论
-        </span>
-
-    `;
+    setSubmitButton(
+        false
+    );
 
 
-    // ========================================================
     // 显示弹窗
-    // ========================================================
 
     ratingModal.classList.add(
         "show"
     );
 
 
-    // ========================================================
-    // 自动聚焦评论框
-    // ========================================================
+    document.body.style.overflow =
+        "hidden";
+
+
+    // 自动聚焦
 
     setTimeout(
         () => {
@@ -1461,14 +1360,14 @@ function openRatingModal(
             }
 
         },
-        150
+        180
     );
 
 }
 
 
 // ============================================================
-// 20. 关闭评分弹窗
+// 22. 关闭弹窗
 // ============================================================
 
 function closeRatingModal() {
@@ -1478,40 +1377,39 @@ function closeRatingModal() {
     );
 
 
+    document.body.style.overflow =
+        "";
+
+
     selectedPlayerId =
         null;
 
 
-    if (commentInput) {
-
-        commentInput.value =
-            "";
-
-    }
-
+    commentInput.value =
+        "";
 
     updateCommentLength();
 
 }
 
 
-if (closeModal) {
+// ============================================================
+// 23. 关闭按钮
+// ============================================================
 
-    closeModal.addEventListener(
-        "click",
-        closeRatingModal
-    );
-
-}
+closeModal.addEventListener(
+    "click",
+    closeRatingModal
+);
 
 
 // ============================================================
-// 21. 点击背景关闭
+// 24. 点击遮罩关闭
 // ============================================================
 
 ratingModal.addEventListener(
     "click",
-    function (event) {
+    event => {
 
         if (
             event.target ===
@@ -1527,12 +1425,12 @@ ratingModal.addEventListener(
 
 
 // ============================================================
-// 22. ESC 关闭
+// 25. ESC
 // ============================================================
 
 document.addEventListener(
     "keydown",
-    function (event) {
+    event => {
 
         if (
             event.key ===
@@ -1556,12 +1454,12 @@ document.addEventListener(
 
 
 // ============================================================
-// 23. 评分滑块
+// 26. 评分滑块
 // ============================================================
 
 scoreRange.addEventListener(
     "input",
-    function () {
+    () => {
 
         let score =
             Number(
@@ -1569,23 +1467,11 @@ scoreRange.addEventListener(
             );
 
 
-        // ====================================================
-        // 强制整数
-        // ====================================================
-
-        score =
-            Math.round(score);
-
-
-        // ====================================================
-        // 限制 0～5
-        // ====================================================
-
         if (
-            score < 0
+            score < 1
         ) {
 
-            score = 0;
+            score = 1;
 
         }
 
@@ -1599,6 +1485,10 @@ scoreRange.addEventListener(
         }
 
 
+        score =
+            Math.round(score);
+
+
         scoreRange.value =
             score;
 
@@ -1606,12 +1496,50 @@ scoreRange.addEventListener(
         scoreValue.textContent =
             score;
 
+
+        updateRangeBackground();
+
     }
 );
 
 
 // ============================================================
-// 24. 评论字数统计
+// 27. 更新滑块背景
+// ============================================================
+
+function updateRangeBackground() {
+
+    const min = 1;
+
+    const max = 5;
+
+    const value =
+        Number(
+            scoreRange.value
+        );
+
+
+    const percentage =
+        (
+            (value - min) /
+            (max - min)
+        ) * 100;
+
+
+    scoreRange.style.background =
+        `linear-gradient(
+            to right,
+            #2bea70 0%,
+            #2bea70 ${percentage}%,
+            rgba(255,255,255,.08) ${percentage}%,
+            rgba(255,255,255,.08) 100%
+        )`;
+
+}
+
+
+// ============================================================
+// 28. 评论字数
 // ============================================================
 
 commentInput.addEventListener(
@@ -1620,18 +1548,7 @@ commentInput.addEventListener(
 );
 
 
-// ============================================================
-// 25. 更新评论字数
-// ============================================================
-
 function updateCommentLength() {
-
-    if (!commentInput) {
-
-        return;
-
-    }
-
 
     const length =
         commentInput.value.length;
@@ -1641,12 +1558,8 @@ function updateCommentLength() {
         `${length} / 200`;
 
 
-    // ========================================================
-    // 超过 200
-    // ========================================================
-
     if (
-        length >= 200
+        length >= 180
     ) {
 
         commentLength.classList.add(
@@ -1665,147 +1578,18 @@ function updateCommentLength() {
 
 
 // ============================================================
-// 26. 提交评分 + 评论
+// 29. 提交按钮状态
 // ============================================================
 
-submitRating.addEventListener(
-    "click",
-    async function () {
+function setSubmitButton(
+    loadingState
+) {
 
-        // ====================================================
-        // 检查目标球员
-        // ====================================================
-
-        if (
-            selectedPlayerId ===
-            null
-        ) {
-
-            alert(
-                "请选择一名球员"
-            );
-
-            return;
-
-        }
+    submitRating.disabled =
+        loadingState;
 
 
-        // ====================================================
-        // 获取评分
-        // ====================================================
-
-        const score =
-            Number(
-                scoreRange.value
-            );
-
-
-        // ====================================================
-        // 获取评论
-        // ====================================================
-
-        const comment =
-            commentInput.value.trim();
-
-
-        // ====================================================
-        // 评分验证
-        // ====================================================
-
-        if (
-            !Number.isInteger(
-                score
-            ) ||
-            score < 0 ||
-            score > 5
-        ) {
-
-            alert(
-                "评分必须是 0～5 的整数"
-            );
-
-            return;
-
-        }
-
-
-        // ====================================================
-        // 评论验证
-        // ====================================================
-
-        if (
-            comment.length === 0
-        ) {
-
-            alert(
-                "请输入对这名球员的评价"
-            );
-
-            commentInput.focus();
-
-            return;
-
-        }
-
-
-        if (
-            comment.length > 200
-        ) {
-
-            alert(
-                "评论不能超过200字"
-            );
-
-            return;
-
-        }
-
-
-        // ====================================================
-        // 防止自己给自己评分
-        // ====================================================
-
-        if (
-            Number(loginUser.id) ===
-            Number(selectedPlayerId)
-        ) {
-
-            alert(
-                "不能评价自己"
-            );
-
-            closeRatingModal();
-
-            return;
-
-        }
-
-
-        console.log(
-            "准备提交评分和评论：",
-            {
-                rater:
-                loginUser.id,
-
-                target:
-                selectedPlayerId,
-
-                score:
-                score,
-
-                comment:
-                comment
-            }
-        );
-
-
-        // ====================================================
-        // 禁用按钮
-        // ====================================================
-
-        submitRating.disabled =
-            true;
-
+    if (loadingState) {
 
         submitRating.innerHTML = `
 
@@ -1814,220 +1598,348 @@ submitRating.addEventListener(
             </span>
 
             <span>
-                提交中...
+                正在提交...
             </span>
 
         `;
 
+    } else {
 
-        try {
+        submitRating.innerHTML = `
 
-            // =================================================
-            // 第一步：提交评分
-            // =================================================
+            <span>
+                ⭐
+            </span>
 
-            console.log(
-                "正在提交评分..."
-            );
+            <span>
+                提交评分与评论
+            </span>
 
-
-            const {
-                data: ratingData,
-                error: ratingError
-            } =
-                await supabaseClient
-                    .rpc(
-                        "rate_player",
-                        {
-
-                            rater:
-                                Number(
-                                    loginUser.id
-                                ),
-
-                            target:
-                                Number(
-                                    selectedPlayerId
-                                ),
-
-                            target_score:
-                            score
-
-                        }
-                    );
-
-
-            // =================================================
-            // 评分失败
-            // =================================================
-
-            if (ratingError) {
-
-                console.error(
-                    "评分失败：",
-                    ratingError
-                );
-
-
-                alert(
-                    "评分失败：\n" +
-                    ratingError.message
-                );
-
-
-                return;
-
-            }
-
-
-            console.log(
-                "评分成功：",
-                ratingData
-            );
-
-
-            // =================================================
-            // 第二步：提交评论
-            // =================================================
-
-            console.log(
-                "正在提交评论..."
-            );
-
-
-            const {
-                data: commentData,
-                error: commentError
-            } =
-                await supabaseClient
-                    .from("comments")
-                    .upsert(
-                        {
-
-                            target_id:
-                                Number(
-                                    selectedPlayerId
-                                ),
-
-                            user_id:
-                                Number(
-                                    loginUser.id
-                                ),
-
-                            content:
-                            comment
-
-                        },
-                        {
-
-                            onConflict:
-                                "user_id,target_id"
-
-                        }
-                    )
-                    .select();
-
-
-            // =================================================
-            // 评论失败
-            // =================================================
-
-            if (commentError) {
-
-                console.error(
-                    "评论提交失败：",
-                    commentError
-                );
-
-
-                alert(
-                    "评分已经提交成功，但评论提交失败：\n" +
-                    commentError.message
-                );
-
-
-                // 评分已经成功
-
-                await loadRanking();
-
-                return;
-
-            }
-
-
-            console.log(
-                "评论成功：",
-                commentData
-            );
-
-
-            // =================================================
-            // 成功
-            // =================================================
-
-            alert(
-                "评分和评论提交成功！"
-            );
-
-
-            // =================================================
-            // 关闭弹窗
-            // =================================================
-
-            closeRatingModal();
-
-
-            // =================================================
-            // 刷新排行榜
-            // =================================================
-
-            await loadRanking();
-
-
-        } catch (error) {
-
-            console.error(
-                "评分评论系统错误：",
-                error
-            );
-
-
-            alert(
-                "提交失败，请检查网络连接后重试"
-            );
-
-
-        } finally {
-
-            submitRating.disabled =
-                false;
-
-
-            submitRating.innerHTML = `
-
-                <span>
-                    ⭐
-                </span>
-
-                <span>
-                    提交评分与评论
-                </span>
-
-            `;
-
-        }
+        `;
 
     }
-);
+
+}
 
 
 // ============================================================
-// 27. 刷新排行榜
+// 30. 提交评分 + 评论
+// ============================================================
+
+submitRating.addEventListener(
+    "click",
+    submitRatingAndComment
+);
+
+
+async function submitRatingAndComment() {
+
+    // 防重复点击
+
+    if (
+        submittingRating
+    ) {
+
+        return;
+
+    }
+
+
+    // ========================================================
+    // 检查目标
+    // ========================================================
+
+    if (
+        selectedPlayerId === null
+    ) {
+
+        alert(
+            "请选择一名球员"
+        );
+
+        return;
+
+    }
+
+
+    // ========================================================
+    // 评分
+    // ========================================================
+
+    const score =
+        Number(
+            scoreRange.value
+        );
+
+
+    if (
+        !Number.isInteger(score) ||
+        score < 1 ||
+        score > 5
+    ) {
+
+        alert(
+            "评分必须是 1～5 的整数"
+        );
+
+        return;
+
+    }
+
+
+    // ========================================================
+    // 评论
+    // ========================================================
+
+    const comment =
+        commentInput.value.trim();
+
+
+    if (
+        comment.length === 0
+    ) {
+
+        alert(
+            "请输入对这名球员的评价"
+        );
+
+        commentInput.focus();
+
+        return;
+
+    }
+
+
+    if (
+        comment.length > 200
+    ) {
+
+        alert(
+            "评论不能超过 200 字"
+        );
+
+        return;
+
+    }
+
+
+    // ========================================================
+    // 不能评价自己
+    // ========================================================
+
+    if (
+        Number(loginUser.id) ===
+        Number(selectedPlayerId)
+    ) {
+
+        alert(
+            "不能评价自己"
+        );
+
+        closeRatingModal();
+
+        return;
+
+    }
+
+
+    // ========================================================
+    // 开始提交
+    // ========================================================
+
+    submittingRating =
+        true;
+
+
+    setSubmitButton(
+        true
+    );
+
+
+    try {
+
+        console.log(
+            "提交评分：",
+            {
+                rater:
+                    Number(loginUser.id),
+
+                target:
+                    Number(selectedPlayerId),
+
+                score:
+                score
+            }
+        );
+
+
+        // ====================================================
+        // 第一步：评分
+        // ====================================================
+
+        const {
+            data: ratingData,
+            error: ratingError
+        } =
+            await supabaseClient
+                .rpc(
+                    "rate_player",
+                    {
+                        rater:
+                            Number(
+                                loginUser.id
+                            ),
+
+                        target:
+                            Number(
+                                selectedPlayerId
+                            ),
+
+                        target_score:
+                        score
+                    }
+                );
+
+
+        if (ratingError) {
+
+            console.error(
+                "评分失败：",
+                ratingError
+            );
+
+
+            alert(
+                "评分失败：\n" +
+                ratingError.message
+            );
+
+            return;
+
+        }
+
+
+        console.log(
+            "评分成功：",
+            ratingData
+        );
+
+
+        // ====================================================
+        // 第二步：评论
+        // ====================================================
+
+        const {
+            data: commentData,
+            error: commentError
+        } =
+            await supabaseClient
+                .from("comments")
+                .upsert(
+                    {
+                        target_id:
+                            Number(
+                                selectedPlayerId
+                            ),
+
+                        user_id:
+                            Number(
+                                loginUser.id
+                            ),
+
+                        content:
+                        comment
+                    },
+                    {
+                        onConflict:
+                            "user_id,target_id"
+                    }
+                )
+                .select();
+
+
+        if (commentError) {
+
+            console.error(
+                "评论提交失败：",
+                commentError
+            );
+
+
+            alert(
+                "评分已经成功提交，但评论提交失败：\n" +
+                commentError.message
+            );
+
+
+            closeRatingModal();
+
+            await loadRanking();
+
+            return;
+
+        }
+
+
+        console.log(
+            "评论成功：",
+            commentData
+        );
+
+
+        // ====================================================
+        // 成功
+        // ====================================================
+
+        alert(
+            "评分和评论提交成功！"
+        );
+
+
+        closeRatingModal();
+
+
+        // ====================================================
+        // 刷新数据
+        // ====================================================
+
+        await loadRanking();
+
+
+    } catch (error) {
+
+        console.error(
+            "评分评论系统异常：",
+            error
+        );
+
+
+        alert(
+            "提交失败，请检查网络连接后重试"
+        );
+
+
+    } finally {
+
+        submittingRating =
+            false;
+
+        setSubmitButton(
+            false
+        );
+
+    }
+
+}
+
+
+// ============================================================
+// 31. 刷新排行榜
 // ============================================================
 
 refreshButton.addEventListener(
     "click",
-    async function () {
+    async () => {
 
         await loadRanking();
 
@@ -2036,12 +1948,25 @@ refreshButton.addEventListener(
 
 
 // ============================================================
-// 28. 退出登录
+// 32. 退出登录
 // ============================================================
 
 logoutButton.addEventListener(
     "click",
-    function () {
+    () => {
+
+        const confirmed =
+            confirm(
+                "确定要退出登录吗？"
+            );
+
+
+        if (!confirmed) {
+
+            return;
+
+        }
+
 
         localStorage.removeItem(
             "loginUser"
@@ -2056,7 +1981,7 @@ logoutButton.addEventListener(
 
 
 // ============================================================
-// 29. 获取头像首字母
+// 33. 获取头像首字母
 // ============================================================
 
 function getInitial(
@@ -2094,7 +2019,7 @@ function getInitial(
 
 
 // ============================================================
-// 30. 防止 HTML 注入
+// 34. HTML 转义
 // ============================================================
 
 function escapeHTML(
@@ -2120,7 +2045,7 @@ function escapeHTML(
 
 
 // ============================================================
-// 31. 格式化评论时间
+// 35. 评论时间
 // ============================================================
 
 function formatCommentTime(
@@ -2162,9 +2087,18 @@ function formatCommentTime(
         date.getTime();
 
 
-    // ========================================================
-    // 一分钟以内
-    // ========================================================
+    // 未来时间
+
+    if (
+        diff < 0
+    ) {
+
+        return "刚刚";
+
+    }
+
+
+    // 一分钟
 
     if (
         diff < 60 * 1000
@@ -2175,9 +2109,7 @@ function formatCommentTime(
     }
 
 
-    // ========================================================
-    // 一小时以内
-    // ========================================================
+    // 一小时
 
     if (
         diff < 60 * 60 * 1000
@@ -2194,9 +2126,7 @@ function formatCommentTime(
     }
 
 
-    // ========================================================
-    // 一天以内
-    // ========================================================
+    // 一天
 
     if (
         diff < 24 * 60 * 60 * 1000
@@ -2213,9 +2143,24 @@ function formatCommentTime(
     }
 
 
-    // ========================================================
-    // 超过一天
-    // ========================================================
+    // 三十天以内
+
+    if (
+        diff < 30 * 24 * 60 * 60 * 1000
+    ) {
+
+        return (
+            Math.floor(
+                diff /
+                (24 * 60 * 60 * 1000)
+            ) +
+            "天前"
+        );
+
+    }
+
+
+    // 日期
 
     return (
         date.getFullYear() +
@@ -2239,7 +2184,7 @@ function formatCommentTime(
 
 
 // ============================================================
-// 32. 页面启动
+// 36. 页面启动
 // ============================================================
 
 initializePage();

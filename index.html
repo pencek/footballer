@@ -2,168 +2,164 @@
 <html lang="zh-CN">
 
 <head>
-
     <meta charset="UTF-8">
 
     <meta
             name="viewport"
             content="width=device-width, initial-scale=1.0">
 
+    <meta
+            name="theme-color"
+            content="#07120b">
+
     <title>Footballer - 球员排行榜</title>
 
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <!-- =========================
-         Supabase
-    ========================== -->
-
-    <script
-            src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
-    </script>
-
-
-    <!-- =========================
-         Supabase 配置
-    ========================== -->
-
+    <!-- Supabase 配置 -->
     <script src="js/supabase.js"></script>
 
-
-    <!-- =========================
-         页面 CSS
-    ========================== -->
-
-    <link
-            rel="stylesheet"
-            href="css/index.css">
-
+    <!-- 页面 CSS -->
+    <link rel="stylesheet" href="css/index.css">
 </head>
 
 
 <body>
 
-
 <div class="page">
 
-
-    <!-- ==================================================
+    <!-- =====================================================
          背景
-    =================================================== -->
+    ====================================================== -->
 
     <div class="background">
 
-        <div class="glow glow-1"></div>
+        <div class="background-gradient"></div>
 
-        <div class="glow glow-2"></div>
+        <div class="glow glow-green"></div>
+        <div class="glow glow-blue"></div>
 
         <div class="field">
 
-            <div class="field-line horizontal"></div>
+            <div class="field-border"></div>
 
-            <div class="field-line vertical"></div>
+            <div class="field-half-line"></div>
 
-            <div class="center-circle"></div>
+            <div class="field-center-line"></div>
+
+            <div class="field-center-circle"></div>
+
+            <div class="field-center-dot"></div>
+
+            <div class="penalty-area penalty-left"></div>
+            <div class="penalty-area penalty-right"></div>
 
         </div>
+
+        <div class="grid"></div>
 
     </div>
 
 
-
-    <!-- ==================================================
-         顶部导航栏
-    =================================================== -->
+    <!-- =====================================================
+         顶部导航
+    ====================================================== -->
 
     <header class="navbar">
 
+        <div class="nav-inner">
 
-        <!-- =====================
-             Logo
-        ====================== -->
+            <!-- Logo -->
 
-        <div class="brand">
+            <a class="brand" href="index.html">
 
-            <div class="brand-icon">
-                ⚽
-            </div>
+                <div class="brand-logo">
 
+                    <span>⚽</span>
 
-            <div>
-
-                <div class="brand-title">
-                    FOOTBALLER
                 </div>
 
-                <div class="brand-subtitle">
-                    PLAYER PLATFORM
+                <div class="brand-text">
+
+                    <div class="brand-title">
+                        FOOTBALLER
+                    </div>
+
+                    <div class="brand-subtitle">
+                        PLAYER RATING PLATFORM
+                    </div>
+
                 </div>
+
+            </a>
+
+
+            <!-- 当前用户 -->
+
+            <div class="user-area">
+
+                <div
+                        class="user-avatar"
+                        id="currentUserAvatar">
+                    ?
+                </div>
+
+                <div class="user-info">
+
+                    <div
+                            class="user-name"
+                            id="currentUserName">
+                        用户
+                    </div>
+
+                    <div class="user-status">
+                        ONLINE
+                    </div>
+
+                </div>
+
+                <button
+                        type="button"
+                        id="logoutButton"
+                        class="logout-button">
+
+                    <span class="logout-icon">↪</span>
+
+                    <span>退出</span>
+
+                </button>
 
             </div>
 
         </div>
-
-
-
-        <!-- =====================
-             用户信息
-        ====================== -->
-
-        <div class="user-area">
-
-            <div
-                    class="user-avatar"
-                    id="currentUserAvatar">
-
-                ?
-
-            </div>
-
-
-            <div
-                    class="user-name"
-                    id="currentUserName">
-
-                用户
-
-            </div>
-
-
-            <button
-                    id="logoutButton"
-                    class="logout-button">
-
-                退出
-
-            </button>
-
-        </div>
-
 
     </header>
 
 
-
-    <!-- ==================================================
+    <!-- =====================================================
          主体
-    =================================================== -->
+    ====================================================== -->
 
     <main class="main">
 
 
-        <!-- ==================================================
-             页面标题
-        =================================================== -->
+        <!-- =================================================
+             Hero
+        ================================================== -->
 
         <section class="hero">
 
+            <div class="hero-label">
 
-            <div class="hero-tag">
+                <span class="hero-label-dot"></span>
 
-                ⚽ PLAYER RANKING
+                PLAYER RANKING
 
             </div>
 
 
-            <h1>
+            <h1 class="hero-title">
 
                 球员
                 <span>排行榜</span>
@@ -171,86 +167,217 @@
             </h1>
 
 
-            <p>
+            <p class="hero-description">
 
-                根据所有球员评分的平均分进行排名
+                通过真实球员评分与社区评价，
+                发现表现最出色的球员。
 
             </p>
 
 
-            <!-- =====================
-                 每日刷新提示
-            ====================== -->
+            <div class="hero-stats">
 
-            <div class="hero-notice">
+                <div class="hero-stat">
 
-                <span>★</span>
+                    <div class="hero-stat-icon">
+                        🏆
+                    </div>
 
-                每日北京时间 04:00 自动刷新评分与评论
+                    <div>
+
+                        <strong>
+                            RANKING
+                        </strong>
+
+                        <span>
+                            实时球员排名
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="hero-stat-divider"></div>
+
+
+                <div class="hero-stat">
+
+                    <div class="hero-stat-icon">
+                        ⭐
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            RATING
+                        </strong>
+
+                        <span>
+                            社区评分系统
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="hero-stat-divider"></div>
+
+
+                <div class="hero-stat">
+
+                    <div class="hero-stat-icon">
+                        💬
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            REVIEW
+                        </strong>
+
+                        <span>
+                            球员真实评价
+                        </span>
+
+                    </div>
+
+                </div>
 
             </div>
 
 
+            <div class="hero-notice">
+
+                <span class="notice-icon">✦</span>
+
+                <span>
+                    每日北京时间 04:00 自动刷新评分与评论
+                </span>
+
+            </div>
+
         </section>
 
 
-
-        <!-- ==================================================
+        <!-- =================================================
              排行榜
-        =================================================== -->
+        ================================================== -->
 
         <section class="ranking-card">
 
 
-            <!-- =====================
-                 排行榜头部
-            ====================== -->
+            <!-- 排行榜顶部 -->
 
             <div class="ranking-header">
 
+                <div class="ranking-title-area">
 
-                <div>
+                    <div class="ranking-title-icon">
+                        🏆
+                    </div>
 
-                    <h2>
-                        球员排名
-                    </h2>
+                    <div>
+
+                        <h2>
+                            球员排名
+                        </h2>
+
+                        <p>
+                            根据所有球员平均评分进行排名
+                        </p>
+
+                    </div>
+
+                </div>
 
 
-                    <p>
+                <div class="ranking-header-right">
 
-                        共
+                    <div class="player-total">
 
                         <span id="playerCount">
                             0
                         </span>
 
-                        名球员
+                        <small>
+                            PLAYERS
+                        </small>
 
-                    </p>
+                    </div>
+
+
+                    <button
+                            type="button"
+                            id="refreshButton"
+                            class="refresh-button">
+
+                        <span class="refresh-icon">
+                            ↻
+                        </span>
+
+                        <span>
+                            刷新
+                        </span>
+
+                    </button>
 
                 </div>
-
-
-                <button
-                        id="refreshButton"
-                        class="refresh-button">
-
-                    <span>
-                        ↻
-                    </span>
-
-                    刷新
-
-                </button>
-
 
             </div>
 
 
+            <!-- 排名说明 -->
 
-            <!-- ==================================================
-                 加载状态
-            =================================================== -->
+            <div class="ranking-info">
+
+                <div class="ranking-info-item">
+
+                    <span class="ranking-info-icon gold">
+                        1
+                    </span>
+
+                    <span>
+                        第一名
+                    </span>
+
+                </div>
+
+                <div class="ranking-info-item">
+
+                    <span class="ranking-info-icon silver">
+                        2
+                    </span>
+
+                    <span>
+                        第二名
+                    </span>
+
+                </div>
+
+                <div class="ranking-info-item">
+
+                    <span class="ranking-info-icon bronze">
+                        3
+                    </span>
+
+                    <span>
+                        第三名
+                    </span>
+
+                </div>
+
+                <div class="ranking-info-note">
+                    ⭐ 平均评分越高，排名越靠前
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 加载
+            ================================================== -->
 
             <div
                     id="loading"
@@ -262,44 +389,43 @@
                     正在加载球员数据...
                 </p>
 
+                <span>
+                    CONNECTING TO SERVER
+                </span>
+
             </div>
 
 
-
-            <!-- ==================================================
+            <!-- =================================================
                  球员列表
-            =================================================== -->
+            ================================================== -->
 
             <div
                     id="rankingList"
                     class="ranking-list">
+            </div>
 
-                <!--
 
-                    index.js 动态生成。
+            <!-- =================================================
+                 空状态
+            ================================================== -->
 
-                    每个球员：
+            <div
+                    id="emptyState"
+                    class="empty-state"
+                    style="display:none;">
 
-                    .player
+                <div class="empty-icon">
+                    ⚽
+                </div>
 
-                    ├── .player-main
-                    │
-                    │   ├── 排名
-                    │   ├── 球员信息
-                    │   ├── 平均评分
-                    │   └── 评分按钮
-                    │
-                    └── .player-comments
-                        │
-                        ├── 评论标题
-                        │
-                        ├── 评论列表
-                        │
-                        ├── 查看全部评论
-                        │
-                        └── 评论提示
+                <h3>
+                    暂时还没有球员
+                </h3>
 
-                -->
+                <p>
+                    等待更多球员加入 Footballer
+                </p>
 
             </div>
 
@@ -307,13 +433,37 @@
         </section>
 
 
+        <!-- =================================================
+             页面底部提示
+        ================================================== -->
+
+        <div class="page-footer">
+
+            <span>
+                FOOTBALLER
+            </span>
+
+            <i></i>
+
+            <span>
+                PLAYER COMMUNITY
+            </span>
+
+            <i></i>
+
+            <span>
+                © 2026
+            </span>
+
+        </div>
+
+
     </main>
 
 
-
-    <!-- ==================================================
-         评分 + 评论弹窗
-    =================================================== -->
+    <!-- =====================================================
+         评分弹窗
+    ====================================================== -->
 
     <div
             id="ratingModal"
@@ -323,9 +473,7 @@
         <div class="modal-content">
 
 
-            <!-- =====================
-                 关闭按钮
-            ====================== -->
+            <!-- 关闭 -->
 
             <button
                     type="button"
@@ -337,66 +485,69 @@
             </button>
 
 
+            <!-- 顶部 -->
 
-            <!-- =====================
-                 图标
-            ====================== -->
+            <div class="modal-top">
 
-            <div class="modal-icon">
+                <div class="modal-icon">
+                    ⭐
+                </div>
 
-                ⭐
+                <div>
+
+                    <div class="modal-label">
+                        PLAYER RATING
+                    </div>
+
+                    <h2>
+
+                        评价
+                        <span id="ratingPlayerName">
+                            球员
+                        </span>
+
+                    </h2>
+
+                </div>
 
             </div>
 
 
-
-            <!-- =====================
-                 标题
-            ====================== -->
-
-            <h2>
-
-                评价
-
-                <span id="ratingPlayerName">
-                    球员
-                </span>
-
-            </h2>
-
-
             <p class="modal-description">
 
-                给这名球员评分，并写下你的评价
+                给这名球员评分，并分享你的真实评价
 
             </p>
 
 
-
-            <!-- ==================================================
+            <!-- =================================================
                  评分区域
-            =================================================== -->
+            ================================================== -->
 
             <div class="rating-section">
 
+                <div class="section-header">
 
-                <div class="rating-section-title">
+                    <div class="section-title">
 
-                    <span class="section-icon">
-                        ⭐
-                    </span>
+                        <span class="section-icon">
+                            ⭐
+                        </span>
 
-                    <span>
-                        球员评分
+                        <span>
+                            球员评分
+                        </span>
+
+                    </div>
+
+                    <span class="section-required">
+                        REQUIRED
                     </span>
 
                 </div>
 
 
-
-                <!-- =====================
-                     分数
-                ====================== -->
+                <!-- 分数 -->
 
                 <div class="score-display">
 
@@ -404,67 +555,67 @@
                         5
                     </span>
 
-                    <small>
-                        / 5
-                    </small>
+                    <div class="score-max">
+                        <strong>/</strong>
+                        5
+                    </div>
 
                 </div>
 
 
-
-                <!-- =====================
-                     滑块
-                ====================== -->
-
-                <input
-                        type="range"
-                        id="scoreRange"
-                        min="0"
-                        max="5"
-                        step="1"
-                        value="5">
+                <div class="score-description">
+                    拖动滑块选择评分
+                </div>
 
 
+                <!-- 滑块 -->
 
-                <!-- =====================
-                     刻度
-                ====================== -->
+                <div class="range-wrapper">
+
+                    <input
+                            type="range"
+                            id="scoreRange"
+                            min="1"
+                            max="5"
+                            step="1"
+                            value="5">
+
+                </div>
+
 
                 <div class="score-range-label">
 
-                    <span>0</span>
-
                     <span>1</span>
-
                     <span>2</span>
-
                     <span>3</span>
-
                     <span>4</span>
-
                     <span>5</span>
 
                 </div>
 
 
+                <div class="score-words">
+
+                    <span>较差</span>
+                    <span>一般</span>
+                    <span>不错</span>
+                    <span>优秀</span>
+                    <span>顶级</span>
+
+                </div>
+
             </div>
 
 
-
-            <!-- ==================================================
-                 评论区域
-            =================================================== -->
+            <!-- =================================================
+                 评论
+            ================================================== -->
 
             <div class="comment-section">
 
+                <div class="section-header">
 
-                <!-- =====================
-                     评论标题
-                ====================== -->
-
-                <div class="comment-section-header">
-
-                    <div class="comment-section-title">
+                    <div class="section-title">
 
                         <span class="section-icon">
                             💬
@@ -476,49 +627,40 @@
 
                     </div>
 
-
                     <span
                             id="commentLength"
                             class="comment-length">
-
                         0 / 200
-
                     </span>
 
                 </div>
 
 
-
-                <!-- =====================
-                     评论输入框
-                ====================== -->
-
                 <textarea
                         id="commentInput"
                         class="comment-input"
                         maxlength="200"
-                        placeholder="写下你对这名球员的评价，例如：速度很快，突破能力很强……"
-                        rows="5"></textarea>
+                        rows="5"
+                        placeholder="写下你对这名球员的评价，例如：速度很快，突破能力很强，比赛中非常有威胁……">
+                </textarea>
 
 
-                <!-- =====================
-                     评论提示
-                ====================== -->
+                <div class="comment-bottom">
 
-                <div class="comment-tip">
+                    <span>
+                        💡 每位用户每天可以评价一次
+                    </span>
 
-                    💡 每位用户每天可以评价一次
+                    <span>
+                        最多 200 字
+                    </span>
 
                 </div>
-
 
             </div>
 
 
-
-            <!-- ==================================================
-                 提交按钮
-            =================================================== -->
+            <!-- 提交 -->
 
             <button
                     type="button"
@@ -536,24 +678,22 @@
             </button>
 
 
+            <div class="modal-safe-tip">
+
+                🔒 你的评价将展示给 Footballer 社区用户
+
+            </div>
+
         </div>
 
-
     </div>
-
 
 
 </div>
 
 
-
-<!-- ==================================================
-     首页 JS
-=================================================== -->
-
+<!-- 页面 JS -->
 <script src="js/index.js"></script>
 
-
 </body>
-
 </html>
