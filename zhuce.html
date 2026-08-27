@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>⚽ 足球俱乐部 - 注册</title>
+
+    <!-- Supabase CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
+    </script>
+
+    <style>
+        /* ============ 全局样式与足球场背景 ============ */
+        :root {
+            --pitch-green: #1a7a3a;
+            --pitch-dark: #0f4d24;
+            --pitch-light: #2e9e52;
+            --grass-stripe-1: #1e8540;
+            --grass-stripe-2: #177238;
+            --white: #ffffff;
+            --off-white: #f5f5f0;
+            --gold: #ffd700;
+            --gold-dark: #c9a800;
+            --red-accent: #e63946;
+            --text-dark: #1a1a2e;
+            --text-light: #f0f0f0;
+            --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.45);
+            --shadow-md: 0 8px 30px rgba(0, 0, 0, 0.3);
+            --radius-card: 20px;
+            --radius-input: 12px;
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', sans-serif;
+            background: var(--pitch-dark);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .pitch-bg {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background: repeating-linear-gradient(
+                    0deg,
+                    var(--grass-stripe-1) 0px,
+                    var(--grass-stripe-1) 80px,
+                    var(--grass-stripe-2) 80px,
+                    var(--grass-stripe-2) 160px
+            );
+            pointer-events: none;
+        }
+
+        .pitch-bg::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 500px;
+            height: 500px;
+            border: 3px solid rgba(255, 255, 255, 0.12);
+            border-radius: 50%;
+        }
+
+        .pitch-bg::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.12);
+            transform: translateY(-50%);
+        }
+
+        /* 浮动足球装饰 */
+        .floating-balls {
+            position: fixed;
+            inset: 0;
+            z-index: 1;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .floating-ball {
+            position: absolute;
+            font-size: 2.5rem;
+            opacity: 0.15;
+            animation: floatBall 18s infinite ease-in-out;
+        }
+
+        .floating-ball:nth-child(1) {
+            top: 8%;
+            left: 5%;
+            animation-delay: 0s;
+            animation-duration: 16s;
+            font-size: 3.5rem;
+        }
+        .floating-ball:nth-child(2) {
+            top: 70%;
+            left: 3%;
+            animation-delay: -4s;
+            animation-duration: 20s;
+            font-size: 2.8rem;
+        }
+        .floating-ball:nth-child(3) {
+            top: 15%;
+            right: 8%;
+            animation-delay: -8s;
+            animation-duration: 22s;
+            font-size: 3.2rem;
+        }
+        .floating-ball:nth-child(4) {
+            bottom: 5%;
+            right: 12%;
+            animation-delay: -12s;
+            animation-duration: 19s;
+            font-size: 2.2rem;
+        }
+        .floating-ball:nth-child(5) {
+            top: 45%;
+            left: 45%;
+            animation-delay: -6s;
+            animation-duration: 25s;
+            font-size: 4rem;
+            opacity: 0.08;
+        }
+
+        @keyframes floatBall {
+            0%,
+            100% {
+                transform: translateY(0) rotate(0deg) scale(1);
+            }
+            25% {
+                transform: translateY(-40px) rotate(90deg) scale(1.05);
+            }
+            50% {
+                transform: translateY(-15px) rotate(180deg) scale(0.95);
+            }
+            75% {
+                transform: translateY(-50px) rotate(270deg) scale(1.02);
+            }
+        }
+
+        /* ============ 主卡片容器 ============ */
+        .login-wrapper {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 480px;
+            padding: 20px;
+        }
+
+        .login-card {
+            background: rgba(255, 255, 255, 0.97);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius-card);
+            box-shadow: var(--shadow-lg);
+            padding: 40px 36px 36px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .login-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, var(--gold), var(--gold-dark), var(--gold));
+            background-size: 200% 100%;
+            animation: shimmer 3s infinite linear;
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: 200% 0;
+            }
+            100% {
+                background-position: -200% 0;
+            }
+        }
+
+        /* ============ 标志区域 ============ */
+        .logo-section {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        .logo-icon {
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle at 35% 35%, #3a3a3a, #1a1a1a);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            font-size: 3rem;
+            box-shadow:
+                    0 10px 30px rgba(0, 0, 0, 0.3),
+                    inset 0 -4px 8px rgba(0, 0, 0, 0.5),
+                    inset 0 4px 8px rgba(255, 255, 255, 0.08);
+            position: relative;
+            border: 3px solid var(--gold);
+            animation: pulseGlow 3s infinite ease-in-out;
+        }
+
+        @keyframes pulseGlow {
+            0%,
+            100% {
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3), inset 0 -4px 8px rgba(0, 0, 0, 0.5), inset 0 4px 8px rgba(255, 255, 255, 0.08), 0 0 0 0 rgba(255, 215, 0, 0.4);
+            }
+            50% {
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3), inset 0 -4px 8px rgba(0, 0, 0, 0.5), inset 0 4px 8px rgba(255, 255, 255, 0.08), 0 0 0 10px rgba(255, 215, 0, 0);
+            }
+        }
+
+        .logo-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--text-dark);
+            letter-spacing: 1px;
+            line-height: 1.2;
+        }
+
+        .logo-title .highlight {
+            color: var(--pitch-green);
+            position: relative;
+        }
+
+        .logo-subtitle {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 6px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+
+        /* ============ 表单样式 ============ */
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 16px;
+            font-size: 1.2rem;
+            opacity: 0.5;
+            pointer-events: none;
+            transition: var(--transition);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 14px 18px 14px 48px;
+            border: 2px solid #e0e0e0;
+            border-radius: var(--radius-input);
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text-dark);
+            background: var(--off-white);
+            transition: var(--transition);
+            outline: none;
+            font-family: inherit;
+        }
+
+        .form-input:focus {
+            border-color: var(--pitch-green);
+            background: #ffffff;
+            box-shadow: 0 0 0 4px rgba(26, 122, 58, 0.12);
+        }
+
+        .form-input:focus~.input-icon,
+        .input-wrapper:focus-within .input-icon {
+            opacity: 1;
+            color: var(--pitch-green);
+        }
+
+        .form-input::placeholder {
+            color: #aaa;
+            font-weight: 400;
+        }
+
+        .form-input.error {
+            border-color: var(--red-accent);
+            box-shadow: 0 0 0 4px rgba(230, 57, 70, 0.1);
+        }
+
+        /* 密码可见切换 */
+        .toggle-password {
+            position: absolute;
+            right: 14px;
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            opacity: 0.5;
+            transition: var(--transition);
+            padding: 4px;
+            color: #666;
+        }
+
+        .toggle-password:hover {
+            opacity: 0.9;
+            transform: scale(1.1);
+        }
+
+        /* ============ 错误提示 ============ */
+        .error-message {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #fff0f0;
+            border: 1px solid #ffcccc;
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin-bottom: 18px;
+            font-size: 0.88rem;
+            color: #c0392b;
+            font-weight: 500;
+            opacity: 0;
+            transform: translateY(-8px);
+            transition: var(--transition);
+            pointer-events: none;
+        }
+
+        .error-message.visible {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        /* ============ 按钮 ============ */
+        .btn-register {
+            width: 100%;
+            padding: 16px 24px;
+            background: linear-gradient(135deg, var(--pitch-green), var(--pitch-dark));
+            color: var(--white);
+            border: none;
+            border-radius: var(--radius-input);
+            font-size: 1.05rem;
+            font-weight: 700;
+            cursor: pointer;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 6px 20px rgba(26, 122, 58, 0.35);
+        }
+
+        .btn-register:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(26, 122, 58, 0.45);
+            background: linear-gradient(135deg, #1e8a42, #0f5a28);
+        }
+
+        .btn-register:active {
+            transform: translateY(1px);
+            box-shadow: 0 3px 10px rgba(26, 122, 58, 0.3);
+        }
+
+        .btn-register:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-register .spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            display: none;
+        }
+
+        .btn-register.loading .spinner {
+            display: block;
+        }
+        .btn-register.loading .btn-text {
+            display: none;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* ============ 底部链接 ============ */
+        .card-footer {
+            text-align: center;
+            margin-top: 22px;
+            padding-top: 18px;
+            border-top: 1px solid #eee;
+        }
+
+        .card-footer p {
+            font-size: 0.85rem;
+            color: #888;
+        }
+
+        .card-footer a {
+            color: var(--pitch-green);
+            text-decoration: none;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .card-footer a:hover {
+            color: var(--pitch-dark);
+            text-decoration: underline;
+        }
+
+        /* ============ Supabase 配置提示 ============ */
+        .config-hint {
+            position: fixed;
+            bottom: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 20;
+            background: rgba(0, 0, 0, 0.75);
+            color: #ffcc00;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 0.78rem;
+            backdrop-filter: blur(10px);
+            pointer-events: none;
+            opacity: 0;
+            transition: var(--transition);
+            text-align: center;
+            max-width: 90vw;
+        }
+
+        .config-hint.visible {
+            opacity: 1;
+        }
+
+        /* ============ 响应式 ============ */
+        @media (max-width: 480px) {
+            .login-card {
+                padding: 32px 20px 26px;
+                border-radius: 16px;
+            }
+            .logo-icon {
+                width: 64px;
+                height: 64px;
+                font-size: 2.4rem;
+            }
+            .logo-title {
+                font-size: 1.5rem;
+            }
+            .form-input {
+                padding: 12px 14px 12px 42px;
+                font-size: 0.92rem;
+            }
+            .btn-register {
+                padding: 14px 20px;
+                font-size: 0.95rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<!-- 足球场背景 -->
+<div class="pitch-bg"></div>
+
+<!-- 浮动足球装饰 -->
+<div class="floating-balls">
+    <span class="floating-ball">⚽</span>
+    <span class="floating-ball">⚽</span>
+    <span class="floating-ball">⚽</span>
+    <span class="floating-ball">⚽</span>
+    <span class="floating-ball">⚽</span>
+</div>
+
+<!-- 注册卡片 -->
+<div class="login-wrapper">
+    <div class="login-card">
+        <!-- Logo 区域 -->
+        <div class="logo-section">
+            <div class="logo-icon">⚽</div>
+            <h1 class="logo-title">足球<span class="highlight">俱乐部</span></h1>
+            <p class="logo-subtitle">FÚTBOL CLUB · 注册新成员</p>
+        </div>
+
+        <!-- 错误提示 -->
+        <div class="error-message" id="errorMessage">
+            <span>⚠️</span>
+            <span id="errorText">注册失败，请检查输入</span>
+        </div>
+
+        <!-- 注册表单 -->
+        <form id="registerForm" autocomplete="off">
+            <!-- 姓名 -->
+            <div class="form-group">
+                <label class="form-label" for="fullname">姓名</label>
+                <div class="input-wrapper">
+                    <span class="input-icon">👤</span>
+                    <input
+                            type="text"
+                            id="fullname"
+                            class="form-input"
+                            placeholder="你的真实姓名或昵称"
+                            required
+                            autocomplete="name"
+                    />
+                </div>
+            </div>
+
+            <!-- 用户名 -->
+            <div class="form-group">
+                <label class="form-label" for="username">用户名</label>
+                <div class="input-wrapper">
+                    <span class="input-icon">⚡</span>
+                    <input
+                            type="text"
+                            id="username"
+                            class="form-input"
+                            placeholder="登录时使用的用户名"
+                            required
+                            autocomplete="username"
+                    />
+                </div>
+            </div>
+
+            <!-- 密码 -->
+            <div class="form-group">
+                <label class="form-label" for="password">密码</label>
+                <div class="input-wrapper">
+                    <span class="input-icon">🔒</span>
+                    <input
+                            type="password"
+                            id="password"
+                            class="form-input"
+                            placeholder="设置密码"
+                            required
+                            autocomplete="new-password"
+                    />
+                    <button
+                            type="button"
+                            class="toggle-password"
+                            id="togglePassword"
+                            aria-label="显示/隐藏密码"
+                    >
+                        👁️
+                    </button>
+                </div>
+            </div>
+
+            <!-- 确认密码 -->
+            <div class="form-group">
+                <label class="form-label" for="confirmPassword">确认密码</label>
+                <div class="input-wrapper">
+                    <span class="input-icon">🔐</span>
+                    <input
+                            type="password"
+                            id="confirmPassword"
+                            class="form-input"
+                            placeholder="再次输入密码"
+                            required
+                            autocomplete="new-password"
+                    />
+                </div>
+            </div>
+
+            <!-- 注册按钮 -->
+            <button type="submit" class="btn-register" id="registerBtn">
+                <span class="spinner"></span>
+                <span class="btn-text">🏆 立即注册</span>
+            </button>
+        </form>
+
+        <!-- 底部 -->
+        <div class="card-footer">
+            <p>已有账号？<a href="login.html">返回登录</a></p>
+            <p style="margin-top:6px;font-size:0.75rem;color:#bbb;">⚽ 加入我们，一起踢球！</p>
+        </div>
+    </div>
+</div>
+
+<!-- Supabase 配置提示 -->
+<div class="config-hint" id="configHint">
+    ⚠️ 请先在下方 JavaScript 中配置你的 Supabase URL 和 anon key
+</div>
+
+<script>
+    (function() {
+        // =============================================
+        // ⚠️ 在这里配置你的 Supabase 项目信息
+        // 与登录页面保持一致
+        // =============================================
+        const SUPABASE_URL = 'https://tkomfsasuwvvkffxlmtk.supabase.co'; // 替换为你的项目URL
+        const SUPABASE_ANON_KEY = 'sb_publishable_77zkLllta4fd0-dz1ksCnw_yDwViGLj'; // 替换为你的anon key
+
+        // =============================================
+        // DOM 元素引用
+        // =============================================
+        const registerForm = document.getElementById('registerForm');
+        const fullnameInput = document.getElementById('fullname');
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const confirmPasswordInput = document.getElementById('confirmPassword');
+        const togglePasswordBtn = document.getElementById('togglePassword');
+        const registerBtn = document.getElementById('registerBtn');
+        const errorMessage = document.getElementById('errorMessage');
+        const errorText = document.getElementById('errorText');
+        const configHint = document.getElementById('configHint');
+
+        // =============================================
+        // 检查 Supabase 是否已配置
+        // =============================================
+        const isConfigured =
+            SUPABASE_URL &&
+            !SUPABASE_URL.includes('YOUR-PROJECT') &&
+            SUPABASE_ANON_KEY &&
+            !SUPABASE_ANON_KEY.includes('YOUR-ANON-KEY');
+
+        let supabase = null;
+
+        if (isConfigured) {
+            try {
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+                    auth: { persistSession: true, autoRefreshToken: true },
+                });
+                console.log('✅ Supabase 客户端初始化成功');
+            } catch (err) {
+                console.error('❌ Supabase 初始化失败:', err);
+                showError('Supabase 初始化失败，请检查配置');
+            }
+        } else {
+            configHint.classList.add('visible');
+            console.warn('⚠️ 请配置 Supabase URL 和 anon key');
+            setTimeout(() => {
+                configHint.classList.remove('visible');
+            }, 8000);
+        }
+
+        // =============================================
+        // 密码可见切换（只作用于密码字段）
+        // =============================================
+        togglePasswordBtn.addEventListener('click', () => {
+            const isPassword = passwordInput.type === 'password';
+            passwordInput.type = isPassword ? 'text' : 'password';
+            togglePasswordBtn.textContent = isPassword ? '🙈' : '👁️';
+        });
+
+        // =============================================
+        // 错误提示函数
+        // =============================================
+        function showError(message) {
+            errorText.textContent = message;
+            errorMessage.classList.add('visible');
+            // 标红所有输入框
+            [fullnameInput, usernameInput, passwordInput, confirmPasswordInput].forEach((input) => {
+                input.classList.add('error');
+            });
+
+            setTimeout(() => {
+                errorMessage.classList.remove('visible');
+                [fullnameInput, usernameInput, passwordInput, confirmPasswordInput].forEach((input) => {
+                    input.classList.remove('error');
+                });
+            }, 4000);
+        }
+
+        function clearError() {
+            errorMessage.classList.remove('visible');
+            [fullnameInput, usernameInput, passwordInput, confirmPasswordInput].forEach((input) => {
+                input.classList.remove('error');
+            });
+        }
+
+        // =============================================
+        // 输入时清除错误状态
+        // =============================================
+        [fullnameInput, usernameInput, passwordInput, confirmPasswordInput].forEach((input) => {
+            input.addEventListener('input', clearError);
+        });
+
+        // =============================================
+        // 表单提交处理
+        // =============================================
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const fullname = fullnameInput.value.trim();
+            const username = usernameInput.value.trim();
+            const password = passwordInput.value.trim();
+            const confirmPassword = confirmPasswordInput.value.trim();
+
+            // 前端验证
+            if (!fullname || !username || !password || !confirmPassword) {
+                showError('请填写所有字段');
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                showError('两次输入的密码不一致');
+                passwordInput.classList.add('error');
+                confirmPasswordInput.classList.add('error');
+                return;
+            }
+
+            if (password.length < 6) {
+                showError('密码长度至少为6位');
+                passwordInput.classList.add('error');
+                return;
+            }
+
+            if (!isConfigured || !supabase) {
+                showError('⚠️ Supabase 未配置，请检查代码中的配置');
+                configHint.classList.add('visible');
+                return;
+            }
+
+            // 按钮进入加载状态
+            registerBtn.classList.add('loading');
+            registerBtn.disabled = true;
+
+            try {
+                // =============================================
+                // 插入新用户到 public.user 表
+                // 注意：列 "user" 是带引号的，所以对象键需要用引号
+                // =============================================
+                const { data, error } = await supabase
+                    .from('user')
+                    .insert([
+                        {
+                            name: fullname,
+                            'user': username,
+                            passwd: password
+                        }
+                    ]);
+
+                if (error) {
+                    console.error('❌ 注册错误:', error);
+                    // 处理唯一约束冲突 (错误码 23505)
+                    if (error.code === '23505') {
+                        // 判断具体是哪个字段冲突
+                        if (error.message.includes('user_name_key')) {
+                            showError('该姓名已被使用，请更换姓名');
+                        } else if (error.message.includes('user_user_key')) {
+                            showError('该用户名已被注册，请更换用户名');
+                        } else {
+                            showError('用户名或姓名已存在，请更换');
+                        }
+                    } else {
+                        showError('注册失败，请稍后重试');
+                    }
+                    return;
+                }
+
+                // ✅ 注册成功
+                console.log('✅ 注册成功:', data);
+
+                // 清空表单（可选）
+                registerForm.reset();
+
+                // 显示成功状态
+                registerBtn.innerHTML = '<span class="btn-text">✅ 注册成功！</span>';
+                registerBtn.style.background = 'linear-gradient(135deg, #27ae60, #1a7a3a)';
+
+                // 延迟跳转或提示
+                setTimeout(() => {
+                    // TODO: 可以选择跳转到登录页，或者自动登录
+                    alert(`🎉 注册成功，${fullname}！\n\n现在可以使用用户名 "${username}" 登录了。`);
+                    // 跳转到登录页（根据实际路径修改）
+                    // window.location.href = 'login.html';
+                }, 800);
+
+            } catch (err) {
+                console.error('❌ 异常:', err);
+                showError('网络错误，请检查连接');
+            } finally {
+                // 恢复按钮状态（等待跳转前仍然恢复）
+                setTimeout(() => {
+                    registerBtn.classList.remove('loading');
+                    registerBtn.disabled = false;
+                    if (!registerBtn.querySelector('.btn-text')) {
+                        registerBtn.innerHTML =
+                            '<span class="spinner"></span><span class="btn-text">🏆 立即注册</span>';
+                    }
+                }, 500);
+            }
+        });
+
+        // =============================================
+        // 键盘快捷键：Enter 提交
+        // =============================================
+        confirmPasswordInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && confirmPasswordInput.value.trim()) {
+                e.preventDefault();
+                registerForm.requestSubmit();
+            }
+        });
+
+        console.log('⚽ 足球俱乐部注册页面已加载');
+        console.log('📋 数据库表: public.user (id, name, "user", passwd)');
+    })();
+</script>
+</body>
+</html>
