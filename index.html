@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>⚽ 足球俱乐部 - 主页</title>
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <style>
         :root {
             --pitch-green: #1a7a3a;
@@ -12,15 +14,21 @@
             --pitch-light: #2e9e52;
             --grass-stripe-1: #1e8540;
             --grass-stripe-2: #177238;
+
             --gold: #ffd700;
             --gold-dark: #c9a800;
+
             --red-accent: #e63946;
+
             --text-dark: #1a1a2e;
             --text-light: #f0f0f0;
+
             --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.45);
             --shadow-md: 0 8px 30px rgba(0, 0, 0, 0.3);
+
             --radius-card: 20px;
             --radius-input: 12px;
+
             --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
@@ -31,19 +39,30 @@
         }
 
         body {
-            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', sans-serif;
+            font-family:
+                    'Segoe UI',
+                    'PingFang SC',
+                    'Microsoft YaHei',
+                    'Helvetica Neue',
+                    sans-serif;
+
             background: var(--pitch-dark);
             min-height: 100vh;
             position: relative;
             overflow-x: hidden;
+
             -webkit-font-smoothing: antialiased;
         }
 
-        /* 足球场背景 */
+        /* ================================
+           足球场背景
+        ================================= */
+
         .pitch-bg {
             position: fixed;
             inset: 0;
             z-index: 0;
+
             background: repeating-linear-gradient(
                     0deg,
                     var(--grass-stripe-1) 0px,
@@ -51,45 +70,67 @@
                     var(--grass-stripe-2) 80px,
                     var(--grass-stripe-2) 160px
             );
+
             pointer-events: none;
         }
 
         .pitch-bg::before {
             content: '';
+
             position: absolute;
+
             top: 50%;
             left: 50%;
+
             transform: translate(-50%, -50%);
+
             width: 600px;
             height: 600px;
+
             border: 3px solid rgba(255, 255, 255, 0.08);
+
             border-radius: 50%;
         }
 
         .pitch-bg::after {
             content: '';
+
             position: absolute;
+
             top: 50%;
             left: 0;
             right: 0;
+
             height: 3px;
+
             background: rgba(255, 255, 255, 0.08);
+
             transform: translateY(-50%);
         }
 
-        /* 顶部导航 */
+        /* ================================
+           导航栏
+        ================================= */
+
         .navbar {
             position: sticky;
             top: 0;
             z-index: 50;
+
             background: rgba(15, 77, 36, 0.95);
+
             backdrop-filter: blur(10px);
+
             border-bottom: 3px solid var(--gold);
+
             padding: 0 24px;
+
             height: 64px;
+
             display: flex;
             align-items: center;
             justify-content: space-between;
+
             box-shadow: var(--shadow-md);
         }
 
@@ -102,170 +143,276 @@
         .navbar-logo {
             width: 40px;
             height: 40px;
-            background: radial-gradient(circle at 30% 30%, #3a3a3a, #1a1a1a);
+
+            background:
+                    radial-gradient(
+                            circle at 30% 30%,
+                            #3a3a3a,
+                            #1a1a1a
+                    );
+
             border-radius: 50%;
+
             display: flex;
             align-items: center;
             justify-content: center;
+
             font-size: 1.5rem;
+
             border: 2px solid var(--gold);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+
+            box-shadow:
+                    0 2px 10px rgba(0, 0, 0, 0.3);
         }
 
         .navbar-title {
             color: white;
+
             font-size: 1.3rem;
+
             font-weight: 700;
+
             letter-spacing: 1px;
         }
 
         .navbar-user {
             display: flex;
             align-items: center;
+
             gap: 10px;
+
             color: white;
+
             font-weight: 600;
+
             font-size: 0.95rem;
-            background: rgba(255,255,255,0.1);
+
+            background: rgba(255, 255, 255, 0.1);
+
             padding: 8px 16px;
+
             border-radius: 20px;
+
             cursor: pointer;
+
             transition: var(--transition);
         }
 
         .navbar-user:hover {
-            background: rgba(255,255,255,0.2);
+            background: rgba(255, 255, 255, 0.2);
         }
 
         .navbar-user .avatar {
             width: 28px;
             height: 28px;
+
             border-radius: 50%;
+
             background: var(--gold);
+
             color: var(--text-dark);
+
             display: flex;
             align-items: center;
             justify-content: center;
+
             font-weight: 700;
+
             font-size: 0.9rem;
         }
 
-        /* 主容器 */
+        /* ================================
+           主体
+        ================================= */
+
         .main-container {
             position: relative;
             z-index: 10;
+
             max-width: 1000px;
+
             margin: 40px auto;
+
             padding: 0 20px;
+
             padding-bottom: 80px;
         }
 
-        /* 头部卡片 */
+        /* ================================
+           顶部标题卡片
+        ================================= */
+
         .header-card {
             background: rgba(255, 255, 255, 0.97);
+
             backdrop-filter: blur(20px);
+
             border-radius: var(--radius-card);
+
             box-shadow: var(--shadow-lg);
+
             padding: 30px 28px;
+
             margin-bottom: 30px;
+
             text-align: center;
+
             position: relative;
+
             overflow: hidden;
         }
 
         .header-card::before {
             content: '';
+
             position: absolute;
+
             top: 0;
             left: 0;
             right: 0;
+
             height: 5px;
-            background: linear-gradient(90deg, var(--gold), var(--gold-dark), var(--gold));
+
+            background:
+                    linear-gradient(
+                            90deg,
+                            var(--gold),
+                            var(--gold-dark),
+                            var(--gold)
+                    );
+
             background-size: 200% 100%;
+
             animation: shimmer 3s infinite linear;
         }
 
         @keyframes shimmer {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
+            0% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: -200% 0;
+            }
         }
 
         .header-title {
             font-size: 2rem;
+
             font-weight: 800;
+
             color: var(--text-dark);
+
             margin-bottom: 8px;
         }
 
         .header-subtitle {
             color: #666;
+
             font-size: 0.9rem;
+
             letter-spacing: 2px;
+
             text-transform: uppercase;
         }
 
         .info-banner {
             background: #f0f7f0;
+
             border: 1px solid #cce0cc;
+
             border-radius: 10px;
+
             padding: 12px 16px;
+
             margin-top: 15px;
+
             font-size: 0.85rem;
+
             color: #2a4d2a;
+
             display: flex;
+
             align-items: center;
+
             gap: 8px;
+
             justify-content: center;
         }
 
-        /* 排行榜卡片 */
+        /* ================================
+           排行榜
+        ================================= */
+
         .ranking-card {
             background: rgba(255, 255, 255, 0.97);
+
             backdrop-filter: blur(20px);
+
             border-radius: var(--radius-card);
+
             box-shadow: var(--shadow-lg);
+
             padding: 24px 20px;
+
             margin-bottom: 20px;
         }
 
         .ranking-header {
             display: flex;
+
             align-items: center;
+
             justify-content: space-between;
+
             margin-bottom: 20px;
+
             padding: 0 8px;
         }
 
         .ranking-header h2 {
             font-size: 1.4rem;
+
             font-weight: 700;
+
             color: var(--text-dark);
         }
 
         .ranking-header .update-time {
             font-size: 0.8rem;
+
             color: #888;
         }
 
         .ranking-table {
             width: 100%;
+
             border-collapse: collapse;
         }
 
         .ranking-table th {
             text-align: left;
+
             padding: 12px 10px;
+
             font-size: 0.78rem;
+
             text-transform: uppercase;
+
             letter-spacing: 0.5px;
+
             color: #777;
+
             border-bottom: 2px solid #e0e0e0;
+
             font-weight: 600;
         }
 
         .ranking-table td {
             padding: 14px 10px;
+
             border-bottom: 1px solid #f0f0f0;
+
             vertical-align: middle;
         }
 
@@ -273,137 +420,371 @@
             background: #fafafa;
         }
 
+        /* ================================
+           排名
+        ================================= */
+
         .rank-number {
             font-weight: 800;
+
             font-size: 1.2rem;
+
             color: #aaa;
+
             width: 50px;
+
             text-align: center;
         }
 
-        .rank-1 { color: var(--gold-dark); font-size: 1.6rem; }
-        .rank-2 { color: #b0b0b0; font-size: 1.4rem; }
-        .rank-3 { color: #cd7f32; font-size: 1.3rem; }
+        .rank-1 {
+            color: var(--gold-dark);
+
+            font-size: 1.6rem;
+        }
+
+        .rank-2 {
+            color: #b0b0b0;
+
+            font-size: 1.4rem;
+        }
+
+        .rank-3 {
+            color: #cd7f32;
+
+            font-size: 1.3rem;
+        }
+
+        /* ================================
+           球员
+        ================================= */
 
         .player-cell {
             display: flex;
+
             align-items: center;
+
             gap: 12px;
         }
 
         .player-avatar {
             width: 40px;
             height: 40px;
+
             border-radius: 50%;
+
             background: var(--pitch-green);
+
             color: white;
+
             display: flex;
+
             align-items: center;
+
             justify-content: center;
+
             font-weight: 700;
+
             font-size: 1rem;
+
             flex-shrink: 0;
+
             border: 2px solid #ddd;
         }
 
         .player-name {
             font-weight: 600;
+
             font-size: 1rem;
+
             color: var(--text-dark);
         }
 
         .player-username {
             font-size: 0.75rem;
+
             color: #999;
         }
 
+        /* ================================
+           平均分
+        ================================= */
+
         .avg-score {
             font-weight: 800;
-            font-size: 1.2rem;
-            color: var(--pitch-green);
-        }
 
-        .no-score {
-            color: #ccc;
-            font-size: 0.9rem;
-            font-style: italic;
+            font-size: 1.2rem;
+
+            color: var(--pitch-green);
         }
 
         .rating-count {
             font-size: 0.75rem;
+
             color: #aaa;
+
             margin-left: 6px;
         }
 
+        /* ================================
+           操作按钮
+        ================================= */
+
         .action-buttons {
             display: flex;
+
             gap: 8px;
+
             justify-content: flex-end;
         }
 
         .btn-rate {
-            background: linear-gradient(135deg, var(--pitch-green), var(--pitch-dark));
+            background:
+                    linear-gradient(
+                            135deg,
+                            var(--pitch-green),
+                            var(--pitch-dark)
+                    );
+
             color: white;
+
             border: none;
+
             border-radius: 20px;
+
             padding: 8px 16px;
+
             font-size: 0.85rem;
+
             font-weight: 600;
+
             cursor: pointer;
+
             transition: var(--transition);
-            box-shadow: 0 3px 10px rgba(26, 122, 58, 0.3);
+
+            box-shadow:
+                    0 3px 10px rgba(26, 122, 58, 0.3);
+
             letter-spacing: 0.5px;
         }
 
         .btn-rate:hover:not(:disabled) {
             transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(26, 122, 58, 0.4);
+
+            box-shadow:
+                    0 6px 15px rgba(26, 122, 58, 0.4);
         }
 
         .btn-rate:disabled {
             background: #ccc;
+
             cursor: not-allowed;
+
             box-shadow: none;
+
             opacity: 0.7;
         }
 
         .btn-rate.rated {
-            background: linear-gradient(135deg, #f39c12, #e67e22);
+            background:
+                    linear-gradient(
+                            135deg,
+                            #f39c12,
+                            #e67e22
+                    );
         }
 
         .btn-rate.rated:hover:not(:disabled) {
-            background: linear-gradient(135deg, #e67e22, #d35400);
+            background:
+                    linear-gradient(
+                            135deg,
+                            #e67e22,
+                            #d35400
+                    );
         }
 
-        /* 模态框 */
+        /* ================================
+           评论区域
+           现在始终显示
+        ================================= */
+
+        .review-carousel-row td {
+            padding: 0 !important;
+
+            border-bottom: none;
+        }
+
+        .carousel-container {
+            display: flex;
+
+            align-items: center;
+
+            gap: 12px;
+
+            padding: 10px 16px 14px 72px;
+
+            background: #f9f9f9;
+
+            border-left: 4px solid var(--pitch-green);
+
+            border-radius: 0 0 12px 12px;
+
+            margin: 0 10px 10px 10px;
+
+            min-height: 62px;
+        }
+
+        .carousel-btn {
+            background: white;
+
+            border: 1px solid #ddd;
+
+            border-radius: 50%;
+
+            width: 32px;
+            height: 32px;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            cursor: pointer;
+
+            font-size: 1.2rem;
+
+            color: #555;
+
+            transition: var(--transition);
+
+            flex-shrink: 0;
+        }
+
+        .carousel-btn:hover:not(:disabled) {
+            background: #e0e0e0;
+
+            color: #333;
+
+            transform: scale(1.05);
+        }
+
+        .carousel-btn:disabled {
+            opacity: 0.35;
+
+            cursor: default;
+        }
+
+        .carousel-comment {
+            flex: 1;
+
+            font-size: 0.9rem;
+
+            color: #555;
+
+            min-height: 40px;
+
+            display: grid;
+
+            grid-template-columns: auto 1fr;
+
+            grid-template-rows: auto auto;
+
+            column-gap: 8px;
+
+            align-items: center;
+
+            overflow: hidden;
+        }
+
+        .carousel-comment .review-stars {
+            color: var(--gold);
+
+            white-space: nowrap;
+
+            grid-column: 1;
+
+            grid-row: 1;
+        }
+
+        .carousel-comment .review-text {
+            word-break: break-word;
+
+            grid-column: 2;
+
+            grid-row: 1;
+
+            line-height: 1.5;
+        }
+
+        .carousel-comment .review-meta {
+            font-size: 0.75rem;
+
+            color: #aaa;
+
+            margin-top: 2px;
+
+            grid-column: 1 / 3;
+
+            grid-row: 2;
+        }
+
+        .empty-review {
+            color: #999;
+
+            font-size: 0.85rem;
+        }
+
+        /* ================================
+           评分模态框
+        ================================= */
+
         .modal-overlay {
             position: fixed;
+
             inset: 0;
+
             z-index: 100;
+
             background: rgba(0, 0, 0, 0.6);
+
             backdrop-filter: blur(5px);
+
             display: flex;
+
             align-items: center;
+
             justify-content: center;
+
             opacity: 0;
+
             pointer-events: none;
+
             transition: var(--transition);
         }
 
         .modal-overlay.active {
             opacity: 1;
+
             pointer-events: auto;
         }
 
         .modal-content {
             background: white;
+
             border-radius: var(--radius-card);
+
             box-shadow: var(--shadow-lg);
+
             padding: 32px 28px;
+
             width: 90%;
+
             max-width: 440px;
+
             position: relative;
+
             transform: translateY(30px);
+
             transition: var(--transition);
         }
 
@@ -413,560 +794,2302 @@
 
         .modal-close {
             position: absolute;
+
             top: 16px;
+
             right: 16px;
+
             background: none;
+
             border: none;
+
             font-size: 1.5rem;
+
             cursor: pointer;
+
             color: #999;
+
             transition: var(--transition);
         }
 
         .modal-close:hover {
             color: #333;
+
             transform: rotate(90deg);
         }
 
         .modal-title {
             font-size: 1.3rem;
+
             font-weight: 700;
+
             color: var(--text-dark);
+
             margin-bottom: 20px;
+
             text-align: center;
         }
 
+        /* ================================
+           星星
+        ================================= */
+
         .rating-stars {
             display: flex;
+
             justify-content: center;
+
             gap: 10px;
+
             margin-bottom: 20px;
         }
 
         .star {
             font-size: 2.5rem;
+
             cursor: pointer;
+
             color: #ddd;
+
             transition: var(--transition);
+
             user-select: none;
         }
 
         .star.active {
             color: var(--gold);
-            text-shadow: 0 0 10px rgba(255,215,0,0.5);
+
+            text-shadow:
+                    0 0 10px rgba(255, 215, 0, 0.5);
         }
 
         .star:hover {
             transform: scale(1.2);
         }
 
+        /* ================================
+           评论输入
+        ================================= */
+
         .comment-input {
             width: 100%;
+
             padding: 12px 16px;
+
             border: 2px solid #e0e0e0;
+
             border-radius: var(--radius-input);
+
             font-size: 0.95rem;
+
             font-family: inherit;
+
             resize: vertical;
+
             min-height: 80px;
+
             transition: var(--transition);
+
             outline: none;
         }
 
         .comment-input:focus {
             border-color: var(--pitch-green);
-            box-shadow: 0 0 0 4px rgba(26, 122, 58, 0.12);
+
+            box-shadow:
+                    0 0 0 4px rgba(26, 122, 58, 0.12);
         }
+
+        /* ================================
+           提交按钮
+        ================================= */
 
         .modal-submit {
             width: 100%;
+
             margin-top: 20px;
+
             padding: 14px;
-            background: linear-gradient(135deg, var(--pitch-green), var(--pitch-dark));
+
+            background:
+                    linear-gradient(
+                            135deg,
+                            var(--pitch-green),
+                            var(--pitch-dark)
+                    );
+
             color: white;
+
             border: none;
+
             border-radius: var(--radius-input);
+
             font-size: 1rem;
+
             font-weight: 700;
+
             cursor: pointer;
+
             letter-spacing: 1px;
+
             transition: var(--transition);
+
             display: flex;
+
             align-items: center;
+
             justify-content: center;
+
             gap: 8px;
         }
 
-        .modal-submit:hover {
+        .modal-submit:hover:not(:disabled) {
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(26, 122, 58, 0.4);
+
+            box-shadow:
+                    0 8px 20px rgba(26, 122, 58, 0.4);
         }
 
         .modal-submit:disabled {
             opacity: 0.6;
+
             cursor: not-allowed;
+
             transform: none;
         }
 
-        /* 加载状态 */
+        /* ================================
+           Loading
+        ================================= */
+
         .loading-spinner {
             display: flex;
+
             justify-content: center;
+
             align-items: center;
+
             padding: 40px;
         }
 
         .spinner {
             width: 40px;
             height: 40px;
+
             border: 4px solid #ddd;
+
             border-top-color: var(--pitch-green);
+
             border-radius: 50%;
+
             animation: spin 0.8s linear infinite;
         }
 
         @keyframes spin {
-            to { transform: rotate(360deg); }
+            to {
+                transform: rotate(360deg);
+            }
         }
 
-        /* 响应式 */
+        /* ================================
+           手机端
+        ================================= */
+
         @media (max-width: 768px) {
+
             .navbar {
                 padding: 0 16px;
+
                 height: 56px;
             }
+
             .navbar-title {
                 font-size: 1.1rem;
             }
+
             .main-container {
                 margin: 20px auto;
+
                 padding: 0 12px;
+
+                padding-bottom: 60px;
             }
-            .ranking-table th, .ranking-table td {
+
+            .header-card {
+                padding: 25px 18px;
+            }
+
+            .header-title {
+                font-size: 1.6rem;
+            }
+
+            .ranking-card {
+                padding: 18px 10px;
+            }
+
+            .ranking-table th,
+            .ranking-table td {
                 padding: 10px 6px;
+
                 font-size: 0.85rem;
             }
+
             .player-avatar {
                 width: 32px;
                 height: 32px;
+
                 font-size: 0.8rem;
             }
+
+            .player-cell {
+                gap: 8px;
+            }
+
+            .player-name {
+                font-size: 0.9rem;
+            }
+
+            .player-username {
+                font-size: 0.68rem;
+            }
+
             .avg-score {
                 font-size: 1rem;
             }
+
+            .rating-count {
+                display: block;
+
+                margin-left: 0;
+
+                margin-top: 2px;
+            }
+
             .btn-rate {
                 padding: 6px 12px;
+
                 font-size: 0.75rem;
             }
+
             .modal-content {
                 padding: 24px 18px;
             }
+
             .star {
                 font-size: 2rem;
+            }
+
+            .carousel-container {
+                padding: 8px 8px 12px 42px;
+
+                gap: 8px;
+            }
+
+            .carousel-comment {
+                font-size: 0.82rem;
+
+                column-gap: 5px;
+            }
+
+            .carousel-btn {
+                width: 28px;
+                height: 28px;
+
+                font-size: 1rem;
+            }
+
+            .navbar-user {
+                padding: 6px 10px;
+            }
+
+            .navbar-user .avatar {
+                width: 25px;
+                height: 25px;
+            }
+        }
+
+        @media (max-width: 520px) {
+
+            .ranking-table th:nth-child(3),
+            .ranking-table td:nth-child(3) {
+                display: none;
+            }
+
+            .ranking-table th:nth-child(1) {
+                width: 40px;
+            }
+
+            .ranking-table th:nth-child(4) {
+                width: 85px;
+            }
+
+            .action-buttons {
+                justify-content: center;
+            }
+
+            .navbar-title {
+                font-size: 1rem;
+            }
+
+            .navbar-user span:last-child {
+                max-width: 70px;
+
+                overflow: hidden;
+
+                text-overflow: ellipsis;
+
+                white-space: nowrap;
             }
         }
     </style>
 </head>
+
 <body>
+
 <div class="pitch-bg"></div>
 
-<!-- 顶部导航 -->
+<!-- ================================
+     导航栏
+================================= -->
+
 <nav class="navbar">
+
     <div class="navbar-left">
-        <div class="navbar-logo">⚽</div>
-        <span class="navbar-title">足球俱乐部</span>
+
+        <div class="navbar-logo">
+            ⚽
+        </div>
+
+        <span class="navbar-title">
+            足球俱乐部
+        </span>
+
     </div>
+
     <div class="navbar-user" id="navbarUser">
-        <span class="avatar" id="userAvatar">?</span>
-        <span id="userName">加载中...</span>
+
+        <span class="avatar" id="userAvatar">
+            ?
+        </span>
+
+        <span id="userName">
+            加载中...
+        </span>
+
     </div>
+
 </nav>
 
-<!-- 主内容 -->
+
+<!-- ================================
+     主体
+================================= -->
+
 <div class="main-container">
-    <!-- 头部卡片 -->
+
+    <!-- 顶部标题 -->
+
     <div class="header-card">
-        <h1 class="header-title">🏆 球员排行榜</h1>
-        <p class="header-subtitle">每日评分 · 互相激励 · 共同进步</p>
+
+        <h1 class="header-title">
+            🏆 球员排行榜
+        </h1>
+
+        <p class="header-subtitle">
+            每日评分 · 互相激励 · 共同进步
+        </p>
+
         <div class="info-banner">
             ⏰ 评分与评价每日凌晨 4:00 自动清空
         </div>
+
     </div>
 
-    <!-- 排行榜卡片 -->
+
+    <!-- 排行榜 -->
+
     <div class="ranking-card">
+
         <div class="ranking-header">
-            <h2>成员排行</h2>
-            <span class="update-time" id="lastUpdate">加载中...</span>
+
+            <h2>
+                成员排行
+            </h2>
+
+            <span
+                    class="update-time"
+                    id="lastUpdate"
+            >
+                加载中...
+            </span>
+
         </div>
+
         <div id="rankingContent">
+
             <div class="loading-spinner">
+
                 <div class="spinner"></div>
+
             </div>
+
         </div>
+
     </div>
+
 </div>
 
-<!-- 评分模态框 -->
-<div class="modal-overlay" id="ratingModal">
+
+<!-- ================================
+     评分模态框
+================================= -->
+
+<div
+        class="modal-overlay"
+        id="ratingModal"
+>
+
     <div class="modal-content">
-        <button class="modal-close" id="modalClose">&times;</button>
-        <h3 class="modal-title" id="modalTitle">评分</h3>
-        <div class="rating-stars" id="starContainer">
-            <span class="star" data-value="1">★</span>
-            <span class="star" data-value="2">★</span>
-            <span class="star" data-value="3">★</span>
-            <span class="star" data-value="4">★</span>
-            <span class="star" data-value="5">★</span>
+
+        <button
+                class="modal-close"
+                id="modalClose"
+        >
+            &times;
+        </button>
+
+        <h3
+                class="modal-title"
+                id="modalTitle"
+        >
+            评分
+        </h3>
+
+        <!-- 星级 -->
+
+        <div
+                class="rating-stars"
+                id="starContainer"
+        >
+
+            <span
+                    class="star"
+                    data-value="1"
+            >
+                ★
+            </span>
+
+            <span
+                    class="star"
+                    data-value="2"
+            >
+                ★
+            </span>
+
+            <span
+                    class="star"
+                    data-value="3"
+            >
+                ★
+            </span>
+
+            <span
+                    class="star"
+                    data-value="4"
+            >
+                ★
+            </span>
+
+            <span
+                    class="star"
+                    data-value="5"
+            >
+                ★
+            </span>
+
         </div>
-        <textarea class="comment-input" id="commentInput" placeholder="写下你的评价...（可选）"></textarea>
-        <button class="modal-submit" id="submitRating">提交评分</button>
+
+        <!-- 评论 -->
+
+        <textarea
+                class="comment-input"
+                id="commentInput"
+                placeholder="写下你的评价...（可选）"
+        ></textarea>
+
+        <!-- 提交 -->
+
+        <button
+                class="modal-submit"
+                id="submitRating"
+        >
+            提交评分
+        </button>
+
     </div>
+
 </div>
+
 
 <script>
-    (function() {
-        // ========== Supabase 配置 ==========
-        const SUPABASE_URL = 'https://tkomfsasuwvvkffxlmtk.supabase.co';
-        const SUPABASE_ANON_KEY = 'sb_publishable_77zkLllta4fd0-dz1ksCnw_yDwViGLj';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        // ========== 全局状态 ==========
-        let currentUser = null;          // 当前登录用户对象
-        let allUsers = [];               // 所有用户
-        let allRatings = [];             // 所有评分记录（从数据库获取）
-        let usersWithAvg = [];           // 计算平均分后的用户数组
-        let ratingTargetId = null;       // 当前评分对象ID
-        let selectedScore = 0;           // 当前选中的星级分数
-        let existingRating = null;       // 当前用户对该目标的已有评分（若存在）
 
-        // ========== DOM 元素 ==========
-        const navbarUser = document.getElementById('navbarUser');
-        const userAvatar = document.getElementById('userAvatar');
-        const userName = document.getElementById('userName');
-        const rankingContent = document.getElementById('rankingContent');
-        const lastUpdate = document.getElementById('lastUpdate');
-        const ratingModal = document.getElementById('ratingModal');
-        const modalClose = document.getElementById('modalClose');
-        const modalTitle = document.getElementById('modalTitle');
-        const starContainer = document.getElementById('starContainer');
-        const commentInput = document.getElementById('commentInput');
-        const submitRatingBtn = document.getElementById('submitRating');
+    (function () {
 
-        // ========== 每日清空逻辑 ==========
+        /* =================================
+           Supabase 配置
+        ================================= */
+
+        const SUPABASE_URL =
+            'https://tkomfsasuwvvkffxlmtk.supabase.co';
+
+        const SUPABASE_ANON_KEY =
+            'sb_publishable_77zkLllta4fd0-dz1ksCnw_yDwViGLj';
+
+        const supabase =
+            window.supabase.createClient(
+                SUPABASE_URL,
+                SUPABASE_ANON_KEY
+            );
+
+
+        /* =================================
+           全局变量
+        ================================= */
+
+        let currentUser = null;
+
+        let allUsers = [];
+
+        let allRatings = [];
+
+        let usersWithAvg = [];
+
+        let ratingTargetId = null;
+
+        let selectedScore = 0;
+
+        let existingRating = null;
+
+
+        /*
+         * 每个球员对应的评论
+         *
+         * userReviewsMap:
+         *
+         * {
+         *     用户ID => [
+         *         rating,
+         *         rating,
+         *         rating
+         *     ]
+         * }
+         */
+
+        const userReviewsMap = new Map();
+
+
+        /*
+         * 评论轮播状态
+         *
+         * {
+         *     用户ID: {
+         *         reviews: [],
+         *         currentIndex: 0,
+         *         timerId: ...
+         *     }
+         * }
+         */
+
+        const carouselStates = {};
+
+
+        /* =================================
+           DOM
+        ================================= */
+
+        const userAvatar =
+            document.getElementById('userAvatar');
+
+        const userName =
+            document.getElementById('userName');
+
+        const rankingContent =
+            document.getElementById('rankingContent');
+
+        const lastUpdate =
+            document.getElementById('lastUpdate');
+
+        const ratingModal =
+            document.getElementById('ratingModal');
+
+        const modalClose =
+            document.getElementById('modalClose');
+
+        const modalTitle =
+            document.getElementById('modalTitle');
+
+        const starContainer =
+            document.getElementById('starContainer');
+
+        const commentInput =
+            document.getElementById('commentInput');
+
+        const submitRatingBtn =
+            document.getElementById('submitRating');
+
+
+        /* =================================
+           每日清空评分
+        ================================= */
+
         async function checkAndClearRatings() {
-            const todayStr = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
-            const lastClearKey = 'football_last_clear_date';
-            const lastClear = localStorage.getItem(lastClearKey);
+
+            const todayStr =
+                new Date()
+                    .toISOString()
+                    .split('T')[0];
+
+            const lastClearKey =
+                'football_last_clear_date';
+
+            const lastClear =
+                localStorage.getItem(lastClearKey);
+
+
+            /*
+             * 每天第一次打开网页时执行一次。
+             */
 
             if (lastClear !== todayStr) {
+
                 try {
-                    // 执行清空操作（需要 ratings 表允许删除）
-                    const { error } = await supabase.from('ratings').delete().neq('id', 0);
+
+                    const { error } =
+                        await supabase
+                            .from('ratings')
+                            .delete()
+                            .neq('id', 0);
+
+
                     if (error) {
-                        console.warn('清空评分失败（可能无权限或表不存在）:', error.message);
-                        // 如果失败，仍然设置日期，避免反复尝试
+
+                        console.warn(
+                            '清空评分失败:',
+                            error.message
+                        );
+
                     } else {
-                        console.log('✅ 每日评分已清空');
+
+                        console.log(
+                            '✅ 每日评分已清空'
+                        );
+
                     }
-                    localStorage.setItem(lastClearKey, todayStr);
+
+                    localStorage.setItem(
+                        lastClearKey,
+                        todayStr
+                    );
+
                 } catch (err) {
-                    console.error('清空评分异常:', err);
-                    localStorage.setItem(lastClearKey, todayStr);
+
+                    console.error(
+                        '清空评分异常:',
+                        err
+                    );
+
+                    localStorage.setItem(
+                        lastClearKey,
+                        todayStr
+                    );
                 }
             }
         }
 
-        // ========== 加载用户和评分 ==========
+
+        /* =================================
+           加载数据
+        ================================= */
+
         async function loadData() {
+
             try {
-                // 从 localStorage 获取当前用户
-                const savedUser = localStorage.getItem('football_user');
+
+                /* -----------------------------
+                   检查登录
+                ----------------------------- */
+
+                const savedUser =
+                    localStorage.getItem(
+                        'football_user'
+                    );
+
+
                 if (!savedUser) {
-                    // 未登录，跳转登录页
-                    window.location.href = 'login.html';
+
+                    window.location.href =
+                        'login.html';
+
                     return;
                 }
-                currentUser = JSON.parse(savedUser);
 
-                // 更新导航栏
-                userAvatar.textContent = currentUser.name.charAt(0).toUpperCase();
-                userName.textContent = currentUser.name;
 
-                // 加载所有用户
-                const { data: usersData, error: usersError } = await supabase
-                    .from('user')
-                    .select('id, name, "user"')
-                    .order('name');
+                currentUser =
+                    JSON.parse(savedUser);
 
-                if (usersError) throw usersError;
-                allUsers = usersData || [];
 
-                // 加载所有评分
-                const { data: ratingsData, error: ratingsError } = await supabase
-                    .from('ratings')
-                    .select('id, rater_id, rated_id, score, comment, updated_at');
+                /* -----------------------------
+                   当前用户
+                ----------------------------- */
 
-                if (ratingsError) {
-                    // 如果 ratings 表不存在，可能报错，我们捕获并提示
-                    console.error('加载评分失败:', ratingsError);
-                    allRatings = [];
-                } else {
-                    allRatings = ratingsData || [];
+                userAvatar.textContent =
+                    currentUser.name
+                        .charAt(0)
+                        .toUpperCase();
+
+                userName.textContent =
+                    currentUser.name;
+
+
+                /* -----------------------------
+                   获取所有用户
+                ----------------------------- */
+
+                const {
+                    data: usersData,
+                    error: usersError
+                } =
+                    await supabase
+                        .from('user')
+                        .select(
+                            'id, name, "user"'
+                        )
+                        .order('name');
+
+
+                if (usersError) {
+                    throw usersError;
                 }
 
-                // 计算平均分并渲染
+
+                allUsers =
+                    usersData || [];
+
+
+                /* -----------------------------
+                   获取所有评分
+                ----------------------------- */
+
+                const {
+                    data: ratingsData,
+                    error: ratingsError
+                } =
+                    await supabase
+                        .from('ratings')
+                        .select(
+                            `
+                        id,
+                        rater_id,
+                        rated_id,
+                        score,
+                        comment,
+                        updated_at
+                        `
+                        );
+
+
+                if (ratingsError) {
+
+                    console.error(
+                        '加载评分失败:',
+                        ratingsError
+                    );
+
+                    allRatings = [];
+
+                } else {
+
+                    allRatings =
+                        ratingsData || [];
+                }
+
+
+                /* -----------------------------
+                   构建评论 Map
+                ----------------------------- */
+
+                userReviewsMap.clear();
+
+
+                allRatings.forEach(
+                    rating => {
+
+                        if (
+                            !userReviewsMap.has(
+                                rating.rated_id
+                            )
+                        ) {
+
+                            userReviewsMap.set(
+                                rating.rated_id,
+                                []
+                            );
+                        }
+
+
+                        userReviewsMap
+                            .get(rating.rated_id)
+                            .push(rating);
+
+                    }
+                );
+
+
+                /* -----------------------------
+                   评论按更新时间倒序
+                ----------------------------- */
+
+                userReviewsMap.forEach(
+                    (reviews) => {
+
+                        reviews.sort(
+                            (a, b) => {
+
+                                const timeA =
+                                    a.updated_at
+                                        ? new Date(
+                                            a.updated_at
+                                        )
+                                        : new Date(0);
+
+                                const timeB =
+                                    b.updated_at
+                                        ? new Date(
+                                            b.updated_at
+                                        )
+                                        : new Date(0);
+
+                                return timeB - timeA;
+                            }
+                        );
+
+                    }
+                );
+
+
+                /* -----------------------------
+                   计算平均分并渲染
+                ----------------------------- */
+
                 computeAveragesAndRender();
 
-                // 更新最后更新时间
-                lastUpdate.textContent = `更新于 ${new Date().toLocaleTimeString()}`;
+
+                lastUpdate.textContent =
+                    `更新于 ${new Date().toLocaleTimeString()}`;
+
 
             } catch (err) {
-                console.error('加载数据失败:', err);
+
+                console.error(
+                    '加载数据失败:',
+                    err
+                );
+
+
                 rankingContent.innerHTML = `
-                        <div style="text-align:center;padding:40px;color:#c0392b;">
-                            <p>❌ 加载数据失败，请刷新重试</p>
-                            <p style="font-size:0.85rem;color:#888;">${err.message || ''}</p>
-                        </div>
-                    `;
+
+                <div
+                    style="
+                        text-align:center;
+                        padding:40px;
+                        color:#c0392b;
+                    "
+                >
+
+                    <p>
+                        ❌ 加载数据失败，请刷新重试
+                    </p>
+
+                    <p
+                        style="
+                            font-size:0.85rem;
+                            color:#888;
+                            margin-top:8px;
+                        "
+                    >
+                        ${err.message || ''}
+                    </p>
+
+                </div>
+
+            `;
             }
         }
 
+
+        /* =================================
+           计算平均评分
+        ================================= */
+
         function computeAveragesAndRender() {
-            // 按用户ID分组计算平均分和评论数
-            const ratingMap = new Map(); // key: rated_id, value: { sum, count, ratings: [] }
 
-            allRatings.forEach(rating => {
-                if (!ratingMap.has(rating.rated_id)) {
-                    ratingMap.set(rating.rated_id, { sum: 0, count: 0, ratings: [] });
+            const ratingMap =
+                new Map();
+
+
+            allRatings.forEach(
+                rating => {
+
+                    if (
+                        !ratingMap.has(
+                            rating.rated_id
+                        )
+                    ) {
+
+                        ratingMap.set(
+                            rating.rated_id,
+                            {
+                                sum: 0,
+                                count: 0,
+                                ratings: []
+                            }
+                        );
+                    }
+
+
+                    const entry =
+                        ratingMap.get(
+                            rating.rated_id
+                        );
+
+
+                    entry.sum +=
+                        Number(rating.score);
+
+                    entry.count += 1;
+
+                    entry.ratings.push(
+                        rating
+                    );
+
                 }
-                const entry = ratingMap.get(rating.rated_id);
-                entry.sum += rating.score;
-                entry.count += 1;
-                entry.ratings.push(rating);
-            });
+            );
 
-            // 构建用户排名数组
-            usersWithAvg = allUsers.map(user => {
-                const stats = ratingMap.get(user.id);
-                const avgScore = stats ? (stats.sum / stats.count).toFixed(1) : null;
-                const ratingCount = stats ? stats.count : 0;
-                // 当前用户是否已给此用户评分
-                let myRating = null;
-                if (currentUser && stats) {
-                    myRating = stats.ratings.find(r => r.rater_id === currentUser.id) || null;
+
+            /* -----------------------------
+               为每个用户计算统计数据
+            ----------------------------- */
+
+            usersWithAvg =
+                allUsers.map(
+                    user => {
+
+                        const stats =
+                            ratingMap.get(
+                                user.id
+                            );
+
+
+                        const avgScore =
+                            stats
+                                ? (
+                                    stats.sum /
+                                    stats.count
+                                ).toFixed(1)
+                                : null;
+
+
+                        const ratingCount =
+                            stats
+                                ? stats.count
+                                : 0;
+
+
+                        let myRating = null;
+
+
+                        if (
+                            currentUser &&
+                            stats
+                        ) {
+
+                            myRating =
+                                stats.ratings.find(
+                                    rating =>
+                                        rating.rater_id ===
+                                        currentUser.id
+                                ) || null;
+                        }
+
+
+                        return {
+
+                            ...user,
+
+                            avgScore:
+                                avgScore
+                                    ? parseFloat(
+                                        avgScore
+                                    )
+                                    : 0,
+
+                            ratingCount,
+
+                            myRating
+
+                        };
+
+                    }
+                );
+
+
+            /* -----------------------------
+               排序
+            ----------------------------- */
+
+            usersWithAvg.sort(
+                (a, b) => {
+
+                    /*
+                     * 第一排序：
+                     * 平均分从高到低
+                     */
+
+                    if (
+                        b.avgScore !==
+                        a.avgScore
+                    ) {
+
+                        return (
+                            b.avgScore -
+                            a.avgScore
+                        );
+                    }
+
+
+                    /*
+                     * 第二排序：
+                     * 姓名
+                     */
+
+                    return a.name.localeCompare(
+                        b.name
+                    );
+
                 }
-                return {
-                    ...user,
-                    avgScore: avgScore ? parseFloat(avgScore) : 0,
-                    ratingCount,
-                    myRating,
-                };
-            });
+            );
 
-            // 排序：平均分降序，同分按姓名升序
-            usersWithAvg.sort((a, b) => {
-                if (b.avgScore !== a.avgScore) return b.avgScore - a.avgScore;
-                return a.name.localeCompare(b.name);
-            });
 
             renderRankingTable();
         }
 
+
+        /* =================================
+           渲染排行榜
+        ================================= */
+
         function renderRankingTable() {
-            if (usersWithAvg.length === 0) {
-                rankingContent.innerHTML = '<div style="text-align:center;padding:30px;color:#999;">暂无成员</div>';
+
+            /* -----------------------------
+               清理旧轮播
+            ----------------------------- */
+
+            Object.keys(
+                carouselStates
+            ).forEach(
+                userId => {
+
+                    if (
+                        carouselStates[userId]
+                            .timerId
+                    ) {
+
+                        clearInterval(
+                            carouselStates[userId]
+                                .timerId
+                        );
+                    }
+
+
+                    delete carouselStates[userId];
+
+                }
+            );
+
+
+            /* -----------------------------
+               没有用户
+            ----------------------------- */
+
+            if (
+                usersWithAvg.length === 0
+            ) {
+
+                rankingContent.innerHTML = `
+
+                <div
+                    style="
+                        text-align:center;
+                        padding:30px;
+                        color:#999;
+                    "
+                >
+                    暂无成员
+                </div>
+
+            `;
+
                 return;
             }
+
+
+            /* -----------------------------
+               开始生成 HTML
+            ----------------------------- */
 
             let html = `
-                    <table class="ranking-table">
-                        <thead>
-                            <tr>
-                                <th>排名</th>
-                                <th>球员</th>
-                                <th>平均评分</th>
-                                <th>操作</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                `;
 
-            usersWithAvg.forEach((user, index) => {
-                const rank = index + 1;
-                const rankClass = rank === 1 ? 'rank-1' : rank === 2 ? 'rank-2' : rank === 3 ? 'rank-3' : '';
-                const avgDisplay = user.avgScore > 0 ? user.avgScore.toFixed(1) : '未评分';
-                const isSelf = currentUser && user.id === currentUser.id;
-                const buttonDisabled = isSelf;
-                const buttonClass = user.myRating ? 'btn-rate rated' : 'btn-rate';
-                const buttonText = user.myRating ? '更新评价' : '评分';
+            <table class="ranking-table">
 
-                html += `
-                        <tr>
-                            <td class="rank-number ${rankClass}">${rank}</td>
-                            <td>
-                                <div class="player-cell">
-                                    <div class="player-avatar">${user.name.charAt(0).toUpperCase()}</div>
-                                    <div>
-                                        <div class="player-name">${user.name}</div>
-                                        <div class="player-username">@${user.user}</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>
-                                <span class="avg-score">${avgDisplay}</span>
-                                ${user.ratingCount > 0 ? `<span class="rating-count">(${user.ratingCount}人评分)</span>` : ''}
-                            </td>
-                            <td>
-                                <div class="action-buttons">
-                                    <button class="${buttonClass}"
-                                            data-user-id="${user.id}"
-                                            ${buttonDisabled ? 'disabled' : ''}>
-                                        ${isSelf ? '自己' : buttonText}
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            排名
+                        </th>
+
+                        <th>
+                            球员
+                        </th>
+
+                        <th>
+                            平均评分
+                        </th>
+
+                        <th>
+                            操作
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+        `;
+
+
+            usersWithAvg.forEach(
+                (user, index) => {
+
+                    const rank =
+                        index + 1;
+
+
+                    /* -------------------------
+                       排名样式
+                    ------------------------- */
+
+                    const rankClass =
+                        rank === 1
+                            ? 'rank-1'
+                            : rank === 2
+                                ? 'rank-2'
+                                : rank === 3
+                                    ? 'rank-3'
+                                    : '';
+
+
+                    /* -------------------------
+                       平均分
+                    ------------------------- */
+
+                    const avgDisplay =
+                        user.avgScore > 0
+                            ? user.avgScore.toFixed(1)
+                            : '未评分';
+
+
+                    /* -------------------------
+                       是否自己
+                    ------------------------- */
+
+                    const isSelf =
+                        currentUser &&
+                        user.id ===
+                        currentUser.id;
+
+
+                    /* -------------------------
+                       评分按钮
+                    ------------------------- */
+
+                    const buttonDisabled =
+                        isSelf;
+
+
+                    const buttonClass =
+                        user.myRating
+                            ? 'btn-rate rated'
+                            : 'btn-rate';
+
+
+                    const buttonText =
+                        user.myRating
+                            ? '更新评价'
+                            : '评分';
+
+
+                    /* -------------------------
+                       当前球员评论
+                    ------------------------- */
+
+                    const reviews =
+                        userReviewsMap.get(
+                            user.id
+                        ) || [];
+
+
+                    /* -------------------------
+                       第一条评论
+                    ------------------------- */
+
+                    let firstReviewHTML = '';
+
+
+                    if (
+                        reviews.length > 0
+                    ) {
+
+                        const review =
+                            reviews[0];
+
+
+                        const rater =
+                            allUsers.find(
+                                u =>
+                                    u.id ===
+                                    review.rater_id
+                            );
+
+
+                        const raterName =
+                            rater
+                                ? rater.name
+                                : '未知用户';
+
+
+                        const stars =
+                            '★'.repeat(
+                                Number(review.score)
+                            ) +
+                            '☆'.repeat(
+                                5 -
+                                Number(review.score)
+                            );
+
+
+                        const comment =
+                            review.comment ||
+                            '无评语';
+
+
+                        const timeStr =
+                            review.updated_at
+                                ? new Date(
+                                    review.updated_at
+                                ).toLocaleString()
+                                : '未知时间';
+
+
+                        firstReviewHTML = `
+
+                        <span
+                            class="review-stars"
+                        >
+                            ${stars}
+                        </span>
+
+                        <span
+                            class="review-text"
+                        >
+                            ${comment}
+                        </span>
+
+                        <div
+                            class="review-meta"
+                        >
+                            ${raterName}
+                            ·
+                            ${timeStr}
+                        </div>
+
                     `;
-            });
 
-            html += '</tbody></table>';
-            rankingContent.innerHTML = html;
+                    } else {
 
-            // 绑定评分按钮事件
-            document.querySelectorAll('.btn-rate').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const userId = parseInt(e.currentTarget.dataset.userId);
-                    openRatingModal(userId);
-                });
-            });
-        }
+                        firstReviewHTML = `
 
-        // ========== 评分模态框逻辑 ==========
-        function openRatingModal(targetUserId) {
-            if (!currentUser) return;
-            if (targetUserId === currentUser.id) return;
+                        <span
+                            class="empty-review"
+                        >
+                            暂无评价
+                        </span>
 
-            ratingTargetId = targetUserId;
-            const targetUser = allUsers.find(u => u.id === targetUserId);
-            if (!targetUser) return;
+                    `;
+                    }
 
-            modalTitle.textContent = `评价 ${targetUser.name}`;
 
-            // 检查是否有已有评分
-            existingRating = usersWithAvg.find(u => u.id === targetUserId)?.myRating || null;
+                    /* -------------------------
+                       球员主行
+                    ------------------------- */
 
-            // 设置星级
-            selectedScore = existingRating ? existingRating.score : 0;
-            updateStars(selectedScore);
+                    html += `
 
-            // 设置评论
-            commentInput.value = existingRating ? (existingRating.comment || '') : '';
+                    <tr>
 
-            // 显示模态框
-            ratingModal.classList.add('active');
-        }
+                        <td
+                            class="rank-number ${rankClass}"
+                        >
+                            ${rank}
+                        </td>
 
-        function updateStars(score) {
-            const stars = starContainer.querySelectorAll('.star');
-            stars.forEach(star => {
-                const value = parseInt(star.dataset.value);
-                if (value <= score) {
-                    star.classList.add('active');
-                } else {
-                    star.classList.remove('active');
+
+                        <td>
+
+                            <div
+                                class="player-cell"
+                            >
+
+                                <div
+                                    class="player-avatar"
+                                >
+                                    ${user.name
+                        .charAt(0)
+                        .toUpperCase()}
+                                </div>
+
+
+                                <div>
+
+                                    <div
+                                        class="player-name"
+                                    >
+                                        ${user.name}
+                                    </div>
+
+
+                                    <div
+                                        class="player-username"
+                                    >
+                                        @${user.user}
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </td>
+
+
+                        <td>
+
+                            <span
+                                class="avg-score"
+                            >
+                                ${avgDisplay}
+                            </span>
+
+
+                            ${
+                        user.ratingCount > 0
+                            ? `
+                                        <span
+                                            class="rating-count"
+                                        >
+                                            (${user.ratingCount}人评分)
+                                        </span>
+                                      `
+                            : ''
+                    }
+
+                        </td>
+
+
+                        <td>
+
+                            <div
+                                class="action-buttons"
+                            >
+
+                                <button
+                                    class="${buttonClass}"
+                                    data-user-id="${user.id}"
+                                    ${buttonDisabled ? 'disabled' : ''}
+                                >
+                                    ${
+                        isSelf
+                            ? '自己'
+                            : buttonText
+                    }
+                                </button>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+
+                    <!--
+                        评论区域
+                        始终显示
+                    -->
+
+                    <tr
+                        class="review-carousel-row"
+                        data-user-id="${user.id}"
+                    >
+
+                        <td colspan="4">
+
+                            <div
+                                class="carousel-container"
+                            >
+
+                                <button
+                                    class="carousel-btn carousel-prev"
+                                    data-user-id="${user.id}"
+                                    ${
+                        reviews.length <= 1
+                            ? 'disabled'
+                            : ''
+                    }
+                                >
+                                    ‹
+                                </button>
+
+
+                                <div
+                                    class="carousel-comment"
+                                    id="carousel-comment-${user.id}"
+                                >
+                                    ${firstReviewHTML}
+                                </div>
+
+
+                                <button
+                                    class="carousel-btn carousel-next"
+                                    data-user-id="${user.id}"
+                                    ${
+                        reviews.length <= 1
+                            ? 'disabled'
+                            : ''
+                    }
+                                >
+                                    ›
+                                </button>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                `;
                 }
-            });
+            );
+
+
+            html += `
+
+                </tbody>
+
+            </table>
+
+        `;
+
+
+            /* -----------------------------
+               写入页面
+            ----------------------------- */
+
+            rankingContent.innerHTML =
+                html;
+
+
+            /* =================================
+               初始化评论轮播
+            ================================= */
+
+            usersWithAvg.forEach(
+                user => {
+
+                    const reviews =
+                        userReviewsMap.get(
+                            user.id
+                        ) || [];
+
+
+                    /*
+                     * 只有超过一条评论
+                     * 才启动自动轮播
+                     */
+
+                    if (
+                        reviews.length > 1
+                    ) {
+
+                        carouselStates[user.id] = {
+
+                            reviews:
+
+                            reviews,
+
+                            currentIndex: 0,
+
+                            timerId:
+
+                                setInterval(
+                                    () => {
+
+                                        moveReview(
+                                            user.id,
+                                            1
+                                        );
+
+                                    },
+                                    3000
+                                )
+
+                        };
+
+                    }
+
+                }
+            );
+
+
+            /* =================================
+               绑定左右按钮
+            ================================= */
+
+            rankingContent
+                .querySelectorAll(
+                    '.carousel-prev, .carousel-next'
+                )
+                .forEach(
+                    button => {
+
+                        button.addEventListener(
+                            'click',
+                            event => {
+
+                                const userId =
+                                    parseInt(
+                                        event
+                                            .currentTarget
+                                            .dataset
+                                            .userId
+                                    );
+
+
+                                if (
+                                    event
+                                        .currentTarget
+                                        .classList
+                                        .contains(
+                                            'carousel-prev'
+                                        )
+                                ) {
+
+                                    moveReview(
+                                        userId,
+                                        -1
+                                    );
+
+                                } else {
+
+                                    moveReview(
+                                        userId,
+                                        1
+                                    );
+                                }
+
+                            }
+                        );
+
+                    }
+                );
+
+
+            /* =================================
+               绑定评分按钮
+            ================================= */
+
+            rankingContent
+                .querySelectorAll(
+                    '.btn-rate'
+                )
+                .forEach(
+                    button => {
+
+                        button.addEventListener(
+                            'click',
+                            event => {
+
+                                const userId =
+                                    parseInt(
+                                        event
+                                            .currentTarget
+                                            .dataset
+                                            .userId
+                                    );
+
+
+                                openRatingModal(
+                                    userId
+                                );
+
+                            }
+                        );
+
+                    }
+                );
         }
 
-        // 星级点击事件
-        starContainer.addEventListener('click', (e) => {
-            const star = e.target.closest('.star');
-            if (!star) return;
-            selectedScore = parseInt(star.dataset.value);
-            updateStars(selectedScore);
-        });
 
-        // 关闭模态框
-        function closeModal() {
-            ratingModal.classList.remove('active');
-            ratingTargetId = null;
-            existingRating = null;
-            selectedScore = 0;
-        }
+        /* =================================
+           切换评论
+        ================================= */
 
-        modalClose.addEventListener('click', closeModal);
-        ratingModal.addEventListener('click', (e) => {
-            if (e.target === ratingModal) closeModal();
-        });
+        function moveReview(
+            userId,
+            direction
+        ) {
 
-        // 提交评分
-        submitRatingBtn.addEventListener('click', async () => {
-            if (!ratingTargetId || !currentUser) return;
-            if (selectedScore < 1 || selectedScore > 5) {
-                alert('请选择 1-5 星的评分');
+            const state =
+                carouselStates[userId];
+
+
+            /*
+             * 没有轮播状态
+             *
+             * 说明：
+             * 可能只有 0 或 1 条评论
+             */
+
+            if (
+                !state ||
+                state.reviews.length === 0
+            ) {
+
                 return;
             }
 
-            const comment = commentInput.value.trim();
 
-            submitRatingBtn.disabled = true;
-            submitRatingBtn.textContent = '提交中...';
+            /* -----------------------------
+               清除当前计时器
+            ----------------------------- */
 
-            try {
-                const payload = {
-                    rater_id: currentUser.id,
-                    rated_id: ratingTargetId,
-                    score: selectedScore,
-                    comment: comment || null,
-                    updated_at: new Date().toISOString(),
-                };
+            if (state.timerId) {
 
-                let result;
-                if (existingRating) {
-                    // 更新已有评分
-                    result = await supabase
-                        .from('ratings')
-                        .update(payload)
-                        .eq('id', existingRating.id);
-                } else {
-                    // 插入新评分
-                    result = await supabase
-                        .from('ratings')
-                        .insert([payload]);
-                }
-
-                if (result.error) {
-                    console.error('评分提交失败:', result.error);
-                    alert('提交失败，请检查网络或权限');
-                } else {
-                    console.log('✅ 评分提交成功');
-                    closeModal();
-                    // 重新加载数据
-                    await loadData();
-                }
-            } catch (err) {
-                console.error('评分异常:', err);
-                alert('提交出错，请重试');
-            } finally {
-                submitRatingBtn.disabled = false;
-                submitRatingBtn.textContent = '提交评分';
+                clearInterval(
+                    state.timerId
+                );
             }
-        });
 
-        // ========== 初始化 ==========
+
+            /* -----------------------------
+               修改索引
+            ----------------------------- */
+
+            state.currentIndex =
+                (
+                    state.currentIndex +
+                    direction +
+                    state.reviews.length
+                ) %
+                state.reviews.length;
+
+
+            /* -----------------------------
+               更新显示
+            ----------------------------- */
+
+            updateCarouselDisplay(
+                userId
+            );
+
+
+            /* -----------------------------
+               重新开始自动播放
+            ----------------------------- */
+
+            state.timerId =
+                setInterval(
+                    () => {
+
+                        moveReview(
+                            userId,
+                            1
+                        );
+
+                    },
+                    3000
+                );
+        }
+
+
+        /* =================================
+           更新评论显示
+        ================================= */
+
+        function updateCarouselDisplay(
+            userId
+        ) {
+
+            const state =
+                carouselStates[userId];
+
+
+            const commentDiv =
+                document.getElementById(
+                    `carousel-comment-${userId}`
+                );
+
+
+            if (
+                !state ||
+                !commentDiv
+            ) {
+
+                return;
+            }
+
+
+            const review =
+                state.reviews[
+                    state.currentIndex
+                    ];
+
+
+            if (!review) {
+                return;
+            }
+
+
+            /* -----------------------------
+               找评论人
+            ----------------------------- */
+
+            const rater =
+                allUsers.find(
+                    user =>
+                        user.id ===
+                        review.rater_id
+                );
+
+
+            const raterName =
+                rater
+                    ? rater.name
+                    : '未知用户';
+
+
+            /* -----------------------------
+               星星
+            ----------------------------- */
+
+            const score =
+                Number(review.score);
+
+
+            const stars =
+                '★'.repeat(score) +
+                '☆'.repeat(5 - score);
+
+
+            /* -----------------------------
+               评论
+            ----------------------------- */
+
+            const comment =
+                review.comment ||
+                '无评语';
+
+
+            /* -----------------------------
+               时间
+            ----------------------------- */
+
+            const timeStr =
+                review.updated_at
+                    ? new Date(
+                        review.updated_at
+                    ).toLocaleString()
+                    : '未知时间';
+
+
+            /* -----------------------------
+               更新 HTML
+            ----------------------------- */
+
+            commentDiv.innerHTML = `
+
+            <span
+                class="review-stars"
+            >
+                ${stars}
+            </span>
+
+            <span
+                class="review-text"
+            >
+                ${comment}
+            </span>
+
+            <div
+                class="review-meta"
+            >
+                ${raterName}
+                ·
+                ${timeStr}
+            </div>
+
+        `;
+        }
+
+
+        /* =================================
+           打开评分窗口
+        ================================= */
+
+        function openRatingModal(
+            targetUserId
+        ) {
+
+            /*
+             * 不能给自己评分
+             */
+
+            if (
+                !currentUser ||
+                targetUserId ===
+                currentUser.id
+            ) {
+
+                return;
+            }
+
+
+            ratingTargetId =
+                targetUserId;
+
+
+            const targetUser =
+                allUsers.find(
+                    user =>
+                        user.id ===
+                        targetUserId
+                );
+
+
+            if (!targetUser) {
+                return;
+            }
+
+
+            /* -----------------------------
+               标题
+            ----------------------------- */
+
+            modalTitle.textContent =
+                `评价 ${targetUser.name}`;
+
+
+            /* -----------------------------
+               找到自己的旧评分
+            ----------------------------- */
+
+            existingRating =
+                usersWithAvg.find(
+                    user =>
+                        user.id ===
+                        targetUserId
+                )?.myRating || null;
+
+
+            /* -----------------------------
+               如果已经评分
+               自动加载旧数据
+            ----------------------------- */
+
+            selectedScore =
+                existingRating
+                    ? Number(
+                        existingRating.score
+                    )
+                    : 0;
+
+
+            updateStars(
+                selectedScore
+            );
+
+
+            commentInput.value =
+                existingRating
+                    ? (
+                        existingRating.comment ||
+                        ''
+                    )
+                    : '';
+
+
+            /* -----------------------------
+               显示模态框
+            ----------------------------- */
+
+            ratingModal.classList.add(
+                'active'
+            );
+        }
+
+
+        /* =================================
+           更新星星
+        ================================= */
+
+        function updateStars(
+            score
+        ) {
+
+            starContainer
+                .querySelectorAll(
+                    '.star'
+                )
+                .forEach(
+                    star => {
+
+                        const value =
+                            parseInt(
+                                star.dataset.value
+                            );
+
+
+                        star.classList.toggle(
+                            'active',
+                            value <= score
+                        );
+
+                    }
+                );
+        }
+
+
+        /* =================================
+           点击星星
+        ================================= */
+
+        starContainer.addEventListener(
+            'click',
+            event => {
+
+                const star =
+                    event.target.closest(
+                        '.star'
+                    );
+
+
+                if (!star) {
+                    return;
+                }
+
+
+                selectedScore =
+                    parseInt(
+                        star.dataset.value
+                    );
+
+
+                updateStars(
+                    selectedScore
+                );
+
+            }
+        );
+
+
+        /* =================================
+           关闭评分窗口
+        ================================= */
+
+        function closeRatingModal() {
+
+            ratingModal.classList.remove(
+                'active'
+            );
+
+
+            ratingTargetId =
+                null;
+
+
+            existingRating =
+                null;
+
+
+            selectedScore =
+                0;
+        }
+
+
+        /* =================================
+           点击关闭
+        ================================= */
+
+        modalClose.addEventListener(
+            'click',
+            closeRatingModal
+        );
+
+
+        /* =================================
+           点击背景关闭
+        ================================= */
+
+        ratingModal.addEventListener(
+            'click',
+            event => {
+
+                if (
+                    event.target ===
+                    ratingModal
+                ) {
+
+                    closeRatingModal();
+                }
+
+            }
+        );
+
+
+        /* =================================
+           提交评分
+        ================================= */
+
+        submitRatingBtn.addEventListener(
+            'click',
+            async () => {
+
+                /* -----------------------------
+                   基本检查
+                ----------------------------- */
+
+                if (
+                    !ratingTargetId ||
+                    !currentUser
+                ) {
+
+                    return;
+                }
+
+
+                if (
+                    selectedScore < 1 ||
+                    selectedScore > 5
+                ) {
+
+                    alert(
+                        '请选择 1-5 星的评分'
+                    );
+
+                    return;
+                }
+
+
+                /* -----------------------------
+                   获取评论
+                ----------------------------- */
+
+                const comment =
+                    commentInput.value.trim();
+
+
+                /* -----------------------------
+                   禁用按钮
+                ----------------------------- */
+
+                submitRatingBtn.disabled =
+                    true;
+
+                submitRatingBtn.textContent =
+                    '提交中...';
+
+
+                try {
+
+                    /* -------------------------
+                       要提交的数据
+                    ------------------------- */
+
+                    const payload = {
+
+                        rater_id:
+                        currentUser.id,
+
+                        rated_id:
+                        ratingTargetId,
+
+                        score:
+                        selectedScore,
+
+                        comment:
+                            comment || null,
+
+                        updated_at:
+                            new Date()
+                                .toISOString()
+
+                    };
+
+
+                    let result;
+
+
+                    /* =================================
+                       已经评价过
+                       → 更新旧记录
+                    ================================= */
+
+                    if (
+                        existingRating
+                    ) {
+
+                        result =
+                            await supabase
+                                .from('ratings')
+                                .update(payload)
+                                .eq(
+                                    'id',
+                                    existingRating.id
+                                );
+
+                    }
+
+
+                    /* =================================
+                       没评价过
+                       → 新增记录
+                    ================================= */
+
+                    else {
+
+                        result =
+                            await supabase
+                                .from('ratings')
+                                .insert([
+                                    payload
+                                ]);
+
+                    }
+
+
+                    /* -----------------------------
+                       判断结果
+                    ----------------------------- */
+
+                    if (
+                        result.error
+                    ) {
+
+                        console.error(
+                            '评分提交失败:',
+                            result.error
+                        );
+
+
+                        alert(
+                            '提交失败，请检查网络或权限'
+                        );
+
+                    }
+
+                    else {
+
+                        console.log(
+                            '✅ 评分提交成功'
+                        );
+
+
+                        /* -------------------------
+                           关闭窗口
+                        ------------------------- */
+
+                        closeRatingModal();
+
+
+                        /* -------------------------
+                           重新加载排行榜
+                        ------------------------- */
+
+                        await loadData();
+                    }
+
+
+                } catch (err) {
+
+                    console.error(
+                        '评分异常:',
+                        err
+                    );
+
+
+                    alert(
+                        '提交出错，请重试'
+                    );
+
+                } finally {
+
+                    submitRatingBtn.disabled =
+                        false;
+
+                    submitRatingBtn.textContent =
+                        '提交评分';
+                }
+
+            }
+        );
+
+
+        /* =================================
+           初始化
+        ================================= */
+
         async function init() {
-            // 检查并清空评分（如果需要）
+
             await checkAndClearRatings();
-            // 加载数据
+
             await loadData();
         }
 
-        // 启动
+
         init();
 
-        // 暴露部分函数用于调试（可选）
-        window.refreshData = loadData;
+
+        /* =================================
+           暴露刷新函数
+        ================================= */
+
+        window.refreshData =
+            loadData;
+
+
     })();
+
 </script>
+
 </body>
 </html>
