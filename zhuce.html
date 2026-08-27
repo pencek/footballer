@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>⚽ 足球俱乐部 - 登录</title>
+    <title>⚽ 足球俱乐部 - 注册</title>
 
     <!-- Supabase CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
     </script>
 
     <style>
-        /* ============ CSS 变量 & 全局重置 ============ */
+        /* ============ 全局样式与足球场背景 ============ */
         :root {
             --pitch-green: #1a7a3a;
             --pitch-dark: #0f4d24;
@@ -49,22 +49,20 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /* ============ 足球场背景 ============ */
         .pitch-bg {
             position: fixed;
             inset: 0;
             z-index: 0;
             background: repeating-linear-gradient(
-                0deg,
-                var(--grass-stripe-1) 0px,
-                var(--grass-stripe-1) 80px,
-                var(--grass-stripe-2) 80px,
-                var(--grass-stripe-2) 160px
+                    0deg,
+                    var(--grass-stripe-1) 0px,
+                    var(--grass-stripe-1) 80px,
+                    var(--grass-stripe-2) 80px,
+                    var(--grass-stripe-2) 160px
             );
             pointer-events: none;
         }
 
-        /* 球场中圈线 */
         .pitch-bg::before {
             content: '';
             position: absolute;
@@ -77,7 +75,6 @@
             border-radius: 50%;
         }
 
-        /* 中场线 */
         .pitch-bg::after {
             content: '';
             position: absolute;
@@ -89,7 +86,7 @@
             transform: translateY(-50%);
         }
 
-        /* 足球装饰浮动 */
+        /* 浮动足球装饰 */
         .floating-balls {
             position: fixed;
             inset: 0;
@@ -163,7 +160,7 @@
             position: relative;
             z-index: 10;
             width: 100%;
-            max-width: 440px;
+            max-width: 480px;
             padding: 20px;
         }
 
@@ -172,13 +169,12 @@
             backdrop-filter: blur(20px);
             border-radius: var(--radius-card);
             box-shadow: var(--shadow-lg);
-            padding: 48px 40px 40px;
+            padding: 40px 36px 36px;
             position: relative;
             overflow: hidden;
             border: 1px solid rgba(255, 255, 255, 0.3);
         }
 
-        /* 卡片顶部金色条纹 */
         .login-card::before {
             content: '';
             position: absolute;
@@ -203,23 +199,23 @@
         /* ============ 标志区域 ============ */
         .logo-section {
             text-align: center;
-            margin-bottom: 32px;
+            margin-bottom: 28px;
         }
 
         .logo-icon {
-            width: 88px;
-            height: 88px;
+            width: 80px;
+            height: 80px;
             background: radial-gradient(circle at 35% 35%, #3a3a3a, #1a1a1a);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 18px;
-            font-size: 3.2rem;
+            margin: 0 auto 16px;
+            font-size: 3rem;
             box-shadow:
-                0 10px 30px rgba(0, 0, 0, 0.3),
-                inset 0 -4px 8px rgba(0, 0, 0, 0.5),
-                inset 0 4px 8px rgba(255, 255, 255, 0.08);
+                    0 10px 30px rgba(0, 0, 0, 0.3),
+                    inset 0 -4px 8px rgba(0, 0, 0, 0.5),
+                    inset 0 4px 8px rgba(255, 255, 255, 0.08);
             position: relative;
             border: 3px solid var(--gold);
             animation: pulseGlow 3s infinite ease-in-out;
@@ -231,12 +227,12 @@
                 box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3), inset 0 -4px 8px rgba(0, 0, 0, 0.5), inset 0 4px 8px rgba(255, 255, 255, 0.08), 0 0 0 0 rgba(255, 215, 0, 0.4);
             }
             50% {
-                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3), inset 0 -4px 8px rgba(0, 0, 0, 0.5), inset 0 4px 8px rgba(255, 255, 255, 0.08), 0 0 0 12px rgba(255, 215, 0, 0);
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3), inset 0 -4px 8px rgba(0, 0, 0, 0.5), inset 0 4px 8px rgba(255, 255, 255, 0.08), 0 0 0 10px rgba(255, 215, 0, 0);
             }
         }
 
         .logo-title {
-            font-size: 1.9rem;
+            font-size: 1.8rem;
             font-weight: 800;
             color: var(--text-dark);
             letter-spacing: 1px;
@@ -249,7 +245,7 @@
         }
 
         .logo-subtitle {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: #666;
             margin-top: 6px;
             letter-spacing: 3px;
@@ -259,7 +255,7 @@
 
         /* ============ 表单样式 ============ */
         .form-group {
-            margin-bottom: 22px;
+            margin-bottom: 20px;
             position: relative;
         }
 
@@ -290,7 +286,7 @@
 
         .form-input {
             width: 100%;
-            padding: 15px 18px 15px 48px;
+            padding: 14px 18px 14px 48px;
             border: 2px solid #e0e0e0;
             border-radius: var(--radius-input);
             font-size: 1rem;
@@ -369,7 +365,7 @@
         }
 
         /* ============ 按钮 ============ */
-        .btn-login {
+        .btn-register {
             width: 100%;
             padding: 16px 24px;
             background: linear-gradient(135deg, var(--pitch-green), var(--pitch-dark));
@@ -392,25 +388,25 @@
             box-shadow: 0 6px 20px rgba(26, 122, 58, 0.35);
         }
 
-        .btn-login:hover {
+        .btn-register:hover {
             transform: translateY(-2px);
             box-shadow: 0 10px 30px rgba(26, 122, 58, 0.45);
             background: linear-gradient(135deg, #1e8a42, #0f5a28);
         }
 
-        .btn-login:active {
+        .btn-register:active {
             transform: translateY(1px);
             box-shadow: 0 3px 10px rgba(26, 122, 58, 0.3);
         }
 
-        .btn-login:disabled {
+        .btn-register:disabled {
             opacity: 0.6;
             cursor: not-allowed;
             transform: none;
             box-shadow: none;
         }
 
-        .btn-login .spinner {
+        .btn-register .spinner {
             width: 20px;
             height: 20px;
             border: 3px solid rgba(255, 255, 255, 0.3);
@@ -420,10 +416,10 @@
             display: none;
         }
 
-        .btn-login.loading .spinner {
+        .btn-register.loading .spinner {
             display: block;
         }
-        .btn-login.loading .btn-text {
+        .btn-register.loading .btn-text {
             display: none;
         }
 
@@ -436,8 +432,8 @@
         /* ============ 底部链接 ============ */
         .card-footer {
             text-align: center;
-            margin-top: 24px;
-            padding-top: 20px;
+            margin-top: 22px;
+            padding-top: 18px;
             border-top: 1px solid #eee;
         }
 
@@ -485,22 +481,22 @@
         /* ============ 响应式 ============ */
         @media (max-width: 480px) {
             .login-card {
-                padding: 36px 24px 30px;
+                padding: 32px 20px 26px;
                 border-radius: 16px;
             }
             .logo-icon {
-                width: 68px;
-                height: 68px;
+                width: 64px;
+                height: 64px;
                 font-size: 2.4rem;
             }
             .logo-title {
                 font-size: 1.5rem;
             }
             .form-input {
-                padding: 13px 14px 13px 42px;
+                padding: 12px 14px 12px 42px;
                 font-size: 0.92rem;
             }
-            .btn-login {
+            .btn-register {
                 padding: 14px 20px;
                 font-size: 0.95rem;
             }
@@ -509,87 +505,119 @@
 </head>
 
 <body>
-    <!-- 足球场背景 -->
-    <div class="pitch-bg"></div>
+<!-- 足球场背景 -->
+<div class="pitch-bg"></div>
 
-    <!-- 浮动足球装饰 -->
-    <div class="floating-balls">
-        <span class="floating-ball">⚽</span>
-        <span class="floating-ball">⚽</span>
-        <span class="floating-ball">⚽</span>
-        <span class="floating-ball">⚽</span>
-        <span class="floating-ball">⚽</span>
-    </div>
+<!-- 浮动足球装饰 -->
+<div class="floating-balls">
+    <span class="floating-ball">⚽</span>
+    <span class="floating-ball">⚽</span>
+    <span class="floating-ball">⚽</span>
+    <span class="floating-ball">⚽</span>
+    <span class="floating-ball">⚽</span>
+</div>
 
-    <!-- 登录卡片 -->
-    <div class="login-wrapper">
-        <div class="login-card">
-            <!-- Logo 区域 -->
-            <div class="logo-section">
-                <div class="logo-icon">⚽</div>
-                <h1 class="logo-title">足球<span class="highlight">俱乐部</span></h1>
-                <p class="logo-subtitle">FÚTBOL CLUB · 登录</p>
-            </div>
+<!-- 注册卡片 -->
+<div class="login-wrapper">
+    <div class="login-card">
+        <!-- Logo 区域 -->
+        <div class="logo-section">
+            <div class="logo-icon">⚽</div>
+            <h1 class="logo-title">足球<span class="highlight">俱乐部</span></h1>
+            <p class="logo-subtitle">FÚTBOL CLUB · 注册新成员</p>
+        </div>
 
-            <!-- 错误提示 -->
-            <div class="error-message" id="errorMessage">
-                <span>⚠️</span>
-                <span id="errorText">用户名或密码错误</span>
-            </div>
+        <!-- 错误提示 -->
+        <div class="error-message" id="errorMessage">
+            <span>⚠️</span>
+            <span id="errorText">注册失败，请检查输入</span>
+        </div>
 
-            <!-- 登录表单 -->
-            <form id="loginForm" autocomplete="off">
-                <!-- 用户名 -->
-                <div class="form-group">
-                    <label class="form-label" for="username">用户名</label>
-                    <div class="input-wrapper">
-                        <span class="input-icon">👤</span>
-                        <input
-                        type="text"
-                        id="username"
-                        class="form-input"
-                        placeholder="输入你的用户名"
-                        required
-                        autocomplete="username"
-                        />
-                    </div>
+        <!-- 注册表单 -->
+        <form id="registerForm" autocomplete="off">
+            <!-- 姓名 -->
+            <div class="form-group">
+                <label class="form-label" for="fullname">姓名</label>
+                <div class="input-wrapper">
+                    <span class="input-icon">👤</span>
+                    <input
+                            type="text"
+                            id="fullname"
+                            class="form-input"
+                            placeholder="你的真实姓名或昵称"
+                            required
+                            autocomplete="name"
+                    />
                 </div>
+            </div>
 
-                <!-- 密码 -->
-                <div class="form-group">
-                    <label class="form-label" for="password">密码</label>
-                    <div class="input-wrapper">
-                        <span class="input-icon">🔒</span>
-                        <input
-                        type="password"
-                        id="password"
-                        class="form-input"
-                        placeholder="输入你的密码"
-                        required
-                        autocomplete="current-password"
-                        />
-                        <button
-                        type="button"
-                        class="toggle-password"
-                        id="togglePassword"
-                        aria-label="显示/隐藏密码"
-                        >
+            <!-- 用户名 -->
+            <div class="form-group">
+                <label class="form-label" for="username">用户名</label>
+                <div class="input-wrapper">
+                    <span class="input-icon">⚡</span>
+                    <input
+                            type="text"
+                            id="username"
+                            class="form-input"
+                            placeholder="登录时使用的用户名"
+                            required
+                            autocomplete="username"
+                    />
+                </div>
+            </div>
+
+            <!-- 密码 -->
+            <div class="form-group">
+                <label class="form-label" for="password">密码</label>
+                <div class="input-wrapper">
+                    <span class="input-icon">🔒</span>
+                    <input
+                            type="password"
+                            id="password"
+                            class="form-input"
+                            placeholder="设置密码"
+                            required
+                            autocomplete="new-password"
+                    />
+                    <button
+                            type="button"
+                            class="toggle-password"
+                            id="togglePassword"
+                            aria-label="显示/隐藏密码"
+                    >
                         👁️
                     </button>
                 </div>
             </div>
 
-            <!-- 登录按钮 -->
-            <button type="submit" class="btn-login" id="loginBtn">
+            <!-- 确认密码 -->
+            <div class="form-group">
+                <label class="form-label" for="confirmPassword">确认密码</label>
+                <div class="input-wrapper">
+                    <span class="input-icon">🔐</span>
+                    <input
+                            type="password"
+                            id="confirmPassword"
+                            class="form-input"
+                            placeholder="再次输入密码"
+                            required
+                            autocomplete="new-password"
+                    />
+                </div>
+            </div>
+
+            <!-- 注册按钮 -->
+            <button type="submit" class="btn-register" id="registerBtn">
                 <span class="spinner"></span>
-                <span class="btn-text">🏆 登录</span>
+                <span class="btn-text">🏆 立即注册</span>
             </button>
         </form>
 
         <!-- 底部 -->
         <div class="card-footer">
-            <p>还没有账号？<a href="zhuce.html">立即注册</a></p>
-            <p style="margin-top:6px;font-size:0.75rem;color:#bbb;">⚽ 一起踢球，一起赢！</p>
+            <p>已有账号？<a href="login.html">返回登录</a></p>
+            <p style="margin-top:6px;font-size:0.75rem;color:#bbb;">⚽ 加入我们，一起踢球！</p>
         </div>
     </div>
 </div>
@@ -603,7 +631,7 @@
     (function() {
         // =============================================
         // ⚠️ 在这里配置你的 Supabase 项目信息
-        // 前往 https://app.supabase.com 创建项目后获取
+        // 与登录页面保持一致
         // =============================================
         const SUPABASE_URL = 'https://tkomfsasuwvvkffxlmtk.supabase.co'; // 替换为你的项目URL
         const SUPABASE_ANON_KEY = 'sb_publishable_77zkLllta4fd0-dz1ksCnw_yDwViGLj'; // 替换为你的anon key
@@ -611,11 +639,13 @@
         // =============================================
         // DOM 元素引用
         // =============================================
-        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
+        const fullnameInput = document.getElementById('fullname');
         const usernameInput = document.getElementById('username');
         const passwordInput = document.getElementById('password');
+        const confirmPasswordInput = document.getElementById('confirmPassword');
         const togglePasswordBtn = document.getElementById('togglePassword');
-        const loginBtn = document.getElementById('loginBtn');
+        const registerBtn = document.getElementById('registerBtn');
         const errorMessage = document.getElementById('errorMessage');
         const errorText = document.getElementById('errorText');
         const configHint = document.getElementById('configHint');
@@ -642,18 +672,15 @@
                 showError('Supabase 初始化失败，请检查配置');
             }
         } else {
-            // 显示配置提示
             configHint.classList.add('visible');
             console.warn('⚠️ 请配置 Supabase URL 和 anon key');
-
-            // 8秒后自动隐藏提示
             setTimeout(() => {
                 configHint.classList.remove('visible');
             }, 8000);
         }
 
         // =============================================
-        // 密码可见切换
+        // 密码可见切换（只作用于密码字段）
         // =============================================
         togglePasswordBtn.addEventListener('click', () => {
             const isPassword = passwordInput.type === 'password';
@@ -667,42 +694,60 @@
         function showError(message) {
             errorText.textContent = message;
             errorMessage.classList.add('visible');
-            // 输入框标红
-            usernameInput.classList.add('error');
-            passwordInput.classList.add('error');
+            // 标红所有输入框
+            [fullnameInput, usernameInput, passwordInput, confirmPasswordInput].forEach((input) => {
+                input.classList.add('error');
+            });
 
-            // 3.5秒后自动隐藏
             setTimeout(() => {
                 errorMessage.classList.remove('visible');
-                usernameInput.classList.remove('error');
-                passwordInput.classList.remove('error');
-            }, 3500);
+                [fullnameInput, usernameInput, passwordInput, confirmPasswordInput].forEach((input) => {
+                    input.classList.remove('error');
+                });
+            }, 4000);
         }
 
         function clearError() {
             errorMessage.classList.remove('visible');
-            usernameInput.classList.remove('error');
-            passwordInput.classList.remove('error');
+            [fullnameInput, usernameInput, passwordInput, confirmPasswordInput].forEach((input) => {
+                input.classList.remove('error');
+            });
         }
 
         // =============================================
         // 输入时清除错误状态
         // =============================================
-        usernameInput.addEventListener('input', clearError);
-        passwordInput.addEventListener('input', clearError);
+        [fullnameInput, usernameInput, passwordInput, confirmPasswordInput].forEach((input) => {
+            input.addEventListener('input', clearError);
+        });
 
         // =============================================
         // 表单提交处理
         // =============================================
-        loginForm.addEventListener('submit', async (e) => {
+        registerForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
+            const fullname = fullnameInput.value.trim();
             const username = usernameInput.value.trim();
             const password = passwordInput.value.trim();
+            const confirmPassword = confirmPasswordInput.value.trim();
 
             // 前端验证
-            if (!username || !password) {
-                showError('请输入用户名和密码');
+            if (!fullname || !username || !password || !confirmPassword) {
+                showError('请填写所有字段');
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                showError('两次输入的密码不一致');
+                passwordInput.classList.add('error');
+                confirmPasswordInput.classList.add('error');
+                return;
+            }
+
+            if (password.length < 6) {
+                showError('密码长度至少为6位');
+                passwordInput.classList.add('error');
                 return;
             }
 
@@ -713,66 +758,71 @@
             }
 
             // 按钮进入加载状态
-            loginBtn.classList.add('loading');
-            loginBtn.disabled = true;
+            registerBtn.classList.add('loading');
+            registerBtn.disabled = true;
 
             try {
                 // =============================================
-                // 查询 user 表验证登录
+                // 插入新用户到 public.user 表
+                // 注意：列 "user" 是带引号的，所以对象键需要用引号
                 // =============================================
                 const { data, error } = await supabase
                     .from('user')
-                    .select('id, name, "user", passwd')
-                    .eq('user', username)
-                    .eq('passwd', password)
-                    .maybeSingle();
+                    .insert([
+                        {
+                            name: fullname,
+                            'user': username,
+                            passwd: password
+                        }
+                    ]);
 
                 if (error) {
-                    console.error('❌ 查询错误:', error.message);
-                    showError('登录失败，请稍后重试');
+                    console.error('❌ 注册错误:', error);
+                    // 处理唯一约束冲突 (错误码 23505)
+                    if (error.code === '23505') {
+                        // 判断具体是哪个字段冲突
+                        if (error.message.includes('user_name_key')) {
+                            showError('该姓名已被使用，请更换姓名');
+                        } else if (error.message.includes('user_user_key')) {
+                            showError('该用户名已被注册，请更换用户名');
+                        } else {
+                            showError('用户名或姓名已存在，请更换');
+                        }
+                    } else {
+                        showError('注册失败，请稍后重试');
+                    }
                     return;
                 }
 
-                if (data) {
-                    // ✅ 登录成功
-                    console.log('✅ 登录成功:', data);
+                // ✅ 注册成功
+                console.log('✅ 注册成功:', data);
 
-                    // 存储用户信息到 localStorage（方便后续页面使用）
-                    localStorage.setItem(
-                        'football_user',
-                        JSON.stringify({
-                            id: data.id,
-                            name: data.name,
-                            username: data.user,
-                            loginTime: new Date().toISOString(),
-                        })
-                    );
+                // 清空表单（可选）
+                registerForm.reset();
 
-                    // 显示成功动画（可选）
-                    loginBtn.innerHTML = '<span class="btn-text">✅ 登录成功！</span>';
-                    loginBtn.style.background = 'linear-gradient(135deg, #27ae60, #1a7a3a)';
+                // 显示成功状态
+                registerBtn.innerHTML = '<span class="btn-text">✅ 注册成功！</span>';
+                registerBtn.style.background = 'linear-gradient(135deg, #27ae60, #1a7a3a)';
 
-                    // 延迟跳转（可以修改为你要跳转的页面）
-                    setTimeout(() => {
-                        // TODO: 替换为你的主页 URL
-                        window.location.href = '/index.html';
-                        alert(`🎉 欢迎回来，${data.name}！\n\n登录成功！\n\n`);
-                    }, 800);
-                } else {
-                    // ❌ 用户名或密码错误
-                    showError('❌ 用户名或密码错误，请重试');
-                }
+                // 延迟跳转或提示
+                setTimeout(() => {
+                    // TODO: 可以选择跳转到登录页，或者自动登录
+                    alert(`🎉 注册成功，${fullname}！\n\n现在可以使用用户名 "${username}" 登录了。`);
+                    // 跳转到登录页（根据实际路径修改）
+                    // window.location.href = 'login.html';
+                }, 800);
+
             } catch (err) {
                 console.error('❌ 异常:', err);
                 showError('网络错误，请检查连接');
             } finally {
-                // 恢复按钮状态
+                // 恢复按钮状态（等待跳转前仍然恢复）
                 setTimeout(() => {
-                    loginBtn.classList.remove('loading');
-                    loginBtn.disabled = false;
-                    if (!loginBtn.querySelector('.btn-text')) {
-                        loginBtn.innerHTML =
-                            '<span class="spinner"></span><span class="btn-text">🏆 登录</span>';
+                    registerBtn.classList.remove('loading');
+                    registerBtn.disabled = false;
+                    if (!registerBtn.querySelector('.btn-text')) {
+                        registerBtn.innerHTML =
+                            '<span class="spinner"></span><span class="btn-text">🏆 立即注册</span>';
                     }
                 }, 500);
             }
@@ -781,29 +831,14 @@
         // =============================================
         // 键盘快捷键：Enter 提交
         // =============================================
-        usernameInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && usernameInput.value.trim()) {
+        confirmPasswordInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && confirmPasswordInput.value.trim()) {
                 e.preventDefault();
-                passwordInput.focus();
+                registerForm.requestSubmit();
             }
         });
 
-        // =============================================
-        // 检查是否已有登录状态（自动跳转）
-        // =============================================
-        const savedUser = localStorage.getItem('football_user');
-        if (savedUser) {
-            try {
-                const userData = JSON.parse(savedUser);
-                console.log('👋 检测到已登录用户:', userData.name);
-                // 可选：自动跳转到主页
-                // window.location.href = '/home.html';
-            } catch (e) {
-                localStorage.removeItem('football_user');
-            }
-        }
-
-        console.log('⚽ 足球俱乐部登录页面已加载');
+        console.log('⚽ 足球俱乐部注册页面已加载');
         console.log('📋 数据库表: public.user (id, name, "user", passwd)');
     })();
 </script>
