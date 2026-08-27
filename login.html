@@ -588,7 +588,7 @@
 
         <!-- 底部 -->
         <div class="card-footer">
-            <p>还没有账号？<a href="zhuce.html">立即注册</a></p>
+            <p>还没有账号？<a href="#">立即注册</a></p>
             <p style="margin-top:6px;font-size:0.75rem;color:#bbb;">⚽ 一起踢球，一起赢！</p>
         </div>
     </div>
@@ -605,8 +605,8 @@
         // ⚠️ 在这里配置你的 Supabase 项目信息
         // 前往 https://app.supabase.com 创建项目后获取
         // =============================================
-        const SUPABASE_URL = 'https://tkomfsasuwvvkffxlmtk.supabase.co'; // 替换为你的项目URL
-        const SUPABASE_ANON_KEY = 'sb_publishable_77zkLllta4fd0-dz1ksCnw_yDwViGLj'; // 替换为你的anon key
+        const SUPABASE_URL = 'https://YOUR-PROJECT.supabase.co'; // 替换为你的项目URL
+        const SUPABASE_ANON_KEY = 'YOUR-ANON-KEY'; // 替换为你的anon key
 
         // =============================================
         // DOM 元素引用
@@ -754,7 +754,9 @@
 
                     // 延迟跳转（可以修改为你要跳转的页面）
                     setTimeout(() => {
-                        window.location.href = 'index.html'; // 或者 './index.html'，根据你的文件结构
+                        // TODO: 替换为你的主页 URL
+                        // window.location.href = '/home.html';
+                        alert(`🎉 欢迎回来，${data.name}！\n\n登录成功！\n\n（请将此处替换为跳转到主页的代码）`);
                     }, 800);
                 } else {
                     // ❌ 用户名或密码错误
