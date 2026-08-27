@@ -754,9 +754,7 @@
 
                     // 延迟跳转（可以修改为你要跳转的页面）
                     setTimeout(() => {
-                        // TODO: 替换为你的主页 URL
-                        window.location.href = '/index.html';
-                        alert(`🎉 欢迎回来，${data.name}！\n\n登录成功！\n\n`);
+                        window.location.href = 'index.html'; // 或者 './index.html'，根据你的文件结构
                     }, 800);
                 } else {
                     // ❌ 用户名或密码错误
