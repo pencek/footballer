@@ -128,6 +128,28 @@
             font-size: 0.85rem; color: #888;
         }
 
+        /* 管理按钮 */
+        .admin-actions {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .admin-btn {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        .admin-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.3);
+        }
+
         /* 榜单卡片（并排） */
         .rankings-grid {
             display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
@@ -194,6 +216,92 @@
             text-align: center; padding: 40px; color: #999;
         }
 
+        /* 模态框 */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal-content {
+            background: white;
+            border-radius: var(--radius-card);
+            box-shadow: var(--shadow-lg);
+            padding: 28px;
+            width: 90%;
+            max-width: 420px;
+            position: relative;
+            transform: translateY(30px);
+            transition: var(--transition);
+        }
+        .modal-overlay.active .modal-content {
+            transform: translateY(0);
+        }
+        .modal-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #999;
+        }
+        .modal-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+        }
+        .form-input, .form-select {
+            width: 100%;
+            height: 40px;
+            padding: 0 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            outline: none;
+        }
+        .form-input:focus, .form-select:focus {
+            border-color: var(--pitch-green);
+        }
+        .submit-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, var(--pitch-green), var(--pitch-dark));
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .submit-btn:hover {
+            transform: translateY(-1px);
+        }
+
         @media (max-width: 768px) {
             .navbar { padding: 0 16px; height: 60px; }
             .navbar-title { font-size: 1.1rem; }
@@ -246,6 +354,11 @@
         </div>
     </div>
 
+    <!-- 管理员操作按钮（仅 pencek / ChenTK 可见） -->
+    <div class="admin-actions" id="adminActions" style="display: none;">
+        <button class="admin-btn" id="openPracticeModalBtn">＋ 记录日常练习</button>
+    </div>
+
     <!-- 本周榜单（并排） -->
     <div class="rankings-grid">
         <!-- 射手榜 -->
@@ -272,6 +385,29 @@
 
 </div>
 
+<!-- 记录日常练习模态框 -->
+<div class="modal-overlay" id="practiceModal">
+    <div class="modal-content">
+        <button class="modal-close" id="closePracticeModal">&times;</button>
+        <h3 class="modal-title">🏋️ 记录日常练习</h3>
+        <div class="form-group">
+            <label>球员</label>
+            <select class="form-select" id="practicePlayerSelect">
+                <option value="">请选择球员</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>进球数</label>
+            <input type="number" class="form-input" id="practiceGoals" min="0" value="0">
+        </div>
+        <div class="form-group">
+            <label>助攻数</label>
+            <input type="number" class="form-input" id="practiceAssists" min="0" value="0">
+        </div>
+        <button class="submit-btn" id="submitPracticeBtn">保存练习数据</button>
+    </div>
+</div>
+
 <script>
     (function() {
         const SUPABASE_URL = 'https://tkomfsasuwvvkffxlmtk.supabase.co';
@@ -285,13 +421,21 @@
         // DOM
         const userAvatar = document.getElementById('userAvatar');
         const userName = document.getElementById('userName');
+        const adminActions = document.getElementById('adminActions');
         const lastUpdate = document.getElementById('lastUpdate');
         const scorerList = document.getElementById('scorerList');
         const assisterList = document.getElementById('assisterList');
         const lastWeekTopScorer = document.getElementById('lastWeekTopScorer');
         const lastWeekTopAssister = document.getElementById('lastWeekTopAssister');
+        const practiceModal = document.getElementById('practiceModal');
+        const openPracticeModalBtn = document.getElementById('openPracticeModalBtn');
+        const closePracticeModalBtn = document.getElementById('closePracticeModal');
+        const practicePlayerSelect = document.getElementById('practicePlayerSelect');
+        const practiceGoals = document.getElementById('practiceGoals');
+        const practiceAssists = document.getElementById('practiceAssists');
+        const submitPracticeBtn = document.getElementById('submitPracticeBtn');
 
-        // 工具：获取本周一和上周一的日期
+        // 获取本周与上周日期范围
         function getWeekDates() {
             const now = new Date();
             const dayOfWeek = now.getDay();
@@ -310,7 +454,7 @@
             return { thisMonday, thisSunday, lastMonday, lastSunday };
         }
 
-        // 加载数据
+        // 加载所有用户和比赛数据（包含日常踢球）
         async function loadData() {
             try {
                 const savedUser = localStorage.getItem('football_user');
@@ -322,6 +466,12 @@
                 userAvatar.textContent = currentUser.name.charAt(0).toUpperCase();
                 userName.textContent = currentUser.name;
 
+                // 管理员判断：name=ChenTK 或 user=pencek
+                const isAdmin = (String(currentUser.name || '').trim().toLowerCase() === 'chentk') ||
+                    (String(currentUser.user || '').trim().toLowerCase() === 'pencek');
+                adminActions.style.display = isAdmin ? 'block' : 'none';
+
+                // 加载用户
                 const { data: usersData, error: usersError } = await supabase
                     .from('user')
                     .select('id, name, "user"')
@@ -329,16 +479,26 @@
                 if (usersError) throw usersError;
                 allUsers = usersData || [];
 
+                // 初始化球员下拉框
+                practicePlayerSelect.innerHTML = '<option value="">请选择球员</option>';
+                allUsers.forEach(user => {
+                    const option = document.createElement('option');
+                    option.value = user.id;
+                    option.textContent = user.name;
+                    practicePlayerSelect.appendChild(option);
+                });
+
+                // 加载比赛数据：包含比赛、友谊赛、日常踢球
                 const { data: statsData, error: statsError } = await supabase
                     .from('player_match_stats')
                     .select('player_id, goals, assists, match_date, match_type')
-                    .in('match_type', ['比赛', '友谊赛'])
                     .order('match_date', { ascending: false });
                 if (statsError) throw statsError;
                 matchStats = statsData || [];
 
                 const { thisMonday, thisSunday, lastMonday, lastSunday } = getWeekDates();
 
+                // 筛选本周和上周数据
                 const thisWeekStats = matchStats.filter(m => {
                     const d = new Date(m.match_date);
                     return d >= thisMonday && d <= thisSunday;
@@ -348,9 +508,11 @@
                     return d >= lastMonday && d <= lastSunday;
                 });
 
+                // 计算上周射手王和助攻王（只统计比赛+友谊赛，练习数据不计入荣誉）
                 const lastScorerMap = new Map();
                 const lastAssisterMap = new Map();
                 lastWeekStats.forEach(m => {
+                    if (m.match_type === '日常踢球') return; // 荣誉只计正式和友谊赛
                     const pid = Number(m.player_id);
                     lastScorerMap.set(pid, (lastScorerMap.get(pid) || 0) + Number(m.goals || 0));
                     lastAssisterMap.set(pid, (lastAssisterMap.get(pid) || 0) + Number(m.assists || 0));
@@ -360,12 +522,16 @@
                 displayHonor(lastWeekTopScorer, topScorer, '球');
                 displayHonor(lastWeekTopAssister, topAssister, '助攻');
 
+                // 计算本周榜单，包含日常踢球，但日常踢球权重为0.2
                 const thisScorerMap = new Map();
                 const thisAssisterMap = new Map();
                 thisWeekStats.forEach(m => {
                     const pid = Number(m.player_id);
-                    thisScorerMap.set(pid, (thisScorerMap.get(pid) || 0) + Number(m.goals || 0));
-                    thisAssisterMap.set(pid, (thisAssisterMap.get(pid) || 0) + Number(m.assists || 0));
+                    const weight = m.match_type === '日常踢球' ? 0.2 : 1.0;
+                    const goals = Number(m.goals || 0) * weight;
+                    const assists = Number(m.assists || 0) * weight;
+                    thisScorerMap.set(pid, (thisScorerMap.get(pid) || 0) + goals);
+                    thisAssisterMap.set(pid, (thisAssisterMap.get(pid) || 0) + assists);
                 });
 
                 renderRanking(scorerList, thisScorerMap, '进球');
@@ -415,7 +581,7 @@
                 return;
             }
             const arr = Array.from(map.entries()).map(([pid, value]) => ({
-                pid, value
+                pid, value: Math.round(value) // 四舍五入显示整数
             })).sort((a, b) => b.value - a.value);
 
             let html = `<table class="ranking-table">
@@ -444,6 +610,72 @@
             container.innerHTML = html;
         }
 
+        // 打开/关闭练习模态框
+        openPracticeModalBtn.addEventListener('click', () => {
+            practiceModal.classList.add('active');
+        });
+        closePracticeModalBtn.addEventListener('click', () => {
+            practiceModal.classList.remove('active');
+        });
+        practiceModal.addEventListener('click', (e) => {
+            if (e.target === practiceModal) practiceModal.classList.remove('active');
+        });
+
+        // 提交练习数据
+        submitPracticeBtn.addEventListener('click', async () => {
+            const playerId = practicePlayerSelect.value;
+            const goals = parseInt(practiceGoals.value) || 0;
+            const assists = parseInt(practiceAssists.value) || 0;
+
+            if (!playerId) {
+                alert('请选择球员');
+                return;
+            }
+            if (goals < 0 || assists < 0) {
+                alert('进球和助攻不能为负数');
+                return;
+            }
+
+            submitPracticeBtn.disabled = true;
+            submitPracticeBtn.textContent = '保存中...';
+
+            try {
+                const { error } = await supabase
+                    .from('player_match_stats')
+                    .insert([{
+                        player_id: Number(playerId),
+                        position: '中场',   // 练习默认位置，不影响主页统计
+                        match_type: '日常踢球',
+                        minutes_played: 90,
+                        goals: goals,
+                        assists: assists,
+                        shots: 0,
+                        key_passes: 0,
+                        interceptions: 0,
+                        failed_clearances: 0,
+                        saves: 0,
+                        goals_conceded: 0,
+                        match_date: new Date().toISOString().split('T')[0]
+                    }]);
+
+                if (error) throw error;
+
+                practiceModal.classList.remove('active');
+                practicePlayerSelect.value = '';
+                practiceGoals.value = 0;
+                practiceAssists.value = 0;
+                await loadData();
+                alert('✅ 练习数据已记录');
+            } catch (err) {
+                console.error('保存练习数据失败:', err);
+                alert('保存失败：' + (err.message || '未知错误'));
+            } finally {
+                submitPracticeBtn.disabled = false;
+                submitPracticeBtn.textContent = '保存练习数据';
+            }
+        });
+
+        // 初始化
         loadData();
     })();
 </script>
