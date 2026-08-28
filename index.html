@@ -454,7 +454,7 @@
             return { thisMonday, thisSunday, lastMonday, lastSunday };
         }
 
-        // 加载所有用户和比赛数据（包含日常踢球）
+        // 加载所有用户和比赛数据（包含所有类型）
         async function loadData() {
             try {
                 const savedUser = localStorage.getItem('football_user');
@@ -488,10 +488,10 @@
                     practicePlayerSelect.appendChild(option);
                 });
 
-                // 加载比赛数据：包含比赛、友谊赛、日常踢球
+                // 加载比赛数据：包含所有比赛类型，不做过滤
                 const { data: statsData, error: statsError } = await supabase
                     .from('player_match_stats')
-                    .select('player_id, goals, assists, match_date, match_type')
+                    .select('player_id, goals, assists, match_date')
                     .order('match_date', { ascending: false });
                 if (statsError) throw statsError;
                 matchStats = statsData || [];
@@ -508,11 +508,10 @@
                     return d >= lastMonday && d <= lastSunday;
                 });
 
-                // 计算上周射手王和助攻王（只统计比赛+友谊赛，练习数据不计入荣誉）
+                // 计算上周射手王和助攻王（所有类型都计入，权重相同）
                 const lastScorerMap = new Map();
                 const lastAssisterMap = new Map();
                 lastWeekStats.forEach(m => {
-                    if (m.match_type === '日常踢球') return; // 荣誉只计正式和友谊赛
                     const pid = Number(m.player_id);
                     lastScorerMap.set(pid, (lastScorerMap.get(pid) || 0) + Number(m.goals || 0));
                     lastAssisterMap.set(pid, (lastAssisterMap.get(pid) || 0) + Number(m.assists || 0));
@@ -522,14 +521,13 @@
                 displayHonor(lastWeekTopScorer, topScorer, '球');
                 displayHonor(lastWeekTopAssister, topAssister, '助攻');
 
-                // 计算本周榜单，包含日常踢球，但日常踢球权重为0.2
+                // 计算本周榜单，所有类型都计入，权重相同
                 const thisScorerMap = new Map();
                 const thisAssisterMap = new Map();
                 thisWeekStats.forEach(m => {
                     const pid = Number(m.player_id);
-                    const weight = m.match_type === '日常踢球' ? 0.2 : 1.0;
-                    const goals = Number(m.goals || 0) * weight;
-                    const assists = Number(m.assists || 0) * weight;
+                    const goals = Number(m.goals || 0);
+                    const assists = Number(m.assists || 0);
                     thisScorerMap.set(pid, (thisScorerMap.get(pid) || 0) + goals);
                     thisAssisterMap.set(pid, (thisAssisterMap.get(pid) || 0) + assists);
                 });
@@ -581,7 +579,7 @@
                 return;
             }
             const arr = Array.from(map.entries()).map(([pid, value]) => ({
-                pid, value: Math.round(value) // 四舍五入显示整数
+                pid, value: Math.round(value)
             })).sort((a, b) => b.value - a.value);
 
             let html = `<table class="ranking-table">
