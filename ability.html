@@ -314,7 +314,7 @@
     </section>
 </main>
 
-<!-- 添加比赛数据模态框（无比分输入） -->
+<!-- 添加比赛数据模态框（含比赛类型） -->
 <div class="modal" id="addModal">
     <div class="modal-content">
         <div class="modal-header">
@@ -329,6 +329,13 @@
         </div>
 
         <div class="form-section">比赛信息</div>
+        <div class="form-group">
+            <label>比赛类型</label>
+            <select class="form-select" id="matchType">
+                <option value="比赛">比赛</option>
+                <option value="练习">练习</option>
+            </select>
+        </div>
         <div class="form-group">
             <label>本场位置</label>
             <select class="form-select" id="position">
@@ -381,6 +388,7 @@
         let allUsers = [];
         let allMatchStats = [];
 
+        // DOM 元素
         const userAvatar = document.getElementById('userAvatar');
         const userName = document.getElementById('userName');
         const adminActions = document.getElementById('adminActions');
@@ -393,6 +401,7 @@
         const submitDataBtn = document.getElementById('submitData');
         const formError = document.getElementById('formError');
         const playerSelect = document.getElementById('playerSelect');
+        const matchTypeSelect = document.getElementById('matchType');
 
         // 位置权重
         const POSITION_WEIGHTS = {
@@ -404,6 +413,12 @@
             "边后":   { shooting: 0.08, passing: 0.25, defending: 0.42, fitness: 0.25, goalkeeping: 0 },
             "中后":   { shooting: 0.05, passing: 0.15, defending: 0.55, fitness: 0.25, goalkeeping: 0 },
             "门将":   { shooting: 0,    passing: 0.05, defending: 0.10, fitness: 0.10, goalkeeping: 0.75 }
+        };
+
+        // 比赛类型权重
+        const MATCH_TYPE_WEIGHTS = {
+            "比赛": 1.0,
+            "练习": 0.5
         };
 
         function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
@@ -421,56 +436,70 @@
             });
         }
 
-        // 计算球员汇总数据并返回各项原始能力分（未归一化）
-        function computeRawScores() {
-            const playerTotals = new Map();
+        // 计算球员加权汇总数据
+        function computeWeightedTotals() {
+            const playerTotals = new Map(); // player_id -> totals
             allMatchStats.forEach(match => {
                 const pid = Number(match.player_id);
+                const typeWeight = MATCH_TYPE_WEIGHTS[match.match_type] || 1.0;
                 if (!playerTotals.has(pid)) {
                     playerTotals.set(pid, {
-                        matches: 0, totalMinutes: 0,
-                        totalGoals: 0, totalShots: 0, totalAssists: 0, totalKeyPasses: 0,
-                        totalTackles: 0, totalClearances: 0, totalSaves: 0, totalConceded: 0
+                        totalWeightedMinutes: 0,
+                        totalWeightedGoals: 0,
+                        totalWeightedShots: 0,
+                        totalWeightedAssists: 0,
+                        totalWeightedKeyPasses: 0,
+                        totalWeightedTackles: 0,
+                        totalWeightedClearances: 0,
+                        totalWeightedSaves: 0,
+                        totalWeightedConceded: 0,
+                        matches: 0
                     });
                 }
                 const t = playerTotals.get(pid);
                 t.matches++;
-                t.totalMinutes += Number(match.minutes_played || 0);
-                t.totalGoals += Number(match.goals || 0);
-                t.totalShots += Number(match.shots || 0);
-                t.totalAssists += Number(match.assists || 0);
-                t.totalKeyPasses += Number(match.key_passes || 0);
-                t.totalTackles += Number(match.tackles || 0);
-                t.totalClearances += Number(match.clearances || 0);
-                t.totalSaves += Number(match.saves || 0);
-                t.totalConceded += Number(match.goals_conceded || 0);
+                t.totalWeightedMinutes += (Number(match.minutes_played) || 0) * typeWeight;
+                t.totalWeightedGoals += (Number(match.goals) || 0) * typeWeight;
+                t.totalWeightedShots += (Number(match.shots) || 0) * typeWeight;
+                t.totalWeightedAssists += (Number(match.assists) || 0) * typeWeight;
+                t.totalWeightedKeyPasses += (Number(match.key_passes) || 0) * typeWeight;
+                t.totalWeightedTackles += (Number(match.tackles) || 0) * typeWeight;
+                t.totalWeightedClearances += (Number(match.clearances) || 0) * typeWeight;
+                t.totalWeightedSaves += (Number(match.saves) || 0) * typeWeight;
+                t.totalWeightedConceded += (Number(match.goals_conceded) || 0) * typeWeight;
             });
+            return playerTotals;
+        }
 
+        // 计算原始能力分（每90分钟加权数据）
+        function computeRawScores() {
+            const playerTotals = computeWeightedTotals();
             const rawScores = {};
             allUsers.forEach(user => {
                 const pid = Number(user.id);
                 const t = playerTotals.get(pid);
-                if (!t || t.matches === 0) {
+                if (!t || t.matches === 0 || t.totalWeightedMinutes === 0) {
                     rawScores[pid] = {
                         shootingRaw: 0, passingRaw: 0, defendingRaw: 0,
                         fitnessRaw: 0, goalkeepingRaw: 0
                     };
                     return;
                 }
-                const avgMinutes = t.totalMinutes / t.matches;
-                const avgGoals = t.totalGoals / t.matches;
-                const avgShots = t.totalShots / t.matches;
-                const avgAssists = t.totalAssists / t.matches;
-                const avgKeyPasses = t.totalKeyPasses / t.matches;
-                const avgTackles = t.totalTackles / t.matches;
-                const avgClearances = t.totalClearances / t.matches;
-                const avgSaves = t.totalSaves / t.matches;
-                const avgConceded = t.totalConceded / t.matches;
+                // 每90分钟数据 = (加权总数 / 加权分钟) * 90
+                const per90 = (total) => (total / t.totalWeightedMinutes) * 90;
+                const avgGoals = per90(t.totalWeightedGoals);
+                const avgShots = per90(t.totalWeightedShots);
+                const avgAssists = per90(t.totalWeightedAssists);
+                const avgKeyPasses = per90(t.totalWeightedKeyPasses);
+                const avgTackles = per90(t.totalWeightedTackles);
+                const avgClearances = per90(t.totalWeightedClearances);
+                const avgSaves = per90(t.totalWeightedSaves);
+                const avgConceded = per90(t.totalWeightedConceded);
 
-                const shootingRaw = avgGoals * 0.7 + avgShots * 0.3;
+                const shootingRaw = avgGoals * 0.6 + avgShots * 0.4;
                 const passingRaw = avgAssists * 0.6 + avgKeyPasses * 0.4;
                 const defendingRaw = avgTackles * 0.6 + avgClearances * 0.4;
-                const fitnessRaw = (avgMinutes / 90) * 100;
+                const fitnessRaw = 100; // 由于每90分钟标准化后出场时间恒为90，体能设为基础100，后续归一化时区分度低
                 const goalkeepingRaw = avgSaves * 0.6 + (100 - avgConceded * 15) * 0.4;
 
                 rawScores[pid] = {
@@ -481,32 +510,71 @@
             return rawScores;
         }
 
-        // 计算最终能力值（0-99）
+        // 计算最终能力值（分位置归一化 + 置信度调整）
         function computeFinalScores() {
             const raw = computeRawScores();
             const ids = allUsers.map(u => Number(u.id));
-            const shootingRaw = ids.map(id => raw[id]?.shootingRaw ?? 0);
-            const passingRaw = ids.map(id => raw[id]?.passingRaw ?? 0);
-            const defendingRaw = ids.map(id => raw[id]?.defendingRaw ?? 0);
-            const fitnessRaw = ids.map(id => raw[id]?.fitnessRaw ?? 0);
-            const goalkeepingRaw = ids.map(id => raw[id]?.goalkeepingRaw ?? 0);
-
-            const shootingNorm = normalizeScores(shootingRaw);
-            const passingNorm = normalizeScores(passingRaw);
-            const defendingNorm = normalizeScores(defendingRaw);
-            const fitnessNorm = normalizeScores(fitnessRaw);
-            const goalkeepingNorm = normalizeScores(goalkeepingRaw);
-
-            const finalScores = {};
-            ids.forEach((id, i) => {
-                finalScores[id] = {
-                    shooting: shootingNorm[i],
-                    passing: passingNorm[i],
-                    defending: defendingNorm[i],
-                    fitness: fitnessNorm[i],
-                    goalkeeping: goalkeepingNorm[i]
-                };
+            // 确定每个球员的主要位置（出现次数最多，相同则取最近一场）
+            const primaryPosition = {};
+            ids.forEach(id => {
+                const records = allMatchStats.filter(m => Number(m.player_id) === id);
+                if (records.length === 0) {
+                    primaryPosition[id] = "中场"; // 默认
+                } else {
+                    const posCount = {};
+                    records.forEach(r => {
+                        const p = r.position || "中场";
+                        posCount[p] = (posCount[p] || 0) + 1;
+                    });
+                    let maxCount = 0, maxPos = "中场";
+                    for (const [pos, count] of Object.entries(posCount)) {
+                        if (count > maxCount || (count === maxCount && records[records.length-1].position === pos)) {
+                            maxCount = count;
+                            maxPos = pos;
+                        }
+                    }
+                    primaryPosition[id] = maxPos;
+                }
             });
+
+            // 按位置分组，组内归一化
+            const finalScores = {};
+            const positionGroups = {};
+            ids.forEach(id => {
+                const pos = primaryPosition[id];
+                if (!positionGroups[pos]) positionGroups[pos] = [];
+                positionGroups[pos].push(id);
+            });
+
+            Object.entries(positionGroups).forEach(([pos, groupIds]) => {
+                const shootingRaw = groupIds.map(id => raw[id]?.shootingRaw ?? 0);
+                const passingRaw = groupIds.map(id => raw[id]?.passingRaw ?? 0);
+                const defendingRaw = groupIds.map(id => raw[id]?.defendingRaw ?? 0);
+                const fitnessRaw = groupIds.map(id => raw[id]?.fitnessRaw ?? 0);
+                const goalkeepingRaw = groupIds.map(id => raw[id]?.goalkeepingRaw ?? 0);
+
+                const shootingNorm = normalizeScores(shootingRaw);
+                const passingNorm = normalizeScores(passingRaw);
+                const defendingNorm = normalizeScores(defendingRaw);
+                const fitnessNorm = normalizeScores(fitnessRaw);
+                const goalkeepingNorm = normalizeScores(goalkeepingRaw);
+
+                groupIds.forEach((id, idx) => {
+                    const recordsCount = allMatchStats.filter(m => Number(m.player_id) === id).length;
+                    const confidence = Math.min(1, recordsCount / 5);
+                    // 应用置信度：向50靠拢
+                    finalScores[id] = {
+                        shooting: Math.round(50 + (shootingNorm[idx] - 50) * confidence),
+                        passing: Math.round(50 + (passingNorm[idx] - 50) * confidence),
+                        defending: Math.round(50 + (defendingNorm[idx] - 50) * confidence),
+                        fitness: Math.round(50 + (fitnessNorm[idx] - 50) * confidence),
+                        goalkeeping: Math.round(50 + (goalkeepingNorm[idx] - 50) * confidence),
+                        position: pos,
+                        recordsCount
+                    };
+                });
+            });
+
             return finalScores;
         }
 
@@ -515,14 +583,8 @@
             const finalScores = computeFinalScores();
             const players = allUsers.map(user => {
                 const sid = Number(user.id);
-                const scores = finalScores[sid] || { shooting:0, passing:0, defending:0, fitness:0, goalkeeping:0 };
-                const records = allMatchStats.filter(m => Number(m.player_id) === sid);
-                let position = "中场";
-                if (records.length > 0) {
-                    const latest = records.sort((a,b) => b.id - a.id)[0];
-                    position = latest.position || "中场";
-                }
-                const weights = POSITION_WEIGHTS[position] || POSITION_WEIGHTS["中场"];
+                const scores = finalScores[sid] || { shooting:0, passing:0, defending:0, fitness:0, goalkeeping:0, position:"暂无", recordsCount:0 };
+                const weights = POSITION_WEIGHTS[scores.position] || POSITION_WEIGHTS["中场"];
                 const overall = Math.round(
                     scores.shooting * weights.shooting +
                     scores.passing * weights.passing +
@@ -530,7 +592,7 @@
                     scores.fitness * weights.fitness +
                     scores.goalkeeping * weights.goalkeeping
                 );
-                return { user, ...scores, overall, position, recordsCount: records.length };
+                return { user, ...scores, overall };
             });
 
             players.sort((a,b) => {
@@ -577,7 +639,7 @@
                     </div>
                     <div class="card-footer">
                         <span>${p.recordsCount} 场比赛</span>
-                        <span>基于全体数据</span>
+                        <span>基于加权数据</span>
                     </div>
                 </article>`;
             }).join('');
@@ -655,7 +717,7 @@
         async function loadMatchStats() {
             const { data, error } = await supabase
                 .from("player_match_stats")
-                .select(`id, player_id, position, shots, goals, assists, key_passes, tackles, clearances, minutes_played, saves, goals_conceded`)
+                .select(`id, player_id, position, match_type, shots, goals, assists, key_passes, tackles, clearances, minutes_played, saves, goals_conceded`)
                 .order("id", { ascending: false });
             if (error) throw error;
             allMatchStats = data || [];
@@ -714,6 +776,7 @@
 
             const selectedPlayer = playerSelect.value;
             const position = document.getElementById("position").value;
+            const matchType = matchTypeSelect.value;
 
             if (!selectedPlayer) { showFormError("请选择球员"); return; }
             if (!position) { showFormError("请选择本场位置"); return; }
@@ -721,6 +784,7 @@
             const data = {
                 player_id: Number(selectedPlayer),
                 position: position,
+                match_type: matchType,
                 shots: getNumber("shots"),
                 goals: getNumber("goals"),
                 assists: getNumber("assists"),
@@ -756,6 +820,7 @@
         function resetForm() {
             playerSelect.value = "";
             document.getElementById("position").value = "";
+            matchTypeSelect.value = "比赛";
             document.getElementById("shots").value = 0;
             document.getElementById("goals").value = 0;
             document.getElementById("assists").value = 0;
