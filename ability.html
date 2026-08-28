@@ -451,7 +451,7 @@
                         totalWeightedAssists: 0,
                         totalWeightedKeyPasses: 0,
                         totalWeightedInterceptions: 0,
-                        totalWeightedClearances: 0,
+                        totalWeightedFailedClearances: 0,   // 修正字段名
                         totalWeightedSaves: 0,
                         totalWeightedConceded: 0,
                         count: 0
@@ -465,7 +465,7 @@
                 t.totalWeightedAssists += (Number(match.assists) || 0) * weight;
                 t.totalWeightedKeyPasses += (Number(match.key_passes) || 0) * weight;
                 t.totalWeightedInterceptions += (Number(match.interceptions) || 0) * weight;
-                t.totalWeightedFailedClearances += (Number(match.failed_clearances) || 0) * weight;
+                t.totalWeightedFailedClearances += (Number(match.failed_clearances) || 0) * weight; // 修正累加
                 t.totalWeightedSaves += (Number(match.saves) || 0) * weight;
                 t.totalWeightedConceded += (Number(match.goals_conceded) || 0) * weight;
             });
@@ -484,32 +484,27 @@
                     return;
                 }
 
-                // 每 90 分钟数据
                 const goals90 = per90(t.totalWeightedGoals, t.totalWeightedMinutes);
                 const shots90 = per90(t.totalWeightedShots, t.totalWeightedMinutes);
                 const assists90 = per90(t.totalWeightedAssists, t.totalWeightedMinutes);
                 const keyPasses90 = per90(t.totalWeightedKeyPasses, t.totalWeightedMinutes);
                 const interceptions90 = per90(t.totalWeightedInterceptions, t.totalWeightedMinutes);
-                const failedClearances90 = per90(t.totalWeightedFailedClearances, t.totalWeightedMinutes); // 新字段
+                const failedClearances90 = per90(t.totalWeightedFailedClearances, t.totalWeightedMinutes);
                 const saves90 = per90(t.totalWeightedSaves, t.totalWeightedMinutes);
                 const conceded90 = per90(t.totalWeightedConceded, t.totalWeightedMinutes);
                 const avgMinutes = t.totalWeightedMinutes / t.count;
 
-                // 射门
                 const shotEfficiency = clamp(goals90 / (shots90 + 0.5), 0.5, 1.5);
                 const shooting = (goals90 * 0.7 + shots90 * 0.3) * shotEfficiency;
 
-                // 传球
                 const passEfficiency = clamp(assists90 / (keyPasses90 + 0.5), 0.5, 1.5);
                 const passing = (assists90 * 0.7 + keyPasses90 * 0.3) * passEfficiency;
 
-                // 防守（新公式）
+                // 防守：拦截 + 防守失败扣分
                 const defending = interceptions90 * 0.6 + (100 - failedClearances90 * 20) * 0.4;
 
-                // 体能
                 const fitness = clamp((avgMinutes / 90) * 100, 0, 100);
 
-                // 守门
                 const goalkeeping = saves90 * 0.7 + (100 - conceded90 * 10) * 0.3;
 
                 raw[pid] = {
@@ -561,12 +556,12 @@
                 const assists90 = per90(t.totalWeightedAssists, t.totalWeightedMinutes);
                 const keyPasses90 = per90(t.totalWeightedKeyPasses, t.totalWeightedMinutes);
                 const interceptions90 = per90(t.totalWeightedInterceptions, t.totalWeightedMinutes);
-                const clearances90 = per90(t.totalWeightedClearances, t.totalWeightedMinutes);
+                const failedClearances90 = per90(t.totalWeightedFailedClearances, t.totalWeightedMinutes);
                 const saves90 = per90(t.totalWeightedSaves, t.totalWeightedMinutes);
                 const conceded90 = per90(t.totalWeightedConceded, t.totalWeightedMinutes);
                 const shooting = goals90 * 0.6 + shots90 * 0.4;
                 const passing = assists90 * 0.6 + keyPasses90 * 0.4;
-                const defending = interceptions90 * 0.6 + clearances90 * 0.4;
+                const defending = interceptions90 * 0.6 + (100 - failedClearances90 * 20) * 0.4; // 与主体一致
                 const goalkeeping = saves90 * 0.6 + (100 - conceded90 * 15) * 0.4;
                 return { pid, shooting, passing, defending, goalkeeping };
             });
@@ -604,7 +599,6 @@
             const ids = allUsers.map(u => Number(u.id));
             const finalScores = {};
 
-            // 全局归一化（所有球员一起）
             const shootingRaw = ids.map(id => mainRaw[id]?.shooting ?? 0);
             const passingRaw = ids.map(id => mainRaw[id]?.passing ?? 0);
             const defendingRaw = ids.map(id => mainRaw[id]?.defending ?? 0);
@@ -635,7 +629,6 @@
                 };
             });
 
-            // 计算总评
             ids.forEach(id => {
                 const s = finalScores[id];
                 if (!s) return;
@@ -859,7 +852,7 @@
                 assists: getNumber("assists"),
                 key_passes: getNumber("keyPasses"),
                 interceptions: getNumber("interceptions"),
-                clearances: getNumber("clearances"),
+                failed_clearances: getNumber("failedClearances"),  // 修正字段
                 saves: getNumber("saves"),
                 goals_conceded: getNumber("goalsConceded")
             };
@@ -895,7 +888,7 @@
             document.getElementById("assists").value = 0;
             document.getElementById("keyPasses").value = 0;
             document.getElementById("interceptions").value = 0;
-            document.getElementById("clearances").value = 0;
+            document.getElementById("failedClearances").value = 0;  // 修正
             document.getElementById("saves").value = 0;
             document.getElementById("goalsConceded").value = 0;
             formError.style.display = "none";
