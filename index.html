@@ -128,13 +128,16 @@
             font-size: 0.85rem; color: #888;
         }
 
-        /* 榜单卡片 */
+        /* 榜单卡片（并排） */
+        .rankings-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
+        }
         .ranking-card {
             background: rgba(255,255,255,0.97);
             border-radius: var(--radius-card);
             box-shadow: var(--shadow-lg);
             padding: 24px 20px;
-            margin-bottom: 20px;
+            margin-bottom: 0;
         }
         .ranking-header {
             display: flex; align-items: center; justify-content: space-between;
@@ -197,7 +200,7 @@
             .navbar-user { padding: 6px 12px; }
             .navbar-user .avatar { width: 26px; height: 26px; font-size: 0.85rem; }
             .main-container { margin: 20px auto; padding: 0 12px 60px; }
-            .last-week-container { grid-template-columns: 1fr; gap: 15px; }
+            .last-week-container, .rankings-grid { grid-template-columns: 1fr; gap: 15px; }
             .ranking-card { padding: 18px 10px; }
             .ranking-table th, .ranking-table td { padding: 10px 6px; font-size: 0.85rem; }
             .player-avatar { width: 32px; height: 32px; font-size: 0.8rem; }
@@ -243,24 +246,27 @@
         </div>
     </div>
 
-    <!-- 本周射手榜 -->
-    <div class="ranking-card">
-        <div class="ranking-header">
-            <h2>⚽ 本周射手榜</h2>
-            <span class="update-time" id="lastUpdate">加载中...</span>
+    <!-- 本周榜单（并排） -->
+    <div class="rankings-grid">
+        <!-- 射手榜 -->
+        <div class="ranking-card">
+            <div class="ranking-header">
+                <h2>⚽ 本周射手榜</h2>
+                <span class="update-time" id="lastUpdate">加载中...</span>
+            </div>
+            <div id="scorerList">
+                <div class="loading-spinner"><div class="spinner"></div></div>
+            </div>
         </div>
-        <div id="scorerList">
-            <div class="loading-spinner"><div class="spinner"></div></div>
-        </div>
-    </div>
 
-    <!-- 本周助攻榜 -->
-    <div class="ranking-card">
-        <div class="ranking-header">
-            <h2>🎯 本周助攻榜</h2>
-        </div>
-        <div id="assisterList">
-            <div class="loading-spinner"><div class="spinner"></div></div>
+        <!-- 助攻榜 -->
+        <div class="ranking-card">
+            <div class="ranking-header">
+                <h2>🎯 本周助攻榜</h2>
+            </div>
+            <div id="assisterList">
+                <div class="loading-spinner"><div class="spinner"></div></div>
+            </div>
         </div>
     </div>
 
@@ -288,7 +294,7 @@
         // 工具：获取本周一和上周一的日期
         function getWeekDates() {
             const now = new Date();
-            const dayOfWeek = now.getDay(); // 0=周日, 1=周一...
+            const dayOfWeek = now.getDay();
             const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
             const thisMonday = new Date(now);
             thisMonday.setDate(now.getDate() + mondayOffset);
@@ -307,7 +313,6 @@
         // 加载数据
         async function loadData() {
             try {
-                // 检查登录
                 const savedUser = localStorage.getItem('football_user');
                 if (!savedUser) {
                     window.location.href = 'login.html';
@@ -317,7 +322,6 @@
                 userAvatar.textContent = currentUser.name.charAt(0).toUpperCase();
                 userName.textContent = currentUser.name;
 
-                // 加载用户
                 const { data: usersData, error: usersError } = await supabase
                     .from('user')
                     .select('id, name, "user"')
@@ -325,7 +329,6 @@
                 if (usersError) throw usersError;
                 allUsers = usersData || [];
 
-                // 加载比赛数据（只取比赛和友谊赛）
                 const { data: statsData, error: statsError } = await supabase
                     .from('player_match_stats')
                     .select('player_id, goals, assists, match_date, match_type')
@@ -334,10 +337,8 @@
                 if (statsError) throw statsError;
                 matchStats = statsData || [];
 
-                // 计算日期范围
                 const { thisMonday, thisSunday, lastMonday, lastSunday } = getWeekDates();
 
-                // 筛选本周和上周数据
                 const thisWeekStats = matchStats.filter(m => {
                     const d = new Date(m.match_date);
                     return d >= thisMonday && d <= thisSunday;
@@ -347,7 +348,6 @@
                     return d >= lastMonday && d <= lastSunday;
                 });
 
-                // 计算上周射手王和助攻王
                 const lastScorerMap = new Map();
                 const lastAssisterMap = new Map();
                 lastWeekStats.forEach(m => {
@@ -360,7 +360,6 @@
                 displayHonor(lastWeekTopScorer, topScorer, '球');
                 displayHonor(lastWeekTopAssister, topAssister, '助攻');
 
-                // 计算本周射手榜和助攻榜
                 const thisScorerMap = new Map();
                 const thisAssisterMap = new Map();
                 thisWeekStats.forEach(m => {
@@ -380,7 +379,6 @@
             }
         }
 
-        // 找到最高值的球员ID
         function findTopPlayer(map) {
             if (map.size === 0) return null;
             let maxVal = -1;
@@ -394,7 +392,6 @@
             return { playerId: topPid, value: maxVal };
         }
 
-        // 显示上周荣誉
         function displayHonor(element, top, unit) {
             if (!top || top.value === 0) {
                 element.innerHTML = '<div class="empty-state">暂无数据</div>';
@@ -412,13 +409,11 @@
         `;
         }
 
-        // 渲染榜单
         function renderRanking(container, map, unit) {
             if (map.size === 0) {
                 container.innerHTML = '<div class="empty-state">本周暂无数据</div>';
                 return;
             }
-            // 转换成数组并排序
             const arr = Array.from(map.entries()).map(([pid, value]) => ({
                 pid, value
             })).sort((a, b) => b.value - a.value);
@@ -449,7 +444,6 @@
             container.innerHTML = html;
         }
 
-        // 初始化
         loadData();
     })();
 </script>
