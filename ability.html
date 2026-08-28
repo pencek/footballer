@@ -210,6 +210,32 @@
         .dimension-label {
             font-weight: 700; width: 60px;
         }
+        /* 身价展示样式 */
+        .value-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px;
+            margin-top: 10px;
+            background: rgba(0,0,0,0.03);
+            border-radius: 10px;
+        }
+        .value-label {
+            font-size: 0.85rem;
+            color: #666;
+        }
+        .value-number {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: #1a7a3a;
+        }
+        .value-title {
+            font-size: 0.8rem;
+            color: #555;
+            background: #f0f0f0;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
 
         .loading, .empty, .error {
             grid-column: 1 / -1; padding: 70px; text-align: center; color: #777;
@@ -308,7 +334,7 @@
 <main class="container">
     <section class="header">
         <h1>🏆 球员能力图</h1>
-        <p>全局归一化 · 位置权重 · 分数 0-99 · 五维队友评价微调</p>
+        <p>全局归一化 · 位置权重 · 分数 0-99 · 五维队友评价微调 · 身价评估</p>
         <div class="header-tip">⚽ 射门 · 🎯 传球 · 🛡️ 防守 · 💪 体能 · 🧤 守门</div>
         <div class="header-actions" id="adminActions">
             <button class="add-btn" id="openAddModal">＋ 添加比赛数据</button>
@@ -532,6 +558,18 @@
             "门将": { shooting: 0.00, passing: 0.10, defending: 0.10, fitness: 0.10, goalkeeping: 0.70 }
         };
 
+        // 身价位置系数
+        const POSITION_VALUE_FACTORS = {
+            "前锋": 1.20,
+            "边锋": 1.10,
+            "前腰": 1.10,
+            "中场": 1.00,
+            "后腰": 1.00,
+            "边后": 0.95,
+            "中后": 1.00,
+            "门将": 1.10
+        };
+
         function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
 
         function normalizeScores(scores) {
@@ -654,7 +692,27 @@
             return maxPos;
         }
 
-        // ==================== 最终计算（含五维评价微调） ====================
+        // 计算身价
+        function calculatePlayerValue(overall, position, mainCount, avgPeerScore) {
+            // 基础身价（万欧元）
+            const baseValue = 50 * Math.pow(overall / 10, 3.5);
+
+            // 位置系数
+            const positionFactor = POSITION_VALUE_FACTORS[position] || 1.0;
+
+            // 经验系数
+            const experienceFactor = 1 - 0.15 * Math.max(0, 5 - mainCount) / 5;
+            const clampedExperience = Math.max(0.85, experienceFactor);
+
+            // 声誉系数
+            const peerScore = avgPeerScore !== null ? avgPeerScore : 3; // 默认3分
+            const reputationFactor = 0.95 + (peerScore - 3) * 0.03;
+
+            const finalValue = baseValue * positionFactor * clampedExperience * reputationFactor;
+            return Math.round(finalValue);
+        }
+
+        // ==================== 最终计算（含身价） ====================
         function computeFinalScores() {
             const mainTotals = aggregatePlayerData();
             const mainRaw = computeRawScores(mainTotals);
@@ -711,7 +769,7 @@
             });
 
             // 计算每个球员的五维评价平均值并应用微调
-            const reviewAdjustments = {}; // 存储每个球员每个维度的调整值
+            const reviewAdjustments = {};
             ids.forEach(id => {
                 const reviewsForPlayer = allReviews.filter(r => Number(r.reviewed_id) === id);
                 if (reviewsForPlayer.length > 0) {
@@ -721,7 +779,6 @@
                         const avg = reviewsForPlayer.reduce((sum, r) => sum + (Number(r[dim + '_score']) || 3), 0) / reviewsForPlayer.length;
                         avgScores[dim] = avg;
                     });
-                    // 微调：将1-5映射到 -2 到 +2，再缩放至 ±3（可选），这里使用系数1.0得到 -2..+2，我们使用1.5得到 -3..+3
                     const adjustment = {};
                     dims.forEach(dim => {
                         adjustment[dim] = (avgScores[dim] - 3) * 1.5;
@@ -732,7 +789,7 @@
                 }
             });
 
-            // 将微调应用到最终维度分
+            // 应用微调并计算总评、身价
             ids.forEach(id => {
                 const s = finalScores[id];
                 const adj = reviewAdjustments[id];
@@ -743,6 +800,7 @@
                     s.fitness = clamp(Math.round(s.fitness + adj.fitness), 0, 99);
                     s.goalkeeping = clamp(Math.round(s.goalkeeping + adj.goalkeeping), 0, 99);
                 }
+
                 // 计算总评
                 const weights = POSITION_WEIGHTS[s.position] || POSITION_WEIGHTS["中场"];
                 let overall = s.shooting * weights.shooting +
@@ -751,23 +809,41 @@
                     s.fitness * weights.fitness +
                     s.goalkeeping * weights.goalkeeping;
                 s.overall = clamp(Math.round(overall), 0, 99);
-                // 保存评价统计（用于显示）
+
+                // 计算队友评价平均分（用于声誉）
                 const reviewsForPlayer = allReviews.filter(r => Number(r.reviewed_id) === id);
+                let avgPeer = null;
                 if (reviewsForPlayer.length > 0) {
                     const dims = ['shooting', 'passing', 'defending', 'fitness', 'goalkeeping'];
-                    s.peerAvg = {};
+                    const peerScores = {};
                     dims.forEach(dim => {
                         const avg = reviewsForPlayer.reduce((sum, r) => sum + (Number(r[dim + '_score']) || 3), 0) / reviewsForPlayer.length;
-                        s.peerAvg[dim] = avg.toFixed(1);
+                        peerScores[dim] = avg;
                     });
+                    avgPeer = (peerScores.shooting + peerScores.passing + peerScores.defending + peerScores.fitness + peerScores.goalkeeping) / 5;
+                    s.peerAvg = peerScores;
                     s.peerCount = reviewsForPlayer.length;
                 } else {
                     s.peerAvg = null;
                     s.peerCount = 0;
                 }
+
+                // 计算身价
+                s.value = calculatePlayerValue(s.overall, s.position, s.mainCount, avgPeer);
+                s.valueLabel = getValueTitle(s.value);
             });
 
             return finalScores;
+        }
+
+        // 称号系统
+        function getValueTitle(value) {
+            if (value >= 100000) return "世界级";
+            if (value >= 70000) return "洲际级";
+            if (value >= 40000) return "国家级别";
+            if (value >= 20000) return "联赛主力";
+            if (value >= 5000) return "轮换球员";
+            return "青年队";
         }
 
         // ==================== 渲染 ====================
@@ -824,11 +900,17 @@
                     <div class="radar-container">
                         <canvas id="radar-${p.user.id}"></canvas>
                     </div>
+                    <!-- 身价展示 -->
+                    <div class="value-container">
+                        <span class="value-label">身价</span>
+                        <span class="value-number">${p.value.toLocaleString()} 万€</span>
+                        <span class="value-title">${p.valueLabel}</span>
+                    </div>
                     <div class="card-footer">
                         <span>${p.mainCount > 0 ? p.mainCount + ' 场有效比赛' : '暂无比赛'}</span>
                         <button class="btn-review" data-user-id="${p.user.id}" ${btnDisabled}>⭐ 评价</button>
                         <span class="peer-rating-display">
-                            ${p.peerAvg ? `队友评价: ${p.peerAvg.shooting}/${p.peerAvg.passing}/${p.peerAvg.defending}/${p.peerAvg.fitness}/${p.peerAvg.goalkeeping}` : '暂无评价'}
+                            ${p.peerAvg ? `队友: ${p.peerAvg.shooting}/${p.peerAvg.passing}/${p.peerAvg.defending}/${p.peerAvg.fitness}/${p.peerAvg.goalkeeping}` : '暂无评价'}
                         </span>
                     </div>
                 </article>`;
@@ -908,7 +990,7 @@
             const { data, error } = await supabase
                 .from("player_match_stats")
                 .select(`id, player_id, position, match_type, minutes_played, goals, shots, assists, key_passes, interceptions, failed_clearances, saves, goals_conceded`)
-                .in('match_type', ['比赛', '友谊赛'])  // 关键：排除日常踢球
+                .in('match_type', ['比赛', '友谊赛'])  // 排除日常踢球
                 .order("id", { ascending: false });
             if (error) throw error;
             allMatchStats = data || [];
@@ -1042,11 +1124,9 @@
             reviewTargetName.textContent = target ? target.name : '';
             reviewError.style.display = "none";
 
-            // 重置选择
             const dims = ['shooting', 'passing', 'defending', 'fitness', 'goalkeeping'];
             dims.forEach(dim => selectedScores[dim] = 0);
 
-            // 如果已有评价，载入旧值
             existingReview = allReviews.find(r => Number(r.reviewer_id) === Number(currentUser.id) && Number(r.reviewed_id) === Number(userId)) || null;
             if (existingReview) {
                 dims.forEach(dim => {
@@ -1054,7 +1134,6 @@
                 });
             }
 
-            // 更新所有星级显示
             updateAllStars();
             reviewModal.classList.add("active");
         }
@@ -1135,7 +1214,6 @@
         submitReviewBtn.addEventListener("click", submitReview);
         reviewModal.addEventListener("click", (e) => { if (e.target === reviewModal) closeReviewModal(); });
 
-        // 星级点击事件委托
         dimensionRatings.addEventListener("click", (e) => {
             const star = e.target.closest('.star');
             if (!star) return;
@@ -1147,7 +1225,6 @@
             updateAllStars();
         });
 
-        // 评价按钮点击事件委托
         playersGrid.addEventListener("click", (e) => {
             const btn = e.target.closest('.btn-review');
             if (btn && !btn.disabled) {
