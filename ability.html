@@ -489,12 +489,29 @@
                 const conceded90 = per90(t.totalWeightedConceded, t.totalWeightedMinutes);
                 const avgMinutes = t.totalWeightedMinutes / t.count;
 
+                // 射门效率因子
+                const shotEfficiency = clamp(goals90 / (shots90 + 0.5), 0.5, 1.5);
+                const shooting = (goals90 * 0.7 + shots90 * 0.3) * shotEfficiency;
+
+                // 传球效率因子
+                const passEfficiency = clamp(assists90 / (keyPasses90 + 0.5), 0.5, 1.5);
+                const passing = (assists90 * 0.7 + keyPasses90 * 0.3) * passEfficiency;
+
+                // 防守
+                const defending = interceptions90 * 0.5 + clearances90 * 0.5;
+
+                // 体能
+                const fitness = clamp((avgMinutes / 90) * 100, 0, 100);
+
+                // 守门
+                const goalkeeping = saves90 * 0.7 + (100 - conceded90 * 10) * 0.3;
+
                 raw[pid] = {
-                    shooting: goals90 * 0.6 + shots90 * 0.4,
-                    passing: assists90 * 0.6 + keyPasses90 * 0.4,
-                    defending: interceptions90 * 0.6 + clearances90 * 0.4,
-                    fitness: (avgMinutes / 90) * 100,
-                    goalkeeping: saves90 * 0.6 + (100 - conceded90 * 15) * 0.4
+                    shooting,
+                    passing,
+                    defending,
+                    fitness,
+                    goalkeeping
                 };
             });
             return raw;
