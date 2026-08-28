@@ -470,6 +470,7 @@
             return { mainTotals, dailyTotals };
         }
 
+        // 计算原始能力分（优化版）
         function computeRawScores(totals) {
             const raw = {};
             allUsers.forEach(user => {
@@ -479,6 +480,8 @@
                     raw[pid] = { shooting: 0, passing: 0, defending: 0, fitness: 0, goalkeeping: 0 };
                     return;
                 }
+
+                // 每 90 分钟数据
                 const goals90 = per90(t.totalWeightedGoals, t.totalWeightedMinutes);
                 const shots90 = per90(t.totalWeightedShots, t.totalWeightedMinutes);
                 const assists90 = per90(t.totalWeightedAssists, t.totalWeightedMinutes);
@@ -489,21 +492,21 @@
                 const conceded90 = per90(t.totalWeightedConceded, t.totalWeightedMinutes);
                 const avgMinutes = t.totalWeightedMinutes / t.count;
 
-                // 射门效率因子
+                // 射门：进球 + 射门次数，乘以效率因子（进球/射门）
                 const shotEfficiency = clamp(goals90 / (shots90 + 0.5), 0.5, 1.5);
                 const shooting = (goals90 * 0.7 + shots90 * 0.3) * shotEfficiency;
 
-                // 传球效率因子
+                // 传球：助攻 + 关键传球，乘以效率因子（助攻/关键传球）
                 const passEfficiency = clamp(assists90 / (keyPasses90 + 0.5), 0.5, 1.5);
                 const passing = (assists90 * 0.7 + keyPasses90 * 0.3) * passEfficiency;
 
-                // 防守
+                // 防守：拦截与解围各占一半
                 const defending = interceptions90 * 0.5 + clearances90 * 0.5;
 
-                // 体能
+                // 体能：平均出场时间与 90 分钟的比值
                 const fitness = clamp((avgMinutes / 90) * 100, 0, 100);
 
-                // 守门
+                // 守门：扑救为主，丢球扣分适度
                 const goalkeeping = saves90 * 0.7 + (100 - conceded90 * 10) * 0.3;
 
                 raw[pid] = {
