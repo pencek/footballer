@@ -174,9 +174,43 @@
         .radar-container { position: relative; width: 100%; height: 220px; margin: 10px 0; }
         .radar-container canvas { width: 100% !important; height: 100% !important; }
         .card-footer {
-            display: flex; justify-content: space-between; padding-top: 13px;
+            display: flex; justify-content: space-between; align-items: center; padding-top: 13px;
             border-top: 1px solid rgba(0,0,0,.1); color: #888; font-size: 11px;
         }
+        .btn-review {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            border: none; color: white; padding: 5px 12px; border-radius: 15px;
+            cursor: pointer; font-size: 0.8rem; font-weight: 700;
+            transition: var(--transition);
+        }
+        .btn-review:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+        }
+        .btn-review:disabled {
+            background: #ccc; cursor: not-allowed; opacity: 0.7;
+        }
+        .peer-rating-display {
+            font-size: 0.85rem; color: #555; display: flex; align-items: center; gap: 5px;
+        }
+        .rating-stars { display: flex; justify-content: center; gap: 8px; margin-bottom: 15px; }
+        .rating-stars .star {
+            font-size: 2rem; cursor: pointer; color: #ddd;
+            transition: var(--transition); user-select: none;
+        }
+        .rating-stars .star.active {
+            color: var(--gold);
+            text-shadow: 0 0 10px rgba(255,215,0,0.5);
+        }
+        .rating-stars .star:hover { transform: scale(1.2); }
+        .dimension-row {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .dimension-label {
+            font-weight: 700; width: 60px;
+        }
+
         .loading, .empty, .error {
             grid-column: 1 / -1; padding: 70px; text-align: center; color: #777;
         }
@@ -274,7 +308,7 @@
 <main class="container">
     <section class="header">
         <h1>🏆 球员能力图</h1>
-        <p>全局归一化 · 位置权重 · 分数 0-99</p>
+        <p>全局归一化 · 位置权重 · 分数 0-99 · 五维队友评价微调</p>
         <div class="header-tip">⚽ 射门 · 🎯 传球 · 🛡️ 防守 · 💪 体能 · 🧤 守门</div>
         <div class="header-actions" id="adminActions">
             <button class="add-btn" id="openAddModal">＋ 添加比赛数据</button>
@@ -316,7 +350,6 @@
             <select class="form-select" id="matchType">
                 <option value="比赛">比赛</option>
                 <option value="友谊赛">友谊赛</option>
-                <option value="日常踢球">日常踢球</option>
             </select>
         </div>
         <div class="form-group">
@@ -369,6 +402,84 @@
     </div>
 </div>
 
+<!-- 队友评价模态框（五个维度） -->
+<div class="modal" id="reviewModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>⭐ 评价队友</h2>
+            <button class="close-btn" id="closeReviewModal" type="button">×</button>
+        </div>
+        <div class="error-message" id="reviewError"></div>
+
+        <div class="form-group">
+            <label>评价对象</label>
+            <div id="reviewTargetName" style="font-weight:800; font-size:1.2rem;"></div>
+        </div>
+
+        <div class="form-group">
+            <label>各项能力评分（1-5星）</label>
+            <div id="dimensionRatings">
+                <!-- 射门 -->
+                <div class="dimension-row">
+                    <span class="dimension-label">射门</span>
+                    <div class="rating-stars" data-dimension="shooting">
+                        <span class="star" data-value="1">★</span>
+                        <span class="star" data-value="2">★</span>
+                        <span class="star" data-value="3">★</span>
+                        <span class="star" data-value="4">★</span>
+                        <span class="star" data-value="5">★</span>
+                    </div>
+                </div>
+                <!-- 传球 -->
+                <div class="dimension-row">
+                    <span class="dimension-label">传球</span>
+                    <div class="rating-stars" data-dimension="passing">
+                        <span class="star" data-value="1">★</span>
+                        <span class="star" data-value="2">★</span>
+                        <span class="star" data-value="3">★</span>
+                        <span class="star" data-value="4">★</span>
+                        <span class="star" data-value="5">★</span>
+                    </div>
+                </div>
+                <!-- 防守 -->
+                <div class="dimension-row">
+                    <span class="dimension-label">防守</span>
+                    <div class="rating-stars" data-dimension="defending">
+                        <span class="star" data-value="1">★</span>
+                        <span class="star" data-value="2">★</span>
+                        <span class="star" data-value="3">★</span>
+                        <span class="star" data-value="4">★</span>
+                        <span class="star" data-value="5">★</span>
+                    </div>
+                </div>
+                <!-- 体能 -->
+                <div class="dimension-row">
+                    <span class="dimension-label">体能</span>
+                    <div class="rating-stars" data-dimension="fitness">
+                        <span class="star" data-value="1">★</span>
+                        <span class="star" data-value="2">★</span>
+                        <span class="star" data-value="3">★</span>
+                        <span class="star" data-value="4">★</span>
+                        <span class="star" data-value="5">★</span>
+                    </div>
+                </div>
+                <!-- 守门 -->
+                <div class="dimension-row">
+                    <span class="dimension-label">守门</span>
+                    <div class="rating-stars" data-dimension="goalkeeping">
+                        <span class="star" data-value="1">★</span>
+                        <span class="star" data-value="2">★</span>
+                        <span class="star" data-value="3">★</span>
+                        <span class="star" data-value="4">★</span>
+                        <span class="star" data-value="5">★</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <button class="submit-btn" id="submitReview" type="button">提交评价</button>
+    </div>
+</div>
+
 <script>
     (function() {
         const SUPABASE_URL = "https://tkomfsasuwvvkffxlmtk.supabase.co";
@@ -378,6 +489,7 @@
         let currentUser = null;
         let allUsers = [];
         let allMatchStats = [];
+        let allReviews = [];
 
         // DOM 元素
         const userAvatar = document.getElementById('userAvatar');
@@ -392,12 +504,21 @@
         const submitDataBtn = document.getElementById('submitData');
         const formError = document.getElementById('formError');
         const playerSelect = document.getElementById('playerSelect');
+        const reviewModal = document.getElementById('reviewModal');
+        const closeReviewModalBtn = document.getElementById('closeReviewModal');
+        const submitReviewBtn = document.getElementById('submitReview');
+        const reviewTargetName = document.getElementById('reviewTargetName');
+        const reviewError = document.getElementById('reviewError');
+        const dimensionRatings = document.getElementById('dimensionRatings');
+
+        let reviewTargetId = null;
+        let selectedScores = { shooting: 0, passing: 0, defending: 0, fitness: 0, goalkeeping: 0 };
+        let existingReview = null;
 
         // ==================== 权重定义 ====================
         const MATCH_TYPE_WEIGHTS = {
             "比赛": 1.0,
-            "友谊赛": 0.7,
-            "日常踢球": 0.2
+            "友谊赛": 0.7
         };
 
         const POSITION_WEIGHTS = {
@@ -433,7 +554,6 @@
         // ==================== 数据聚合 ====================
         function aggregatePlayerData() {
             const mainTotals = new Map();
-            const dailyTotals = new Map();
 
             allMatchStats.forEach(match => {
                 const pid = Number(match.player_id);
@@ -441,23 +561,21 @@
                 const weight = MATCH_TYPE_WEIGHTS[type] || 1.0;
                 const minutes = Number(match.minutes_played) || 90;
 
-                const map = type === '日常踢球' ? dailyTotals : mainTotals;
-
-                if (!map.has(pid)) {
-                    map.set(pid, {
+                if (!mainTotals.has(pid)) {
+                    mainTotals.set(pid, {
                         totalWeightedMinutes: 0,
                         totalWeightedGoals: 0,
                         totalWeightedShots: 0,
                         totalWeightedAssists: 0,
                         totalWeightedKeyPasses: 0,
                         totalWeightedInterceptions: 0,
-                        totalWeightedFailedClearances: 0,   // 修正字段名
+                        totalWeightedFailedClearances: 0,
                         totalWeightedSaves: 0,
                         totalWeightedConceded: 0,
                         count: 0
                     });
                 }
-                const t = map.get(pid);
+                const t = mainTotals.get(pid);
                 t.count++;
                 t.totalWeightedMinutes += minutes * weight;
                 t.totalWeightedGoals += (Number(match.goals) || 0) * weight;
@@ -465,12 +583,12 @@
                 t.totalWeightedAssists += (Number(match.assists) || 0) * weight;
                 t.totalWeightedKeyPasses += (Number(match.key_passes) || 0) * weight;
                 t.totalWeightedInterceptions += (Number(match.interceptions) || 0) * weight;
-                t.totalWeightedFailedClearances += (Number(match.failed_clearances) || 0) * weight; // 修正累加
+                t.totalWeightedFailedClearances += (Number(match.failed_clearances) || 0) * weight;
                 t.totalWeightedSaves += (Number(match.saves) || 0) * weight;
                 t.totalWeightedConceded += (Number(match.goals_conceded) || 0) * weight;
             });
 
-            return { mainTotals, dailyTotals };
+            return mainTotals;
         }
 
         // 计算原始能力分（优化版）
@@ -536,74 +654,23 @@
             return maxPos;
         }
 
-        function computeDailyAdjustments(dailyTotals) {
-            const adjustments = {};
-            const dailyPlayers = [];
-            allUsers.forEach(user => {
-                const pid = Number(user.id);
-                const t = dailyTotals.get(pid);
-                if (t && t.count > 0 && t.totalWeightedMinutes > 0) {
-                    dailyPlayers.push({ pid, t });
-                }
-            });
-            if (dailyPlayers.length === 0) return adjustments;
-
-            const per90Data = dailyPlayers.map(item => {
-                const pid = item.pid;
-                const t = item.t;
-                const goals90 = per90(t.totalWeightedGoals, t.totalWeightedMinutes);
-                const shots90 = per90(t.totalWeightedShots, t.totalWeightedMinutes);
-                const assists90 = per90(t.totalWeightedAssists, t.totalWeightedMinutes);
-                const keyPasses90 = per90(t.totalWeightedKeyPasses, t.totalWeightedMinutes);
-                const interceptions90 = per90(t.totalWeightedInterceptions, t.totalWeightedMinutes);
-                const failedClearances90 = per90(t.totalWeightedFailedClearances, t.totalWeightedMinutes);
-                const saves90 = per90(t.totalWeightedSaves, t.totalWeightedMinutes);
-                const conceded90 = per90(t.totalWeightedConceded, t.totalWeightedMinutes);
-                const shooting = goals90 * 0.6 + shots90 * 0.4;
-                const passing = assists90 * 0.6 + keyPasses90 * 0.4;
-                const defending = interceptions90 * 0.6 + (100 - failedClearances90 * 20) * 0.4; // 与主体一致
-                const goalkeeping = saves90 * 0.6 + (100 - conceded90 * 15) * 0.4;
-                return { pid, shooting, passing, defending, goalkeeping };
-            });
-
-            const avg = { shooting: 0, passing: 0, defending: 0, goalkeeping: 0 };
-            per90Data.forEach(d => {
-                avg.shooting += d.shooting;
-                avg.passing += d.passing;
-                avg.defending += d.defending;
-                avg.goalkeeping += d.goalkeeping;
-            });
-            avg.shooting /= per90Data.length;
-            avg.passing /= per90Data.length;
-            avg.defending /= per90Data.length;
-            avg.goalkeeping /= per90Data.length;
-
-            per90Data.forEach(d => {
-                const devShoot = avg.shooting !== 0 ? (d.shooting - avg.shooting) / avg.shooting : 0;
-                const devPass = avg.passing !== 0 ? (d.passing - avg.passing) / avg.passing : 0;
-                const devDef = avg.defending !== 0 ? (d.defending - avg.defending) / avg.defending : 0;
-                const devGK = avg.goalkeeping !== 0 ? (d.goalkeeping - avg.goalkeeping) / avg.goalkeeping : 0;
-                const overallDev = (devShoot + devPass + devDef + devGK) / 4;
-                adjustments[d.pid] = Math.round(clamp(overallDev * 5, -5, 5));
-            });
-
-            return adjustments;
-        }
-
-        // ==================== 最终计算 ====================
+        // ==================== 最终计算（含五维评价微调） ====================
         function computeFinalScores() {
-            const { mainTotals, dailyTotals } = aggregatePlayerData();
+            const mainTotals = aggregatePlayerData();
             const mainRaw = computeRawScores(mainTotals);
-            const dailyAdj = computeDailyAdjustments(dailyTotals);
 
             const ids = allUsers.map(u => Number(u.id));
             const finalScores = {};
 
-            const shootingRaw = ids.map(id => mainRaw[id]?.shooting ?? 0);
-            const passingRaw = ids.map(id => mainRaw[id]?.passing ?? 0);
-            const defendingRaw = ids.map(id => mainRaw[id]?.defending ?? 0);
-            const fitnessRaw = ids.map(id => mainRaw[id]?.fitness ?? 0);
-            const goalkeepingRaw = ids.map(id => mainRaw[id]?.goalkeeping ?? 0);
+            // 有比赛数据的球员ID列表
+            const validIds = ids.filter(id => mainTotals.has(id) && mainTotals.get(id).count > 0);
+
+            // 仅对有效球员进行归一化
+            const shootingRaw = validIds.map(id => mainRaw[id]?.shooting ?? 0);
+            const passingRaw = validIds.map(id => mainRaw[id]?.passing ?? 0);
+            const defendingRaw = validIds.map(id => mainRaw[id]?.defending ?? 0);
+            const fitnessRaw = validIds.map(id => mainRaw[id]?.fitness ?? 0);
+            const goalkeepingRaw = validIds.map(id => mainRaw[id]?.goalkeeping ?? 0);
 
             const shootingNorm = normalizeScores(shootingRaw);
             const passingNorm = normalizeScores(passingRaw);
@@ -611,10 +678,10 @@
             const fitnessNorm = normalizeScores(fitnessRaw);
             const goalkeepingNorm = normalizeScores(goalkeepingRaw);
 
-            ids.forEach((id, idx) => {
+            // 处理有效球员
+            validIds.forEach((id, idx) => {
                 const mainCount = mainTotals.get(id)?.count || 0;
                 const confidence = Math.min(1, mainCount / 5);
-                const adj = dailyAdj[id] || 0;
                 const position = getPrimaryPosition(id);
 
                 finalScores[id] = {
@@ -624,22 +691,80 @@
                     fitness: Math.round(50 + (fitnessNorm[idx] - 50) * confidence),
                     goalkeeping: Math.round(50 + (goalkeepingNorm[idx] - 50) * confidence),
                     position,
-                    mainCount,
-                    dailyAdjustment: adj
+                    mainCount
                 };
             });
 
+            // 处理无比赛数据球员：固定低分
+            ids.forEach(id => {
+                if (!finalScores[id]) {
+                    finalScores[id] = {
+                        shooting: 20,
+                        passing: 20,
+                        defending: 20,
+                        fitness: 20,
+                        goalkeeping: 20,
+                        position: getPrimaryPosition(id),
+                        mainCount: 0
+                    };
+                }
+            });
+
+            // 计算每个球员的五维评价平均值并应用微调
+            const reviewAdjustments = {}; // 存储每个球员每个维度的调整值
+            ids.forEach(id => {
+                const reviewsForPlayer = allReviews.filter(r => Number(r.reviewed_id) === id);
+                if (reviewsForPlayer.length > 0) {
+                    const dims = ['shooting', 'passing', 'defending', 'fitness', 'goalkeeping'];
+                    const avgScores = {};
+                    dims.forEach(dim => {
+                        const avg = reviewsForPlayer.reduce((sum, r) => sum + (Number(r[dim + '_score']) || 3), 0) / reviewsForPlayer.length;
+                        avgScores[dim] = avg;
+                    });
+                    // 微调：将1-5映射到 -2 到 +2，再缩放至 ±3（可选），这里使用系数1.0得到 -2..+2，我们使用1.5得到 -3..+3
+                    const adjustment = {};
+                    dims.forEach(dim => {
+                        adjustment[dim] = (avgScores[dim] - 3) * 1.5;
+                    });
+                    reviewAdjustments[id] = adjustment;
+                } else {
+                    reviewAdjustments[id] = null;
+                }
+            });
+
+            // 将微调应用到最终维度分
             ids.forEach(id => {
                 const s = finalScores[id];
-                if (!s) return;
+                const adj = reviewAdjustments[id];
+                if (adj) {
+                    s.shooting = clamp(Math.round(s.shooting + adj.shooting), 0, 99);
+                    s.passing = clamp(Math.round(s.passing + adj.passing), 0, 99);
+                    s.defending = clamp(Math.round(s.defending + adj.defending), 0, 99);
+                    s.fitness = clamp(Math.round(s.fitness + adj.fitness), 0, 99);
+                    s.goalkeeping = clamp(Math.round(s.goalkeeping + adj.goalkeeping), 0, 99);
+                }
+                // 计算总评
                 const weights = POSITION_WEIGHTS[s.position] || POSITION_WEIGHTS["中场"];
                 let overall = s.shooting * weights.shooting +
                     s.passing * weights.passing +
                     s.defending * weights.defending +
                     s.fitness * weights.fitness +
                     s.goalkeeping * weights.goalkeeping;
-                overall += s.dailyAdjustment;
                 s.overall = clamp(Math.round(overall), 0, 99);
+                // 保存评价统计（用于显示）
+                const reviewsForPlayer = allReviews.filter(r => Number(r.reviewed_id) === id);
+                if (reviewsForPlayer.length > 0) {
+                    const dims = ['shooting', 'passing', 'defending', 'fitness', 'goalkeeping'];
+                    s.peerAvg = {};
+                    dims.forEach(dim => {
+                        const avg = reviewsForPlayer.reduce((sum, r) => sum + (Number(r[dim + '_score']) || 3), 0) / reviewsForPlayer.length;
+                        s.peerAvg[dim] = avg.toFixed(1);
+                    });
+                    s.peerCount = reviewsForPlayer.length;
+                } else {
+                    s.peerAvg = null;
+                    s.peerCount = 0;
+                }
             });
 
             return finalScores;
@@ -651,7 +776,7 @@
             const players = allUsers.map(user => {
                 const sid = Number(user.id);
                 const s = finalScores[sid];
-                if (!s || s.mainCount === 0) return null;
+                if (!s) return null;
                 return { user, ...s };
             }).filter(p => p !== null);
 
@@ -674,6 +799,8 @@
                 const name = p.user.name || "未知球员";
                 const username = p.user.user || "";
                 const initial = name.charAt(0).toUpperCase();
+                const isSelf = currentUser && Number(currentUser.id) === p.user.id;
+                const btnDisabled = isSelf ? 'disabled' : '';
                 return `
                 <article class="player-card ${rankClass}" data-player-id="${p.user.id}">
                     <div class="card-head">
@@ -698,8 +825,11 @@
                         <canvas id="radar-${p.user.id}"></canvas>
                     </div>
                     <div class="card-footer">
-                        <span>${p.mainCount} 场有效比赛</span>
-                        <span>${p.dailyAdjustment >= 0 ? '+' : ''}${p.dailyAdjustment} 日常调整</span>
+                        <span>${p.mainCount > 0 ? p.mainCount + ' 场有效比赛' : '暂无比赛'}</span>
+                        <button class="btn-review" data-user-id="${p.user.id}" ${btnDisabled}>⭐ 评价</button>
+                        <span class="peer-rating-display">
+                            ${p.peerAvg ? `队友评价: ${p.peerAvg.shooting}/${p.peerAvg.passing}/${p.peerAvg.defending}/${p.peerAvg.fitness}/${p.peerAvg.goalkeeping}` : '暂无评价'}
+                        </span>
                     </div>
                 </article>`;
             }).join('');
@@ -783,6 +913,14 @@
             allMatchStats = data || [];
         }
 
+        async function loadReviews() {
+            const { data, error } = await supabase
+                .from("player_reviews")
+                .select("*");
+            if (error) throw error;
+            allReviews = data || [];
+        }
+
         function initPlayerSelect() {
             playerSelect.innerHTML = '<option value="">请选择球员</option>';
             allUsers.forEach(user => {
@@ -798,6 +936,7 @@
             try {
                 await loadUsers();
                 await loadMatchStats();
+                await loadReviews();
                 initPlayerSelect();
                 renderPlayers();
                 updateTime.textContent = "更新于 " + new Date().toLocaleTimeString();
@@ -852,7 +991,7 @@
                 assists: getNumber("assists"),
                 key_passes: getNumber("keyPasses"),
                 interceptions: getNumber("interceptions"),
-                failed_clearances: getNumber("failedClearances"),  // 修正字段
+                failed_clearances: getNumber("failedClearances"),
                 saves: getNumber("saves"),
                 goals_conceded: getNumber("goalsConceded")
             };
@@ -888,19 +1027,133 @@
             document.getElementById("assists").value = 0;
             document.getElementById("keyPasses").value = 0;
             document.getElementById("interceptions").value = 0;
-            document.getElementById("failedClearances").value = 0;  // 修正
+            document.getElementById("failedClearances").value = 0;
             document.getElementById("saves").value = 0;
             document.getElementById("goalsConceded").value = 0;
             formError.style.display = "none";
         }
 
-        // ==================== 事件 ====================
+        // ==================== 队友评价（五维） ====================
+        function openReviewModal(userId) {
+            if (!currentUser || Number(userId) === Number(currentUser.id)) return;
+            reviewTargetId = userId;
+            const target = allUsers.find(u => Number(u.id) === userId);
+            reviewTargetName.textContent = target ? target.name : '';
+            reviewError.style.display = "none";
+
+            // 重置选择
+            const dims = ['shooting', 'passing', 'defending', 'fitness', 'goalkeeping'];
+            dims.forEach(dim => selectedScores[dim] = 0);
+
+            // 如果已有评价，载入旧值
+            existingReview = allReviews.find(r => Number(r.reviewer_id) === Number(currentUser.id) && Number(r.reviewed_id) === Number(userId)) || null;
+            if (existingReview) {
+                dims.forEach(dim => {
+                    selectedScores[dim] = existingReview[dim + '_score'] || 0;
+                });
+            }
+
+            // 更新所有星级显示
+            updateAllStars();
+            reviewModal.classList.add("active");
+        }
+
+        function closeReviewModal() {
+            reviewModal.classList.remove("active");
+            reviewTargetId = null;
+            existingReview = null;
+            const dims = ['shooting', 'passing', 'defending', 'fitness', 'goalkeeping'];
+            dims.forEach(dim => selectedScores[dim] = 0);
+        }
+
+        function updateAllStars() {
+            const dims = ['shooting', 'passing', 'defending', 'fitness', 'goalkeeping'];
+            dims.forEach(dim => {
+                const container = dimensionRatings.querySelector(`.rating-stars[data-dimension="${dim}"]`);
+                if (!container) return;
+                const stars = container.querySelectorAll('.star');
+                stars.forEach(star => {
+                    const val = parseInt(star.dataset.value);
+                    star.classList.toggle('active', val <= selectedScores[dim]);
+                });
+            });
+        }
+
+        async function submitReview() {
+            const dims = ['shooting', 'passing', 'defending', 'fitness', 'goalkeeping'];
+            const allSelected = dims.every(dim => selectedScores[dim] >= 1 && selectedScores[dim] <= 5);
+            if (!allSelected) {
+                reviewError.textContent = "❌ 请为所有维度选择 1-5 星";
+                reviewError.style.display = "block";
+                return;
+            }
+
+            const payload = {
+                reviewer_id: currentUser.id,
+                reviewed_id: reviewTargetId,
+                shooting_score: selectedScores.shooting,
+                passing_score: selectedScores.passing,
+                defending_score: selectedScores.defending,
+                fitness_score: selectedScores.fitness,
+                goalkeeping_score: selectedScores.goalkeeping,
+                updated_at: new Date().toISOString()
+            };
+
+            submitReviewBtn.disabled = true;
+            submitReviewBtn.textContent = "提交中...";
+
+            try {
+                let result;
+                if (existingReview) {
+                    result = await supabase.from('player_reviews').update(payload).eq('id', existingReview.id);
+                } else {
+                    result = await supabase.from('player_reviews').insert([payload]);
+                }
+                if (result.error) throw result.error;
+                closeReviewModal();
+                await loadData();
+            } catch (error) {
+                console.error("评价提交失败:", error);
+                reviewError.textContent = "❌ 提交失败：" + (error.message || "未知错误");
+                reviewError.style.display = "block";
+            } finally {
+                submitReviewBtn.disabled = false;
+                submitReviewBtn.textContent = "提交评价";
+            }
+        }
+
+        // 事件监听
         openAddModalBtn.addEventListener("click", openModal);
         closeModalBtn.addEventListener("click", closeModal);
         refreshBtn.addEventListener("click", loadData);
         submitDataBtn.addEventListener("click", saveMatchData);
         addModal.addEventListener("click", (e) => { if (e.target === addModal) closeModal(); });
-        document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeModal(); });
+        document.addEventListener("keydown", (e) => { if (e.key === "Escape") { closeModal(); closeReviewModal(); } });
+
+        closeReviewModalBtn.addEventListener("click", closeReviewModal);
+        submitReviewBtn.addEventListener("click", submitReview);
+        reviewModal.addEventListener("click", (e) => { if (e.target === reviewModal) closeReviewModal(); });
+
+        // 星级点击事件委托
+        dimensionRatings.addEventListener("click", (e) => {
+            const star = e.target.closest('.star');
+            if (!star) return;
+            const container = star.closest('.rating-stars');
+            if (!container) return;
+            const dimension = container.dataset.dimension;
+            const value = parseInt(star.dataset.value);
+            selectedScores[dimension] = value;
+            updateAllStars();
+        });
+
+        // 评价按钮点击事件委托
+        playersGrid.addEventListener("click", (e) => {
+            const btn = e.target.closest('.btn-review');
+            if (btn && !btn.disabled) {
+                const userId = parseInt(btn.dataset.userId);
+                openReviewModal(userId);
+            }
+        });
 
         // ==================== 初始化 ====================
         async function init() {
