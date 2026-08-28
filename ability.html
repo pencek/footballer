@@ -908,6 +908,7 @@
             const { data, error } = await supabase
                 .from("player_match_stats")
                 .select(`id, player_id, position, match_type, minutes_played, goals, shots, assists, key_passes, interceptions, failed_clearances, saves, goals_conceded`)
+                .in('match_type', ['比赛', '友谊赛'])  // 关键：排除日常踢球
                 .order("id", { ascending: false });
             if (error) throw error;
             allMatchStats = data || [];
