@@ -353,7 +353,10 @@
         <div class="form-section">🛡️ 防守</div>
         <div class="form-grid">
             <div class="form-group"><label>拦截数</label><input class="form-input" id="interceptions" type="number" min="0" value="0"></div>
-            <div class="form-group"><label>解围数</label><input class="form-input" id="clearances" type="number" min="0" value="0"></div>
+            <div class="form-group">
+                <label>防守失败导致射门</label>
+                <input class="form-input" id="failedClearances" type="number" min="0" value="0">
+            </div>
         </div>
 
         <div class="form-section">🧤 守门</div>
@@ -462,7 +465,7 @@
                 t.totalWeightedAssists += (Number(match.assists) || 0) * weight;
                 t.totalWeightedKeyPasses += (Number(match.key_passes) || 0) * weight;
                 t.totalWeightedInterceptions += (Number(match.interceptions) || 0) * weight;
-                t.totalWeightedClearances += (Number(match.clearances) || 0) * weight;
+                t.totalWeightedFailedClearances += (Number(match.failed_clearances) || 0) * weight;
                 t.totalWeightedSaves += (Number(match.saves) || 0) * weight;
                 t.totalWeightedConceded += (Number(match.goals_conceded) || 0) * weight;
             });
@@ -487,26 +490,26 @@
                 const assists90 = per90(t.totalWeightedAssists, t.totalWeightedMinutes);
                 const keyPasses90 = per90(t.totalWeightedKeyPasses, t.totalWeightedMinutes);
                 const interceptions90 = per90(t.totalWeightedInterceptions, t.totalWeightedMinutes);
-                const clearances90 = per90(t.totalWeightedClearances, t.totalWeightedMinutes);
+                const failedClearances90 = per90(t.totalWeightedFailedClearances, t.totalWeightedMinutes); // 新字段
                 const saves90 = per90(t.totalWeightedSaves, t.totalWeightedMinutes);
                 const conceded90 = per90(t.totalWeightedConceded, t.totalWeightedMinutes);
                 const avgMinutes = t.totalWeightedMinutes / t.count;
 
-                // 射门：进球 + 射门次数，乘以效率因子（进球/射门）
+                // 射门
                 const shotEfficiency = clamp(goals90 / (shots90 + 0.5), 0.5, 1.5);
                 const shooting = (goals90 * 0.7 + shots90 * 0.3) * shotEfficiency;
 
-                // 传球：助攻 + 关键传球，乘以效率因子（助攻/关键传球）
+                // 传球
                 const passEfficiency = clamp(assists90 / (keyPasses90 + 0.5), 0.5, 1.5);
                 const passing = (assists90 * 0.7 + keyPasses90 * 0.3) * passEfficiency;
 
-                // 防守：拦截与解围各占一半
-                const defending = interceptions90 * 0.5 + clearances90 * 0.5;
+                // 防守（新公式）
+                const defending = interceptions90 * 0.6 + (100 - failedClearances90 * 20) * 0.4;
 
-                // 体能：平均出场时间与 90 分钟的比值
+                // 体能
                 const fitness = clamp((avgMinutes / 90) * 100, 0, 100);
 
-                // 守门：扑救为主，丢球扣分适度
+                // 守门
                 const goalkeeping = saves90 * 0.7 + (100 - conceded90 * 10) * 0.3;
 
                 raw[pid] = {
@@ -781,7 +784,7 @@
         async function loadMatchStats() {
             const { data, error } = await supabase
                 .from("player_match_stats")
-                .select(`id, player_id, position, match_type, minutes_played, goals, shots, assists, key_passes, interceptions, clearances, saves, goals_conceded`)
+                .select(`id, player_id, position, match_type, minutes_played, goals, shots, assists, key_passes, interceptions, failed_clearances, saves, goals_conceded`)
                 .order("id", { ascending: false });
             if (error) throw error;
             allMatchStats = data || [];
