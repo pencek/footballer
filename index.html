@@ -633,36 +633,48 @@
             submitPracticeBtn.textContent = '保存中...';
 
             try {
-                const todayStr = new Date().toISOString().split('T')[0];
+                // 获取本周日期范围
+                const { thisMonday, thisSunday } = getWeekDates();
+                const thisMondayStr = thisMonday.toISOString().split('T')[0];
+                const thisSundayStr = thisSunday.toISOString().split('T')[0];
 
-                // 查询今天是否已有该球员的日常练习记录
-                const { data: existing, error: queryError } = await supabase
+                // 查询本周内该球员的所有日常踢球记录
+                const { data: existingRecords, error: queryError } = await supabase
                     .from('player_match_stats')
                     .select('id, goals, assists')
                     .eq('player_id', Number(playerId))
                     .eq('match_type', '日常踢球')
-                    .eq('match_date', todayStr)
-                    .maybeSingle(); // 最多一条
+                    .gte('match_date', thisMondayStr)
+                    .lte('match_date', thisSundayStr);
 
                 if (queryError) throw queryError;
 
-                let result;
-                if (existing) {
-                    // 已有记录，累加进球和助攻
-                    const newGoals = Number(existing.goals || 0) + goals;
-                    const newAssists = Number(existing.assists || 0) + assists;
+                if (existingRecords && existingRecords.length > 0) {
+                    // 取第一条记录作为合并目标
+                    const target = existingRecords[0];
+                    const totalGoals = existingRecords.reduce((sum, r) => sum + Number(r.goals || 0), 0) + goals;
+                    const totalAssists = existingRecords.reduce((sum, r) => sum + Number(r.assists || 0), 0) + assists;
 
-                    result = await supabase
+                    // 更新目标记录
+                    const { error: updateError } = await supabase
                         .from('player_match_stats')
-                        .update({
-                            goals: newGoals,
-                            assists: newAssists,
-                            // 保持其他字段不变，或者可以更新 updated_at 如果有的话
-                        })
-                        .eq('id', existing.id);
+                        .update({ goals: totalGoals, assists: totalAssists })
+                        .eq('id', target.id);
+                    if (updateError) throw updateError;
+
+                    // 删除其他多余记录（保留目标记录）
+                    const idsToDelete = existingRecords.slice(1).map(r => r.id);
+                    if (idsToDelete.length > 0) {
+                        const { error: deleteError } = await supabase
+                            .from('player_match_stats')
+                            .delete()
+                            .in('id', idsToDelete);
+                        if (deleteError) throw deleteError;
+                    }
                 } else {
-                    // 没有记录，插入新记录
-                    result = await supabase
+                    // 没有本周记录，插入新记录
+                    const todayStr = new Date().toISOString().split('T')[0];
+                    const { error: insertError } = await supabase
                         .from('player_match_stats')
                         .insert([{
                             player_id: Number(playerId),
@@ -679,9 +691,8 @@
                             goals_conceded: 0,
                             match_date: todayStr
                         }]);
+                    if (insertError) throw insertError;
                 }
-
-                if (result.error) throw result.error;
 
                 practiceModal.classList.remove('active');
                 practicePlayerSelect.value = '';
