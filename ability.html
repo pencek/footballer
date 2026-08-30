@@ -1064,11 +1064,7 @@
             if (!selectedPlayer) { showFormError("请选择球员"); return; }
             if (!position) { showFormError("请选择出场位置"); return; }
 
-            const data = {
-                player_id: Number(selectedPlayer),
-                position: position,
-                match_type: matchType,
-                minutes_played: getNumber("minutesPlayed"),
+            const newData = {
                 goals: getNumber("goals"),
                 shots: getNumber("shots"),
                 assists: getNumber("assists"),
@@ -1076,17 +1072,72 @@
                 interceptions: getNumber("interceptions"),
                 failed_clearances: getNumber("failedClearances"),
                 saves: getNumber("saves"),
-                goals_conceded: getNumber("goalsConceded")
+                goals_conceded: getNumber("goalsConceded"),
+                minutes_played: getNumber("minutesPlayed")
             };
 
-            if (data.goals > data.shots) { showFormError("进球数不能超过射门数"); return; }
-            if (data.minutes_played > 200) { showFormError("出场时间不能超过200分钟"); return; }
+            if (newData.goals > newData.shots) { showFormError("进球数不能超过射门数"); return; }
+            if (newData.minutes_played > 200) { showFormError("出场时间不能超过200分钟"); return; }
 
             submitDataBtn.disabled = true;
             submitDataBtn.textContent = "保存中...";
+
             try {
-                const { error } = await supabase.from("player_match_stats").insert([data]);
-                if (error) throw error;
+                const todayStr = new Date().toISOString().split('T')[0];
+
+                // 查询今天是否已有该球员相同比赛类型的记录
+                const { data: existing, error: queryError } = await supabase
+                    .from('player_match_stats')
+                    .select('id, goals, shots, assists, key_passes, interceptions, failed_clearances, saves, goals_conceded, minutes_played')
+                    .eq('player_id', Number(selectedPlayer))
+                    .eq('match_type', matchType)
+                    .eq('match_date', todayStr)
+                    .maybeSingle();
+
+                if (queryError) throw queryError;
+
+                let result;
+                if (existing) {
+                    // 累加各项数据
+                    const updatedData = {
+                        goals: Number(existing.goals || 0) + newData.goals,
+                        shots: Number(existing.shots || 0) + newData.shots,
+                        assists: Number(existing.assists || 0) + newData.assists,
+                        key_passes: Number(existing.key_passes || 0) + newData.key_passes,
+                        interceptions: Number(existing.interceptions || 0) + newData.interceptions,
+                        failed_clearances: Number(existing.failed_clearances || 0) + newData.failed_clearances,
+                        saves: Number(existing.saves || 0) + newData.saves,
+                        goals_conceded: Number(existing.goals_conceded || 0) + newData.goals_conceded,
+                        minutes_played: Number(existing.minutes_played || 0) + newData.minutes_played
+                    };
+
+                    result = await supabase
+                        .from('player_match_stats')
+                        .update(updatedData)
+                        .eq('id', existing.id);
+                } else {
+                    // 插入新记录
+                    result = await supabase
+                        .from('player_match_stats')
+                        .insert([{
+                            player_id: Number(selectedPlayer),
+                            position: position,
+                            match_type: matchType,
+                            minutes_played: newData.minutes_played,
+                            goals: newData.goals,
+                            shots: newData.shots,
+                            assists: newData.assists,
+                            key_passes: newData.key_passes,
+                            interceptions: newData.interceptions,
+                            failed_clearances: newData.failed_clearances,
+                            saves: newData.saves,
+                            goals_conceded: newData.goals_conceded,
+                            match_date: todayStr
+                        }]);
+                }
+
+                if (result.error) throw result.error;
+
                 closeModal();
                 resetForm();
                 await loadData();

@@ -615,11 +615,6 @@
         closePracticeModalBtn.addEventListener('click', () => {
             practiceModal.classList.remove('active');
         });
-        practiceModal.addEventListener('click', (e) => {
-            if (e.target === practiceModal) practiceModal.classList.remove('active');
-        });
-
-        // 提交练习数据
         submitPracticeBtn.addEventListener('click', async () => {
             const playerId = practicePlayerSelect.value;
             const goals = parseInt(practiceGoals.value) || 0;
@@ -638,25 +633,55 @@
             submitPracticeBtn.textContent = '保存中...';
 
             try {
-                const { error } = await supabase
-                    .from('player_match_stats')
-                    .insert([{
-                        player_id: Number(playerId),
-                        position: '中场',   // 练习默认位置，不影响主页统计
-                        match_type: '日常踢球',
-                        minutes_played: 90,
-                        goals: goals,
-                        assists: assists,
-                        shots: 0,
-                        key_passes: 0,
-                        interceptions: 0,
-                        failed_clearances: 0,
-                        saves: 0,
-                        goals_conceded: 0,
-                        match_date: new Date().toISOString().split('T')[0]
-                    }]);
+                const todayStr = new Date().toISOString().split('T')[0];
 
-                if (error) throw error;
+                // 查询今天是否已有该球员的日常练习记录
+                const { data: existing, error: queryError } = await supabase
+                    .from('player_match_stats')
+                    .select('id, goals, assists')
+                    .eq('player_id', Number(playerId))
+                    .eq('match_type', '日常踢球')
+                    .eq('match_date', todayStr)
+                    .maybeSingle(); // 最多一条
+
+                if (queryError) throw queryError;
+
+                let result;
+                if (existing) {
+                    // 已有记录，累加进球和助攻
+                    const newGoals = Number(existing.goals || 0) + goals;
+                    const newAssists = Number(existing.assists || 0) + assists;
+
+                    result = await supabase
+                        .from('player_match_stats')
+                        .update({
+                            goals: newGoals,
+                            assists: newAssists,
+                            // 保持其他字段不变，或者可以更新 updated_at 如果有的话
+                        })
+                        .eq('id', existing.id);
+                } else {
+                    // 没有记录，插入新记录
+                    result = await supabase
+                        .from('player_match_stats')
+                        .insert([{
+                            player_id: Number(playerId),
+                            position: '中场',
+                            match_type: '日常踢球',
+                            minutes_played: 90,
+                            goals: goals,
+                            assists: assists,
+                            shots: 0,
+                            key_passes: 0,
+                            interceptions: 0,
+                            failed_clearances: 0,
+                            saves: 0,
+                            goals_conceded: 0,
+                            match_date: todayStr
+                        }]);
+                }
+
+                if (result.error) throw result.error;
 
                 practiceModal.classList.remove('active');
                 practicePlayerSelect.value = '';
