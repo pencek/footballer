@@ -435,23 +435,37 @@
         const practiceAssists = document.getElementById('practiceAssists');
         const submitPracticeBtn = document.getElementById('submitPracticeBtn');
 
-        // 获取本周与上周日期范围
+        // 获取本周与上周日期范围（周一 0:00 为分界）
         function getWeekDates() {
             const now = new Date();
             const dayOfWeek = now.getDay();
             const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+
             const thisMonday = new Date(now);
             thisMonday.setDate(now.getDate() + mondayOffset);
-            thisMonday.setHours(0,0,0,0);
+            thisMonday.setHours(0, 0, 0, 0);
+
+            const nextMonday = new Date(thisMonday);
+            nextMonday.setDate(thisMonday.getDate() + 7);
+
             const lastMonday = new Date(thisMonday);
             lastMonday.setDate(thisMonday.getDate() - 7);
-            const thisSunday = new Date(thisMonday);
-            thisSunday.setDate(thisMonday.getDate() + 6);
-            thisSunday.setHours(23,59,59,999);
-            const lastSunday = new Date(lastMonday);
-            lastSunday.setDate(lastMonday.getDate() + 6);
-            lastSunday.setHours(23,59,59,999);
-            return { thisMonday, thisSunday, lastMonday, lastSunday };
+
+            const thisSunday = new Date(nextMonday);
+            thisSunday.setMilliseconds(thisSunday.getMilliseconds() - 1);
+
+            const lastSunday = new Date(thisMonday);
+            lastSunday.setMilliseconds(lastSunday.getMilliseconds() - 1);
+
+            return { thisMonday, thisSunday, lastMonday, lastSunday, nextMonday };
+        }
+
+        // 本地日期格式化（避免时区偏移）
+        function formatLocalDate(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
         }
 
         // 加载所有用户和比赛数据（包含所有类型）
@@ -496,16 +510,18 @@
                 if (statsError) throw statsError;
                 matchStats = statsData || [];
 
-                const { thisMonday, thisSunday, lastMonday, lastSunday } = getWeekDates();
+                // 获取日期字符串（本地时间）
+                const { thisMonday, nextMonday, lastMonday } = getWeekDates();
+                const thisMondayStr = formatLocalDate(thisMonday);
+                const nextMondayStr = formatLocalDate(nextMonday);
+                const lastMondayStr = formatLocalDate(lastMonday);
 
-                // 筛选本周和上周数据
+                // 筛选本周和上周数据（字符串比较）
                 const thisWeekStats = matchStats.filter(m => {
-                    const d = new Date(m.match_date);
-                    return d >= thisMonday && d <= thisSunday;
+                    return m.match_date >= thisMondayStr && m.match_date < nextMondayStr;
                 });
                 const lastWeekStats = matchStats.filter(m => {
-                    const d = new Date(m.match_date);
-                    return d >= lastMonday && d <= lastSunday;
+                    return m.match_date >= lastMondayStr && m.match_date < thisMondayStr;
                 });
 
                 // 计算上周射手王和助攻王（所有类型都计入，权重相同）
@@ -615,6 +631,8 @@
         closePracticeModalBtn.addEventListener('click', () => {
             practiceModal.classList.remove('active');
         });
+
+        // 提交练习数据（一周内合并）
         submitPracticeBtn.addEventListener('click', async () => {
             const playerId = practicePlayerSelect.value;
             const goals = parseInt(practiceGoals.value) || 0;
@@ -633,10 +651,9 @@
             submitPracticeBtn.textContent = '保存中...';
 
             try {
-                // 获取本周日期范围
-                const { thisMonday, thisSunday } = getWeekDates();
-                const thisMondayStr = thisMonday.toISOString().split('T')[0];
-                const thisSundayStr = thisSunday.toISOString().split('T')[0];
+                const { thisMonday, nextMonday } = getWeekDates();
+                const thisMondayStr = formatLocalDate(thisMonday);
+                const nextMondayStr = formatLocalDate(nextMonday);
 
                 // 查询本周内该球员的所有日常踢球记录
                 const { data: existingRecords, error: queryError } = await supabase
@@ -645,24 +662,23 @@
                     .eq('player_id', Number(playerId))
                     .eq('match_type', '日常踢球')
                     .gte('match_date', thisMondayStr)
-                    .lte('match_date', thisSundayStr);
+                    .lt('match_date', nextMondayStr);
 
                 if (queryError) throw queryError;
 
                 if (existingRecords && existingRecords.length > 0) {
-                    // 取第一条记录作为合并目标
+                    // 合并到第一条记录
                     const target = existingRecords[0];
                     const totalGoals = existingRecords.reduce((sum, r) => sum + Number(r.goals || 0), 0) + goals;
                     const totalAssists = existingRecords.reduce((sum, r) => sum + Number(r.assists || 0), 0) + assists;
 
-                    // 更新目标记录
                     const { error: updateError } = await supabase
                         .from('player_match_stats')
                         .update({ goals: totalGoals, assists: totalAssists })
                         .eq('id', target.id);
                     if (updateError) throw updateError;
 
-                    // 删除其他多余记录（保留目标记录）
+                    // 删除多余记录
                     const idsToDelete = existingRecords.slice(1).map(r => r.id);
                     if (idsToDelete.length > 0) {
                         const { error: deleteError } = await supabase
@@ -672,8 +688,8 @@
                         if (deleteError) throw deleteError;
                     }
                 } else {
-                    // 没有本周记录，插入新记录
-                    const todayStr = new Date().toISOString().split('T')[0];
+                    // 插入新记录
+                    const todayStr = formatLocalDate(new Date());
                     const { error: insertError } = await supabase
                         .from('player_match_stats')
                         .insert([{
